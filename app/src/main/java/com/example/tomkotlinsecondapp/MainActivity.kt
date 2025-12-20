@@ -66,6 +66,7 @@ import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.window.Dialog
 import com.example.tomkotlinsecondapp.ui.theme.TomKotlinSecondAppTheme
+import com.example.tomkotlinsecondapp.Guitar
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -77,7 +78,7 @@ class MainActivity : ComponentActivity() {
                     ButtonExample1()
                     //InputTextField()
                     DialogButton()
-                    //InputTextField(spacerInd.value)
+                    InputTextField(spacerInd.value)
                     //SpacerButton()
             }
         }
@@ -205,7 +206,7 @@ fun Greeting (name: String) {
             }
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(400.dp))
 
         SpacerButton()
     }
@@ -217,13 +218,17 @@ fun Greeting (name: String) {
 fun InputTextField(inout1:Boolean)
 {
 
+    var guitarInstance = Guitar()
+
     var inputText by remember { mutableStateOf("") }
 
     var buttonText by remember {mutableStateOf("")}
 
     fun buttonUpdate(input: String)
     {
-        buttonText = input.uppercase()
+        guitarInstance.model = input
+
+        buttonText = guitarInstance.model.uppercase()
     }
 
     //Spacer(modifier = Modifier.height(200.dp))
@@ -232,9 +237,9 @@ fun InputTextField(inout1:Boolean)
     {
         if (inout1)
         {
-            Spacer(modifier = Modifier.height(200.dp))
+            Spacer(modifier = Modifier.height(400.dp))
         }
-        else if (inout1 == false)
+        else
         {
             Spacer(modifier = Modifier.height(100.dp))
         }
