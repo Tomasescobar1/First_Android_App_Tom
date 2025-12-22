@@ -48,6 +48,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -218,17 +219,44 @@ fun Greeting (name: String) {
 fun InputTextField(inout1:Boolean)
 {
 
-    var guitarInstance = Guitar()
+    val guitarInstance = Guitar()
 
     var inputText by remember { mutableStateOf("") }
 
-    var buttonText by remember {mutableStateOf("")}
+    var buttonText by remember {mutableStateOf("") }
 
-    fun buttonUpdate(input: String)
+    var inputCount by  remember { mutableIntStateOf(0) }
+
+    fun buttonUpdate(input: String, input2: Int)
     {
-        guitarInstance.model = input
+        when(input2)
+        {
+            1 -> {
+                guitarInstance.model = input
 
-        buttonText = guitarInstance.model.uppercase()
+                buttonText = guitarInstance.model.uppercase()
+            }
+
+            2 -> {
+                guitarInstance.scaleLength = input.toDouble()
+
+                buttonText = guitarInstance.scaleLength.toString()
+            }
+
+            3 -> {
+                guitarInstance.color = input
+
+                buttonText = guitarInstance.color.uppercase()
+            }
+
+            4 -> {
+                guitarInstance.numberOfStrings = input.toInt()
+
+                buttonText = guitarInstance.numberOfStrings.toString()
+            }
+        }
+
+        //buttonText = guitarInstance.model.uppercase()
     }
 
     //Spacer(modifier = Modifier.height(200.dp))
@@ -272,7 +300,20 @@ fun InputTextField(inout1:Boolean)
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        TextButton(onClick = {buttonUpdate(inputText)},
+        TextButton(onClick = {
+                                if(inputCount < 4)
+                                {
+                                    inputCount++
+
+                                    buttonUpdate(inputText, inputCount)
+                                }
+
+                                else
+                                {
+                                    buttonText = "Done!"
+                                }
+                             },
+
             modifier = Modifier.background(color = Color.Blue, shape = RoundedCornerShape(16.dp))
                 .border(width = 4.dp, color = Color.Black, shape = RoundedCornerShape(16.dp)))
         {

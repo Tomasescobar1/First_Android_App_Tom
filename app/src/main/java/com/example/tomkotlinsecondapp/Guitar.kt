@@ -1,6 +1,6 @@
 package com.example.tomkotlinsecondapp
 
-class Guitar(var model: String = "Telecaster", var scaleLength: Double = 25.50, numberOfStrings : Int = 6) {
+class Guitar(var model: String = "Telecaster", var scaleLength: Double = 25.50, var numberOfStrings : Int = 6) {
 
     var color: String = "Red"
 
