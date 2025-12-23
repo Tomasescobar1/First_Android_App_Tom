@@ -36,6 +36,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
@@ -213,7 +214,21 @@ fun Greeting (name: String) {
     }
 }
 
+@Composable
+fun DropDownSection()
+{
+    var dropped by remember {mutableStateOf(false)}
 
+    var selectedAxe by remember {mutableStateOf("None")}
+
+    val guitarNames = listOf("Telecaster", "Stratocaster", "Jaguar", "Jazzmaster", "Mustang")
+
+    DropdownMenu(
+        expanded = dropped,
+        onDismissRequest = {dropped = false}
+    ) {}
+
+}
 
 @Composable
 fun InputTextField(inout1:Boolean)
@@ -225,7 +240,7 @@ fun InputTextField(inout1:Boolean)
 
     var buttonText by remember {mutableStateOf("") }
 
-    var inputCount by  remember { mutableIntStateOf(0) }
+    var inputCount by remember { mutableIntStateOf(0) }
 
     fun buttonUpdate(input: String, input2: Int)
     {
