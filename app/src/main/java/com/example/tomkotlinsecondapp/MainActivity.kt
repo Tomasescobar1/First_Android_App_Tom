@@ -80,7 +80,6 @@ class MainActivity : ComponentActivity() {
             TomKotlinSecondAppTheme {
                     Greeting(name = "Tomas Escobar Ruiz")
                     ButtonExample1()
-                    //InputTextField()
                     DialogButton()
                     InputTextField(spacerInd.value)
                     //SpacerButton()
@@ -89,24 +88,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-var spacerInd = mutableStateOf(value = true)
-
-@Composable
-fun SpacerButton()
-{
-    TextButton(
-            onClick = { spacerInd.value = !spacerInd.value },
-    modifier = Modifier.border(4.dp, Color.Black, RoundedCornerShape(16.dp))
-        .background(Color.Blue, RoundedCornerShape(16.dp))
-    )
-    {
-        Text(
-            text = "Confirm",
-            color = Color(0xffffffff),
-            fontFamily = FontFamily.Monospace
-        )
-    }
-}
+val spacerInd = mutableStateOf(value = true)
 
 @Composable
 fun Greeting (name: String) {
@@ -213,117 +195,6 @@ fun Greeting (name: String) {
         Spacer(modifier = Modifier.height(400.dp))
 
         SpacerButton()
-    }
-}
-
-@Composable
-fun InputTextField(inout1:Boolean)
-{
-
-    val guitarInstance = Guitar()
-
-    var inputText by remember { mutableStateOf("") }
-
-    var buttonText by remember {mutableStateOf("") }
-
-    var inputCount by remember { mutableIntStateOf(0) }
-
-    fun buttonUpdate(input: String, input2: Int)
-    {
-        when(input2)
-        {
-            1 -> {
-                guitarInstance.model = input
-
-                buttonText = guitarInstance.model.uppercase()
-            }
-
-            2 -> {
-                guitarInstance.scaleLength = input.toDouble()
-
-                buttonText = guitarInstance.scaleLength.toString()
-            }
-
-            3 -> {
-                guitarInstance.color = input
-
-                buttonText = guitarInstance.color.uppercase()
-            }
-
-            4 -> {
-                guitarInstance.numberOfStrings = input.toInt()
-
-                buttonText = guitarInstance.numberOfStrings.toString()
-            }
-        }
-
-        //buttonText = guitarInstance.model.uppercase()
-    }
-
-    //Spacer(modifier = Modifier.height(200.dp))
-
-    Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally)
-    {
-        if (inout1)
-        {
-            Spacer(modifier = Modifier.height(400.dp))
-        }
-        else
-        {
-            Spacer(modifier = Modifier.height(100.dp))
-        }
-
-        DropDownSection()
-
-        Box(contentAlignment = Alignment.Center /*, modifier = Modifier.padding(top = 420.dp)*/)
-        {
-            OutlinedTextField(
-                value = inputText,
-                onValueChange = { newText -> inputText = newText },
-                label = { Text(text = "Label", color = Color.Black) },
-                placeholder = { Text(text = "Type in a guitar name: ") },
-                //textColor = Color.Black,
-                //singleLine = true,
-                modifier = Modifier.height(60.dp),
-                colors = OutlinedTextFieldDefaults.colors(focusedTextColor = Color.Black)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Box(
-            modifier = Modifier.background(color = Color.Blue, shape = RoundedCornerShape(16.dp)).height(50.dp).width(300.dp)
-                .border(width = 4.dp, shape = RoundedCornerShape(16.dp), color = Color.Black).padding(4.dp),
-            contentAlignment = Alignment.Center
-        )
-        {
-            Text(text = "Hello $buttonText", color = Color.White, fontFamily = FontFamily.Monospace,
-                textAlign = TextAlign.Center)
-        }
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        TextButton(onClick = {
-                                if(inputCount < 4)
-                                {
-                                    inputCount++
-
-                                    buttonUpdate(inputText, inputCount)
-                                }
-
-                                else
-                                {
-                                    buttonText = "Done!"
-                                }
-                             },
-
-            modifier = Modifier.background(color = Color.Blue, shape = RoundedCornerShape(16.dp))
-                .border(width = 4.dp, color = Color.Black, shape = RoundedCornerShape(16.dp)))
-        {
-            Text(text = "Update Text", color = Color.White, fontFamily = FontFamily.Monospace)
-        }
-
-        Spacer(modifier = Modifier.height(20.dp))
     }
 }
 
