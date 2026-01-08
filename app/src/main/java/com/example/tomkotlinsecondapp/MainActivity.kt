@@ -70,7 +70,7 @@ import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.window.Dialog
 import com.example.tomkotlinsecondapp.ui.theme.TomKotlinSecondAppTheme
-import com.example.tomkotlinsecondapp.Guitar
+//import com.example.tomkotlinsecondapp.Guitar
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -78,11 +78,16 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             TomKotlinSecondAppTheme {
-                    Greeting(name = "Tomas Escobar Ruiz")
+                    //Greeting(name = "Tomas Escobar Ruiz")
                     ButtonExample1()
                     DialogButton()
                     InputTextField(spacerInd.value)
-                    //SpacerButton()
+                    Column(modifier = Modifier.fillMaxWidth().fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally)
+                    {
+                        Spacer(modifier = Modifier.height(200.dp))
+
+                        SpacerButton()
+                    }
             }
         }
     }
@@ -194,7 +199,7 @@ fun Greeting (name: String) {
 
         Spacer(modifier = Modifier.height(400.dp))
 
-        SpacerButton()
+        //SpacerButton()
     }
 }
 
@@ -338,7 +343,15 @@ fun DialogButton ()
 @Composable
 fun GreetingPreview() {
     TomKotlinSecondAppTheme {
-        Greeting("Tomas Escobar Ruiz")
+        //Greeting("Tomas Escobar Ruiz")
+
+        Column(modifier = Modifier.fillMaxWidth().fillMaxHeight().padding(top = 70.dp, bottom = 70.dp),
+            verticalArrangement = Arrangement.Top, horizontalAlignment = Alignment.CenterHorizontally)
+        {
+            GuitarViewPort()
+        }
+
+        //GuitarViewPort()
         ButtonExample1()
         DialogButton()
         InputTextField(spacerInd.value)
