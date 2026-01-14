@@ -15,12 +15,16 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.sceneview.rememberEngine
 
 //import androidx.compose.material3
 
 @Composable
 fun GuitarViewPort()
 {
+
+    val engine = rememberEngine()
+
     Box(modifier = Modifier.border(4.dp, Color.Black, RoundedCornerShape(24.dp))
         .height(300.dp).width(200.dp), contentAlignment = Alignment.Center)
     {
