@@ -79,15 +79,24 @@ class MainActivity : ComponentActivity() {
         setContent {
             TomKotlinSecondAppTheme {
                     //Greeting(name = "Tomas Escobar Ruiz")
+
+                /*Column(modifier = Modifier.fillMaxWidth().fillMaxHeight().padding(top = 70.dp, bottom = 70.dp),
+                    verticalArrangement = Arrangement.Top, horizontalAlignment = Alignment.CenterHorizontally)
+                {
+                    GuitarViewPort()
+                }*/
+
+                    GuitarViewPort()
+
                     ButtonExample1()
                     DialogButton()
                     InputTextField(spacerInd.value)
-                    Column(modifier = Modifier.fillMaxWidth().fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally)
+                    /*Column(modifier = Modifier.fillMaxWidth().fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally)
                     {
                         Spacer(modifier = Modifier.height(200.dp))
 
                         SpacerButton()
-                    }
+                    }*/
             }
         }
     }
