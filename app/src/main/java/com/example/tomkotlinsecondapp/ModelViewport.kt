@@ -3,16 +3,23 @@ package com.example.tomkotlinsecondapp
 import android.icu.text.Transliterator
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
@@ -20,7 +27,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.android.filament.Skybox
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.zIndex
+import dev.romainguy.kotlin.math.Float3
 import io.github.sceneview.Scene
+import io.github.sceneview.SceneView
 import io.github.sceneview.math.Position
 import io.github.sceneview.math.Rotation
 import io.github.sceneview.math.Scale
@@ -38,69 +54,186 @@ import io.github.sceneview.rememberNodes
 import io.github.sceneview.rememberRenderer
 import io.github.sceneview.rememberScene
 import io.github.sceneview.rememberView
+import com.example.tomkotlinsecondapp.ColorDropDown
+import kotlinx.coroutines.delay
 
 //import androidx.compose.material3
 
 @Composable
 fun GuitarViewPort()
 {
-
     val engine = rememberEngine()
 
     val modelLoaderDef = rememberModelLoader(engine)
 
     val materialLoaderDef = rememberMaterialLoader(engine)
 
-    val environmentLoaderDef = rememberEnvironmentLoader(engine)
+    var isLoading by remember {mutableStateOf(true)}
 
-    val environment = remember {
-        environmentLoaderDef.createHDREnvironment("environments/sky_2k.hdr")
-    }
+    var cameraOrbitHome = Float3(0.0f, 0.0f, 1.3f)
+
+    val colorMaterialRed = materialLoaderDef.createColorInstance(
+        color = Color.Red,
+        roughness = 0.0f,
+        metallic = 0.0f,
+    )
+
+    val colorMaterialBlue = materialLoaderDef.createColorInstance(
+        color = Color(red = 66, green = 212, blue = 245),
+        roughness = 0.0f,
+        metallic = 0.0f,
+    )
+
+    val colorMaterialOGreen = materialLoaderDef.createColorInstance(
+        color = Color(red = 37, green = 92, blue = 44),
+        roughness = 0.0f,
+        metallic = 0.0f,
+    )
+
+    val colorMaterialWhite = materialLoaderDef.createColorInstance(
+        color = Color.White,
+        roughness = -10.7f,
+        metallic = 0.0f,
+        reflectance = 0.5f,
+    )
+
+    val environmentLoaderDef = rememberEnvironmentLoader(engine)
 
     val view = rememberView(engine)
 
-    Box(modifier = Modifier.border(4.dp, Color.Black, RoundedCornerShape(24.dp))
-        .height(800.dp).width(400.dp).background(Color.White), contentAlignment = Alignment.Center)
+    var modelNode = ModelNode(
+        modelInstance = modelLoaderDef.createModelInstance("growler_body.glb"),
+    )
+
+    var neckModelNode = ModelNode(
+        modelInstance = modelLoaderDef.createModelInstance("25_inch_neck_assembly.glb")
+    )
+
+    Box(modifier = Modifier
+        .height(900.dp).width(400.dp).background(Color.White), contentAlignment = Alignment.Center,)
     {
 
-        Scene(
-            modifier = Modifier.fillMaxSize().border(14.dp, Color.White, RoundedCornerShape(24.dp)),
+        LaunchedEffect(colorInput.value, modelIndVal.value) {
 
-            engine = engine,
-
-            view = view,
-            renderer = rememberRenderer(engine),
-            scene = rememberScene(engine),
-
-            modelLoader = modelLoaderDef,
-
-            childNodes = rememberNodes {
-                val modelNode = ModelNode(
-                    modelInstance = modelLoaderDef.createModelInstance("growler_body.glb"),
-                )
-
-                modelNode.scale = Scale(0.8f)
-
-                modelNode.rotation = Rotation(0.0f, 0.0f, 90.0f)
-
-                add(modelNode)
-            },
-
-            cameraNode = rememberCameraNode(engine)
+            when (colorInput.value)
             {
-                position = Position(0.0f, 0.0f, 1.0f)
-            },
+                "Red" -> {
+                    modelNode.setMaterialInstance(colorMaterialRed)
+                }
 
-            cameraManipulator = rememberCameraManipulator(),
+                "Sky Blue" -> {
+                    modelNode.setMaterialInstance(colorMaterialBlue)
+                }
 
-            mainLightNode = rememberMainLightNode(engine){
-                intensity = 100_000.0f
+                "Olive Green" -> {
+                    modelNode.setMaterialInstance(colorMaterialOGreen)
+                }
+
+                "White" -> {
+                    modelNode.setMaterialInstance(colorMaterialWhite)
+                }
             }
-        )
-        /*Text(
-            text = "This is going to be the guitar viewport.",
-            fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, fontSize = 20.sp,
-            modifier = Modifier.padding(15.dp)
-        )*/
+        }
+
+        LaunchedEffect(colorInput.value, modelIndVal.value)
+        {
+            isLoading = true
+
+            delay(1500L)
+
+            isLoading = false
+        }
+
+        if(isLoading)
+        {
+            Box(modifier = Modifier.fillMaxSize().background(Color.LightGray, RoundedCornerShape(22.dp)).zIndex(2f), contentAlignment = Alignment.Center)
+            {
+                CircularProgressIndicator(modifier = Modifier.size(100.dp), strokeWidth = 10.dp, trackColor = Color.Blue, color = Color.LightGray)
+            }
+        }
+
+        key(colorInput.value, modelIndVal.value)
+        {
+            Scene(
+                modifier = Modifier.fillMaxSize().border(6.dp, Color.White)
+                    .align(Alignment.Center),
+
+                engine = engine,
+
+                view = view,
+                renderer = rememberRenderer(engine),
+                scene = rememberScene(engine),
+
+                materialLoader = materialLoaderDef,
+
+                modelLoader = modelLoaderDef,
+
+                childNodes = rememberNodes {
+
+                    when (modelIndVal.value)
+                    {
+                        "Telecaster" -> {
+                            modelNode = ModelNode(
+                                modelInstance = modelLoaderDef.createModelInstance("tele_25_inch_body.glb"),
+                            )
+
+                            modelNode.rotation = Rotation(0.0f,0.0f, 90.0f)
+
+                            modelNode.position = Position(0.0f, -0.32f, 0.0f)
+
+                            neckModelNode.rotation = Rotation(0.0f, 0.0f, 90.0f)
+
+                            neckModelNode.position = Position(0.0f,-0.32f, 0.0f)
+                        }
+
+                        "Growler" -> {
+                            modelNode = ModelNode(
+                                modelInstance = modelLoaderDef.createModelInstance("growler_body.glb"),
+                            )
+
+                            modelNode.rotation = Rotation(0.0f,0.0f, 90.0f)
+
+                            modelNode.position = Position(0.0f, -0.3f, 0.0f)
+
+                            neckModelNode.rotation = Rotation(0.0f, 0.0f, 90.0f)
+
+                            neckModelNode.position = Position(0.0f,-0.3f, 0.0f)
+
+                            //cameraOrbitHome = Float3(0.0f, 0.0f, 1.1f)
+                        }
+                    }
+
+                    modelNode.setMaterialInstance(colorMaterialWhite)
+
+                    add(modelNode)
+
+                    add(neckModelNode)
+
+                },
+
+                cameraNode = rememberCameraNode(engine)
+                {
+                    position = Position(cameraOrbitHome)
+                },
+
+                cameraManipulator = rememberCameraManipulator(cameraOrbitHome),
+
+                mainLightNode = rememberMainLightNode(engine){
+                    intensity = 100_000.0f
+                },
+
+            )
+        }
+
+        Column(modifier = Modifier.width(400.dp).height(900.dp).zIndex(2f)
+            .border(8.dp, Color.White, RoundedCornerShape(22.dp)), verticalArrangement = Arrangement.Bottom,
+            horizontalAlignment = Alignment.Start)
+        {
+            ColorDropDown()
+
+            DropDownSection()
+        }
+
     }
+
 }

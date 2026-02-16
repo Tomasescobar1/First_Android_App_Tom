@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 fun SpacerButton()
 {
     TextButton(
-        onClick = { spacerInd.value = !spacerInd.value },
+        onClick = { colorIndVal.value = !colorIndVal.value },
         modifier = Modifier.border(4.dp, Color.Black, RoundedCornerShape(16.dp))
             .background(Color.Blue, RoundedCornerShape(16.dp))
     )

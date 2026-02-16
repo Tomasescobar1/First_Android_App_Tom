@@ -25,7 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun DropDownSection()
+fun ColorDropDown()
 {
     var dropped by remember {mutableStateOf(false)}
 
@@ -33,37 +33,35 @@ fun DropDownSection()
 
     val savedGuitar = Guitar()
 
-    savedGuitar.model = modelIndVal.value
+    savedGuitar.color = colorInput.value
 
-    val guitarNames = listOf("Telecaster", "Growler")
+    val guitarColors = listOf("White", "Red", "Sky Blue", "Olive Green")
 
-    //val guitarNames1 = listOf("Telecaster", "Stratocaster", "Jaguar", "Jazzmaster", "Growler")
-
-    Box(modifier = Modifier.width(200.dp).height(80.dp).padding(start = 8.dp, bottom = 8.dp)
+    Box(modifier = Modifier.width(200.dp).height(80.dp).padding(start = 8.dp)
         .background(Color.Blue, RoundedCornerShape(16.dp))
         .border(4.dp, Color.Black, RoundedCornerShape(16.dp)), contentAlignment = Alignment.Center)
     {
 
         TextButton(onClick = {dropped =  true}, modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp)).width(150.dp)) {
-            Text(text = "${savedGuitar.model}", color = Color.Black, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+            Text(text = "${savedGuitar.color}", color = Color.Black, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
         }
 
         DropdownMenu(
             expanded = dropped,
             onDismissRequest = {dropped = false},
             modifier = Modifier.border(4.dp, Color.Black, RoundedCornerShape(16.dp))
-                .background(Color.White, RoundedCornerShape(16.dp))
+                .background(Color.White)
         ) {
-            guitarNames.forEach { guitarName ->
+            guitarColors.forEach { guitarColor ->
                 DropdownMenuItem(
-                    text = {Text(guitarName, color = Color.Black, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
+                    text = {Text(guitarColor, color = Color.Black, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
                     onClick = {
-                        modelIndVal.value =  guitarName
+                        colorInput.value =  guitarColor
                         dropped = false
 
                     },
                     //contentPadding = MenuDefaults.DropdownMenuItemContentPadding,
-                    modifier = Modifier.width(200.dp).background(color = Color.Transparent, RoundedCornerShape(16.dp))
+                    modifier = Modifier.width(200.dp)
                 )
             }
         }

@@ -80,28 +80,31 @@ class MainActivity : ComponentActivity() {
             TomKotlinSecondAppTheme {
                     //Greeting(name = "Tomas Escobar Ruiz")
 
-                /*Column(modifier = Modifier.fillMaxWidth().fillMaxHeight().padding(top = 70.dp, bottom = 70.dp),
+                Column(modifier = Modifier.fillMaxWidth().fillMaxHeight().padding(top = 70.dp, bottom = 70.dp),
                     verticalArrangement = Arrangement.Top, horizontalAlignment = Alignment.CenterHorizontally)
                 {
                     GuitarViewPort()
-                }*/
+                }
 
-                    GuitarViewPort()
+                    //GuitarViewPort()
 
-                    ButtonExample1()
+                    /*ButtonExample1()
                     DialogButton()
                     InputTextField(spacerInd.value)
-                    /*Column(modifier = Modifier.fillMaxWidth().fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally)
+                    Column(modifier = Modifier.fillMaxWidth().fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally)
                     {
                         Spacer(modifier = Modifier.height(200.dp))
 
-                        SpacerButton()
-                    }*/
+                       */
             }
         }
     }
 }
 
+
+val colorInput = mutableStateOf(value = "White")
+val modelIndVal = mutableStateOf(value = "Telecaster")
+val colorIndVal = mutableStateOf(value = false)
 val spacerInd = mutableStateOf(value = true)
 
 @Composable
