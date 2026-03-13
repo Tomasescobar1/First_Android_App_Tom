@@ -1,19 +1,29 @@
 package com.example.tomkotlinsecondapp
 
+import android.graphics.drawable.Icon
 import android.icu.text.Transliterator
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -33,6 +43,8 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.zIndex
 import dev.romainguy.kotlin.math.Float3
 import io.github.sceneview.Scene
@@ -56,6 +68,7 @@ import io.github.sceneview.rememberScene
 import io.github.sceneview.rememberView
 import com.example.tomkotlinsecondapp.ColorDropDown
 import kotlinx.coroutines.delay
+import kotlin.math.roundToInt
 
 //import androidx.compose.material3
 
@@ -70,7 +83,15 @@ fun GuitarViewPort()
 
     var isLoading by remember {mutableStateOf(true)}
 
+    var isDeployed by remember {mutableStateOf(false)}
+
+    var fabOffset by remember {mutableStateOf(Offset(0f, 0f))}
+
     var cameraOrbitHome = Float3(0.0f, 0.0f, 1.3f)
+
+    var cameraPosition = Float3(0.0f, 0.0f, 1.3f)
+
+    var cameraRotation = Float3(0.0f, 0.0f, 0.0f)
 
     val colorMaterialRed = materialLoaderDef.createColorInstance(
         color = Color.Red,
@@ -102,11 +123,15 @@ fun GuitarViewPort()
     val view = rememberView(engine)
 
     var modelNode = ModelNode(
-        modelInstance = modelLoaderDef.createModelInstance("growler_body.glb"),
+        modelInstance = modelLoaderDef.createModelInstance("growler_25_inch_body.glb"),
     )
 
     var neckModelNode = ModelNode(
         modelInstance = modelLoaderDef.createModelInstance("25_inch_neck_assembly.glb")
+    )
+
+    var componentsNode = ModelNode(
+        modelInstance = modelLoaderDef.createModelInstance("growler_25_components.glb")
     )
 
     Box(modifier = Modifier
@@ -135,7 +160,7 @@ fun GuitarViewPort()
             }
         }
 
-        LaunchedEffect(colorInput.value, modelIndVal.value)
+        LaunchedEffect(colorInput.value, modelIndVal.value, cameraInd.intValue)
         {
             isLoading = true
 
@@ -148,11 +173,11 @@ fun GuitarViewPort()
         {
             Box(modifier = Modifier.fillMaxSize().background(Color.LightGray, RoundedCornerShape(22.dp)).zIndex(2f), contentAlignment = Alignment.Center)
             {
-                CircularProgressIndicator(modifier = Modifier.size(100.dp), strokeWidth = 10.dp, trackColor = Color.Blue, color = Color.LightGray)
+                CircularProgressIndicator(modifier = Modifier.size(100.dp), strokeWidth = 10.dp, trackColor = Color(66, 203, 245), color = Color.White)
             }
         }
 
-        key(colorInput.value, modelIndVal.value)
+        key(colorInput.value, modelIndVal.value, cameraInd.intValue)
         {
             Scene(
                 modifier = Modifier.fillMaxSize().border(6.dp, Color.White)
@@ -177,6 +202,10 @@ fun GuitarViewPort()
                                 modelInstance = modelLoaderDef.createModelInstance("tele_25_inch_body.glb"),
                             )
 
+                            componentsNode = ModelNode(
+                                modelInstance = modelLoaderDef.createModelInstance("tele_25_components.glb")
+                            )
+
                             modelNode.rotation = Rotation(0.0f,0.0f, 90.0f)
 
                             modelNode.position = Position(0.0f, -0.32f, 0.0f)
@@ -184,11 +213,19 @@ fun GuitarViewPort()
                             neckModelNode.rotation = Rotation(0.0f, 0.0f, 90.0f)
 
                             neckModelNode.position = Position(0.0f,-0.32f, 0.0f)
+
+                            componentsNode.rotation = Rotation(0.0f, 0.0f, 90.0f)
+
+                            componentsNode.position = Position(0.0f, -0.32f, 0.0f)
                         }
 
                         "Growler" -> {
                             modelNode = ModelNode(
-                                modelInstance = modelLoaderDef.createModelInstance("growler_body.glb"),
+                                modelInstance = modelLoaderDef.createModelInstance("growler_25_inch_body.glb"),
+                            )
+
+                            componentsNode = ModelNode(
+                                modelInstance = modelLoaderDef.createModelInstance("growler_25_components.glb")
                             )
 
                             modelNode.rotation = Rotation(0.0f,0.0f, 90.0f)
@@ -198,6 +235,10 @@ fun GuitarViewPort()
                             neckModelNode.rotation = Rotation(0.0f, 0.0f, 90.0f)
 
                             neckModelNode.position = Position(0.0f,-0.3f, 0.0f)
+
+                            componentsNode.rotation = Rotation(0.0f, 0.0f, 90.0f)
+
+                            componentsNode.position = Position(0.0f, -0.3f, 0.0f)
 
                             //cameraOrbitHome = Float3(0.0f, 0.0f, 1.1f)
                         }
@@ -209,11 +250,24 @@ fun GuitarViewPort()
 
                     add(neckModelNode)
 
+                    add(componentsNode)
+
                 },
 
                 cameraNode = rememberCameraNode(engine)
                 {
-                    position = Position(cameraOrbitHome)
+                    when(cameraInd.intValue)
+                    {
+                        1 -> {
+                            cameraPosition = Float3(0.25f, 0.6f, 1.3f)
+
+                            cameraRotation = Float3(-21.0f, 10.0f, 0.0f)
+                        }
+                    }
+
+                    position = Position(cameraPosition)
+
+                    rotation = Rotation(cameraRotation)
                 },
 
                 cameraManipulator = rememberCameraManipulator(cameraOrbitHome),
@@ -229,9 +283,42 @@ fun GuitarViewPort()
             .border(8.dp, Color.White, RoundedCornerShape(22.dp)), verticalArrangement = Arrangement.Bottom,
             horizontalAlignment = Alignment.Start)
         {
-            ColorDropDown()
 
-            DropDownSection()
+            /*AnimatedVisibility(visible = isDeployed)
+            {
+                Column(modifier = Modifier.width(250.dp).height(300.dp), verticalArrangement = Arrangement.Bottom,
+                    horizontalAlignment = Alignment.Start)
+                {
+                    ColorDropDown()
+
+                    DropDownSection()
+                }
+            }*/
+
+            FloatingActionButton( onClick = {isDeployed = !isDeployed}, modifier = Modifier.padding(start = 10.dp, bottom = 10.dp)
+                .offset{ IntOffset(fabOffset.x.roundToInt(), fabOffset.y.roundToInt()) }
+                .pointerInput(Unit){ detectDragGestures { change, dragAmount -> change.consume()
+                    fabOffset = fabOffset.plus(dragAmount)}},
+                containerColor = Color(66, 203, 245))
+            {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add",
+                    tint = Color.Black
+                )
+
+                AnimatedVisibility(visible = isDeployed)
+                {
+                    Column(modifier = Modifier.width(200.dp).height(256.dp), verticalArrangement = Arrangement.Bottom,
+                        horizontalAlignment = Alignment.Start)
+                    {
+                        ColorDropDown()
+
+                        DropDownSection()
+                    }
+                }
+
+            }
         }
 
     }

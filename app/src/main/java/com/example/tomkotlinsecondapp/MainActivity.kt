@@ -106,6 +106,7 @@ val colorInput = mutableStateOf(value = "White")
 val modelIndVal = mutableStateOf(value = "Telecaster")
 val colorIndVal = mutableStateOf(value = false)
 val spacerInd = mutableStateOf(value = true)
+val cameraInd = mutableIntStateOf(value = 0)
 
 @Composable
 fun Greeting (name: String) {

@@ -37,8 +37,17 @@ fun ColorDropDown()
 
     val guitarColors = listOf("White", "Red", "Sky Blue", "Olive Green")
 
-    Box(modifier = Modifier.width(200.dp).height(80.dp).padding(start = 8.dp)
-        .background(Color.Blue, RoundedCornerShape(16.dp))
+    Box(modifier = Modifier.width(200.dp).height(80.dp)//.padding(start = 8.dp)
+        .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
+        .border(4.dp, Color.Black, RoundedCornerShape(16.dp)), contentAlignment = Alignment.Center)
+    {
+        TextButton(onClick = {cameraInd.intValue = 1}, modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp)).width(150.dp)) {
+            Text(text = "Camera Toggle", color = Color.Black, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+        }
+    }
+
+    Box(modifier = Modifier.width(200.dp).height(80.dp)//.padding(start = 8.dp)
+        .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
         .border(4.dp, Color.Black, RoundedCornerShape(16.dp)), contentAlignment = Alignment.Center)
     {
 
