@@ -295,7 +295,13 @@ fun GuitarViewPort()
         }
 
         Column(modifier = Modifier.width(400.dp).height(900.dp).zIndex(1f)
-            .border(8.dp, Color(66, 203, 240), RoundedCornerShape(22.dp)), verticalArrangement = Arrangement.Bottom,
+            .border(8.dp, Color.White, RoundedCornerShape(22.dp)), verticalArrangement = Arrangement.Bottom,
+            horizontalAlignment = Alignment.Start)
+        {
+
+        }
+
+        Column(modifier = Modifier.width(400.dp).height(900.dp).zIndex(3f), verticalArrangement = Arrangement.Bottom,
             horizontalAlignment = Alignment.Start)
         {
             FloatingActionButton( onClick = {containerBackground()}, modifier = Modifier.padding(start = 10.dp, bottom = 10.dp).zIndex(3f)
@@ -322,7 +328,6 @@ fun GuitarViewPort()
                 }
             }
         }
-
     }
 
 }
