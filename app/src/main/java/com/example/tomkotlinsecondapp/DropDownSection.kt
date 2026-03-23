@@ -39,7 +39,7 @@ fun DropDownSection()
 
     //val guitarNames1 = listOf("Telecaster", "Stratocaster", "Jaguar", "Jazzmaster", "Growler")
 
-    Box(modifier = Modifier.width(200.dp).height(80.dp).padding(bottom = 8.dp)
+    Box(modifier = Modifier.width(200.dp).height(80.dp)//.padding(bottom = 8.dp)
         .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
         .border(4.dp, Color.Black, RoundedCornerShape(16.dp)), contentAlignment = Alignment.Center)
     {

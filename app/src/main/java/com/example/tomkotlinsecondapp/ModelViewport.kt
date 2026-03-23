@@ -6,6 +6,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -87,6 +88,8 @@ fun GuitarViewPort()
 
     var fabOffset by remember {mutableStateOf(Offset(0f, 0f))}
 
+    var colorOffset by remember {mutableStateOf(Color(66, 203, 240))}
+
     var cameraOrbitHome = Float3(0.0f, 0.0f, 1.3f)
 
     var cameraPosition = Float3(0.0f, 0.0f, 1.3f)
@@ -126,13 +129,25 @@ fun GuitarViewPort()
         modelInstance = modelLoaderDef.createModelInstance("growler_25_inch_body.glb"),
     )
 
-    var neckModelNode = ModelNode(
+    val neckModelNode = ModelNode(
         modelInstance = modelLoaderDef.createModelInstance("25_inch_neck_assembly.glb")
     )
 
     var componentsNode = ModelNode(
         modelInstance = modelLoaderDef.createModelInstance("growler_25_components.glb")
     )
+
+    fun containerBackground()
+    {
+        isDeployed = !isDeployed
+
+        if(isDeployed)
+        {
+            colorOffset = Color.Transparent
+        }
+
+        else colorOffset = Color(66, 203, 240)
+    }
 
     Box(modifier = Modifier
         .height(900.dp).width(400.dp).background(Color.White), contentAlignment = Alignment.Center,)
@@ -171,7 +186,7 @@ fun GuitarViewPort()
 
         if(isLoading)
         {
-            Box(modifier = Modifier.fillMaxSize().background(Color.LightGray, RoundedCornerShape(22.dp)).zIndex(2f), contentAlignment = Alignment.Center)
+            Box(modifier = Modifier.fillMaxSize().background(Color.LightGray, RoundedCornerShape(22.dp)).zIndex(1f), contentAlignment = Alignment.Center)
             {
                 CircularProgressIndicator(modifier = Modifier.size(100.dp), strokeWidth = 10.dp, trackColor = Color(66, 203, 245), color = Color.White)
             }
@@ -279,27 +294,15 @@ fun GuitarViewPort()
             )
         }
 
-        Column(modifier = Modifier.width(400.dp).height(900.dp).zIndex(2f)
-            .border(8.dp, Color.White, RoundedCornerShape(22.dp)), verticalArrangement = Arrangement.Bottom,
+        Column(modifier = Modifier.width(400.dp).height(900.dp).zIndex(1f)
+            .border(8.dp, Color(66, 203, 240), RoundedCornerShape(22.dp)), verticalArrangement = Arrangement.Bottom,
             horizontalAlignment = Alignment.Start)
         {
-
-            /*AnimatedVisibility(visible = isDeployed)
-            {
-                Column(modifier = Modifier.width(250.dp).height(300.dp), verticalArrangement = Arrangement.Bottom,
-                    horizontalAlignment = Alignment.Start)
-                {
-                    ColorDropDown()
-
-                    DropDownSection()
-                }
-            }*/
-
-            FloatingActionButton( onClick = {isDeployed = !isDeployed}, modifier = Modifier.padding(start = 10.dp, bottom = 10.dp)
+            FloatingActionButton( onClick = {containerBackground()}, modifier = Modifier.padding(start = 10.dp, bottom = 10.dp).zIndex(3f)
                 .offset{ IntOffset(fabOffset.x.roundToInt(), fabOffset.y.roundToInt()) }
                 .pointerInput(Unit){ detectDragGestures { change, dragAmount -> change.consume()
                     fabOffset = fabOffset.plus(dragAmount)}},
-                containerColor = Color(66, 203, 245))
+                containerColor = (colorOffset))
             {
                 Icon(
                     imageVector = Icons.Default.Add,
@@ -309,7 +312,7 @@ fun GuitarViewPort()
 
                 AnimatedVisibility(visible = isDeployed)
                 {
-                    Column(modifier = Modifier.width(200.dp).height(256.dp), verticalArrangement = Arrangement.Bottom,
+                    Column(modifier = Modifier.width(200.dp).height(240.dp), verticalArrangement = Arrangement.Bottom,
                         horizontalAlignment = Alignment.Start)
                     {
                         ColorDropDown()
@@ -317,7 +320,6 @@ fun GuitarViewPort()
                         DropDownSection()
                     }
                 }
-
             }
         }
 
