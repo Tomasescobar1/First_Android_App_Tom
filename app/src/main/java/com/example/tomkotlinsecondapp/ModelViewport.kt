@@ -273,8 +273,26 @@ fun GuitarViewPort()
                 {
                     when(cameraInd.intValue)
                     {
+                        0 -> {
+                            cameraPosition = Float3(0.0f, 0.0f, 1.3f)
+
+                            cameraRotation = Float3(0.0f, 0.0f, 0.0f)
+                        }
+
                         1 -> {
                             cameraPosition = Float3(0.25f, 0.6f, 1.3f)
+
+                            cameraRotation = Float3(-21.0f, 10.0f, 0.0f)
+                        }
+
+                        2 -> {
+                            cameraPosition = Float3(0.5f, 1.2f, 1.3f)
+
+                            cameraRotation = Float3(-21.0f, 10.0f, 0.0f)
+                        }
+
+                        3 -> {
+                            cameraPosition = Float3(1.0f, 2.4f, 1.3f)
 
                             cameraRotation = Float3(-21.0f, 10.0f, 0.0f)
                         }

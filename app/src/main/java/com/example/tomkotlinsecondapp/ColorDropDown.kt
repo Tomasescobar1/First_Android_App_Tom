@@ -24,6 +24,16 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
+fun cameraToggle()
+{
+    cameraInd.intValue ++
+
+    if(cameraInd.intValue > 3)
+    {
+        cameraInd.intValue = 0
+    }
+}
+
 @Composable
 fun ColorDropDown()
 {
@@ -41,7 +51,7 @@ fun ColorDropDown()
         .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
         .border(4.dp, Color.Black, RoundedCornerShape(16.dp)), contentAlignment = Alignment.Center)
     {
-        TextButton(onClick = {cameraInd.intValue = 1}, modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp)).width(150.dp)) {
+        TextButton(onClick = {cameraToggle()}, modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp)).width(150.dp)) {
             Text(text = "Camera Toggle", color = Color.Black, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
         }
     }
