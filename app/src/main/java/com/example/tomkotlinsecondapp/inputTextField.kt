@@ -39,7 +39,7 @@ fun InputTextField(inout1:Boolean)
 
     var inputCount by remember { mutableIntStateOf(0) }
 
-    fun buttonUpdate(input: String, input2: Int)
+    /*fun buttonUpdate(input: String, input2: Int)
     {
         when(input2)
         {
@@ -70,6 +70,8 @@ fun InputTextField(inout1:Boolean)
 
         //buttonText = guitarInstance.model.uppercase()
     }
+
+    */
 
     //Spacer(modifier = Modifier.height(200.dp))
 
@@ -117,7 +119,7 @@ fun InputTextField(inout1:Boolean)
             {
                 inputCount++
 
-                buttonUpdate(inputText, inputCount)
+                //buttonUpdate(inputText, inputCount)
             }
 
             else

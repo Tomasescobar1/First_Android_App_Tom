@@ -1,23 +1,7 @@
 package com.example.tomkotlinsecondapp
 
-class Guitar(var model: String = "Telecaster", var scaleLength: Double = 25.50, var numberOfStrings : Int = 6) {
+class Guitar(var customer: String = "Tom", var model: String = " Telecaster", var color: String = "White", var scaleLength: Double = 25.5) {
 
-    var color: String = "Red"
-
-    constructor(model: String ="Tele", scaleLength: Double, numberOfStrings : Int, color1 : String) : this(model, scaleLength, numberOfStrings) {
-
-        this.color = color1
-
-        println("The name of  the guitar model is $model")
-
-    }
-
-}
-
-class GuitarTwo(modelTwo: String = "Telecaster", scaleLengthTwo : Double = 25.50, numberOfStringsTwo : Int = 6) {
-
-    init {
-        val modelName:String = modelTwo
-    }
+    
 
 }

@@ -84,12 +84,6 @@ fun GuitarViewPort()
 
     var isLoading by remember {mutableStateOf(true)}
 
-    var isDeployed by remember {mutableStateOf(false)}
-
-    var fabOffset by remember {mutableStateOf(Offset(0f, 0f))}
-
-    var colorOffset by remember {mutableStateOf(Color(66, 203, 240))}
-
     var cameraOrbitHome = Float3(0.0f, 0.0f, 1.3f)
 
     var cameraPosition = Float3(0.0f, 0.0f, 1.3f)
@@ -136,18 +130,6 @@ fun GuitarViewPort()
     var componentsNode = ModelNode(
         modelInstance = modelLoaderDef.createModelInstance("growler_25_components.glb")
     )
-
-    fun containerBackground()
-    {
-        isDeployed = !isDeployed
-
-        if(isDeployed)
-        {
-            colorOffset = Color.Transparent
-        }
-
-        else colorOffset = Color(66, 203, 240)
-    }
 
     Box(modifier = Modifier
         .height(900.dp).width(400.dp).background(Color.White), contentAlignment = Alignment.Center,)
@@ -322,29 +304,7 @@ fun GuitarViewPort()
         Column(modifier = Modifier.width(400.dp).height(900.dp).zIndex(3f), verticalArrangement = Arrangement.Bottom,
             horizontalAlignment = Alignment.Start)
         {
-            FloatingActionButton( onClick = {containerBackground()}, modifier = Modifier.padding(start = 10.dp, bottom = 10.dp).zIndex(3f)
-                .offset{ IntOffset(fabOffset.x.roundToInt(), fabOffset.y.roundToInt()) }
-                .pointerInput(Unit){ detectDragGestures { change, dragAmount -> change.consume()
-                    fabOffset = fabOffset.plus(dragAmount)}},
-                containerColor = (colorOffset))
-            {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Add",
-                    tint = Color.Black
-                )
-
-                AnimatedVisibility(visible = isDeployed)
-                {
-                    Column(modifier = Modifier.width(200.dp).height(240.dp), verticalArrangement = Arrangement.Bottom,
-                        horizontalAlignment = Alignment.Start)
-                    {
-                        ColorDropDown()
-
-                        DropDownSection()
-                    }
-                }
-            }
+            FABComponent()
         }
     }
 

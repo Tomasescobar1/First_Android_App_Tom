@@ -62,7 +62,7 @@ fun ColorDropDown()
     {
 
         TextButton(onClick = {dropped =  true}, modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp)).width(150.dp)) {
-            Text(text = "${savedGuitar.color}", color = Color.Black, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+            Text(text = "${colorInput.value}", color = Color.Black, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
         }
 
         DropdownMenu(

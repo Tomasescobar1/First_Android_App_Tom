@@ -51,6 +51,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -91,5 +92,5 @@ class MainActivity : ComponentActivity() {
 val colorInput = mutableStateOf(value = "White")
 val modelIndVal = mutableStateOf(value = "Telecaster")
 val colorIndVal = mutableStateOf(value = false)
-val spacerInd = mutableStateOf(value = true)
+val scaleLengthInd = mutableDoubleStateOf(value = 25.5)
 val cameraInd = mutableIntStateOf(value = 0)

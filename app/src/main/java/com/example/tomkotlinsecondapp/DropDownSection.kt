@@ -11,6 +11,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Text
+
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -29,6 +30,8 @@ fun DropDownSection()
 {
     var dropped by remember {mutableStateOf(false)}
 
+    var scaleLengthDropped by remember {mutableStateOf( false)}
+
     var selectedAxe by remember {mutableStateOf("None")}
 
     val savedGuitar = Guitar()
@@ -36,6 +39,8 @@ fun DropDownSection()
     savedGuitar.model = modelIndVal.value
 
     val guitarNames = listOf("Telecaster", "Growler")
+
+    val scaleLengths = listOf(25.5, 25.0, 24.75, 24.0)
 
     //val guitarNames1 = listOf("Telecaster", "Stratocaster", "Jaguar", "Jazzmaster", "Growler")
 
@@ -45,7 +50,7 @@ fun DropDownSection()
     {
 
         TextButton(onClick = {dropped =  true}, modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp)).width(150.dp)) {
-            Text(text = "${savedGuitar.model}", color = Color.Black, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+            Text(text = modelIndVal.value, color = Color.Black, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
         }
 
         DropdownMenu(
@@ -60,12 +65,48 @@ fun DropDownSection()
                     onClick = {
                         modelIndVal.value =  guitarName
                         dropped = false
-
                     },
                     //contentPadding = MenuDefaults.DropdownMenuItemContentPadding,
-                    modifier = Modifier.width(190.dp).background(color = Color.Transparent, RoundedCornerShape(16.dp))
+                    modifier = Modifier.width(200.dp).background(color = Color.Transparent, RoundedCornerShape(16.dp))
                 )
             }
+        }
+    }
+
+    Box(modifier = Modifier.width(200.dp).height(80.dp)
+        .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
+        .border(4.dp, Color.Black, RoundedCornerShape(16.dp)), contentAlignment = Alignment.Center)
+    {
+        TextButton(onClick = {scaleLengthDropped = true}, modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp)).width(150.dp)) {
+            Text(text = "Scale Length", color = Color.Black, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+        }
+
+        DropdownMenu(
+            expanded = scaleLengthDropped,
+            onDismissRequest = {scaleLengthDropped = false},
+            modifier = Modifier.border(4.dp, Color.Black, RoundedCornerShape(16.dp))
+                .background(Color.White, RoundedCornerShape(16.dp))
+        ) {
+            scaleLengths.forEach { scaleLength ->
+                DropdownMenuItem(
+                    text = {Text(scaleLength.toString(), color = Color.Black, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
+                    onClick = {
+                        scaleLengthInd.doubleValue = scaleLength
+                        scaleLengthDropped = false
+                    },
+
+                    modifier = Modifier.background(Color.Transparent, RoundedCornerShape(16.dp)).width(200.dp)
+                )
+            }
+        }
+    }
+
+    Box(modifier = Modifier.width(200.dp).height(80.dp)
+        .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
+        .border(4.dp, Color.Black, RoundedCornerShape(16.dp)), contentAlignment = Alignment.Center)
+    {
+        TextButton(onClick = {}, modifier = Modifier.background(Color.White,RoundedCornerShape(12.dp)).width(150.dp))  {
+            Text(text = "Place Order", color = Color.Black, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
         }
     }
 
