@@ -7,13 +7,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Text
 
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,13 +27,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DropDownSection()
 {
     var dropped by remember {mutableStateOf(false)}
 
     var scaleLengthDropped by remember {mutableStateOf( false)}
+
+    var orderIndicator by remember {mutableStateOf(false)}
 
     var selectedAxe by remember {mutableStateOf("None")}
 
@@ -41,6 +48,29 @@ fun DropDownSection()
     val guitarNames = listOf("Telecaster", "Growler")
 
     val scaleLengths = listOf(25.5, 25.0, 24.75, 24.0)
+
+    val guitarOrders = GuitarOrder()
+
+    fun submitData()
+    {
+        guitarOrders.addListElement(Guitar("Tomas", modelIndVal.value, colorInput.value, 25.5))
+
+        orderIndicator = true
+    }
+
+    LaunchedEffect(orderIndicator)
+    {
+        delay(1000L)
+    }
+
+    if(orderIndicator)
+    {
+        AlertDialog(
+            onDismissRequest = {orderIndicator = false},
+            title = {Text("Hello")},
+            text = {Text("Hello")},
+            confirmButton = {})
+    }
 
     //val guitarNames1 = listOf("Telecaster", "Stratocaster", "Jaguar", "Jazzmaster", "Growler")
 
@@ -105,9 +135,18 @@ fun DropDownSection()
         .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
         .border(4.dp, Color.Black, RoundedCornerShape(16.dp)), contentAlignment = Alignment.Center)
     {
-        TextButton(onClick = {}, modifier = Modifier.background(Color.White,RoundedCornerShape(12.dp)).width(150.dp))  {
+        TextButton(onClick = {submitData()}, modifier = Modifier.background(Color.White,RoundedCornerShape(12.dp)).width(150.dp))  {
             Text(text = "Place Order", color = Color.Black, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
         }
     }
+
+    /*Box(modifier = Modifier.width(200.dp).height(80.dp)
+        .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
+        .border(4.dp, Color.Black, RoundedCornerShape(16.dp)), contentAlignment = Alignment.Center)
+    {
+        TextButton(onClick = {}, modifier = Modifier.background(Color.White,RoundedCornerShape(12.dp)).width(150.dp))  {
+            Text(text = "${guitarOrders.orderList[0].color}", color = Color.Black, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+        }
+    }*/
 
 }

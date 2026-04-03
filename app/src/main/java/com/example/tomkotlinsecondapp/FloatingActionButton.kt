@@ -75,7 +75,7 @@ fun FABComponent() {
         AnimatedVisibility(visible = isDeployed)
         {
             Column(
-                modifier = Modifier.zIndex(4f).width(200.dp).height(400.dp),
+                modifier = Modifier.zIndex(4f).width(200.dp).height(480.dp),
                 verticalArrangement = Arrangement.Bottom,
                 horizontalAlignment = Alignment.Start
             )
