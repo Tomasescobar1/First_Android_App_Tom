@@ -305,6 +305,8 @@ fun GuitarViewPort()
             horizontalAlignment = Alignment.Start)
         {
             FABComponent()
+
+            ConfirmSection()
         }
     }
 

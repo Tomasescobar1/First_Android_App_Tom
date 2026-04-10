@@ -91,8 +91,11 @@ class MainActivity : ComponentActivity() {
 
 val colorInput = mutableStateOf(value = "White")
 val modelIndVal = mutableStateOf(value = "Telecaster")
-
-var customerInputVal = mutableStateOf("")
+val customerInputVal = mutableStateOf("")
 val colorIndVal = mutableStateOf(value = false)
 val scaleLengthInd = mutableDoubleStateOf(value = 25.5)
 val cameraInd = mutableIntStateOf(value = 0)
+
+val orderPlaceG = mutableStateOf(false)
+
+val instanceInd = mutableIntStateOf(0)

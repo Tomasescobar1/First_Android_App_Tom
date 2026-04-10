@@ -55,7 +55,7 @@ fun FABComponent() {
 
     FloatingActionButton (
         onClick = { containerBackground() },
-        modifier = Modifier.padding(start = 10.dp, bottom = 10.dp).zIndex(3f)
+        modifier = Modifier.padding(start = 10.dp, bottom = 10.dp).zIndex(2f)
             .offset { IntOffset(fabOffset.x.roundToInt(), fabOffset.y.roundToInt()) }
             .pointerInput(Unit) {
                 detectDragGestures { change, dragAmount ->
@@ -75,7 +75,7 @@ fun FABComponent() {
         AnimatedVisibility(visible = isDeployed)
         {
             Column(
-                modifier = Modifier.zIndex(4f).width(200.dp).height(400.dp),
+                modifier = Modifier.zIndex(2f).width(200.dp).height(400.dp),
                 verticalArrangement = Arrangement.Bottom,
                 horizontalAlignment = Alignment.Start
             )
