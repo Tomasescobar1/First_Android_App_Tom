@@ -28,18 +28,25 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.delay
+
 @Composable
 fun DropDownSection()
 {
@@ -53,6 +60,11 @@ fun DropDownSection()
     val guitarNames = listOf("Telecaster", "Growler")
 
     val scaleLengths = listOf(25.5, 25.0, 24.75, 24.0)
+
+    //var orderPlaceG by rememberSaveable {mutableStateOf(false)}
+
+    //var orderConfirm by rememberSaveable {mutableStateOf(false)}
+
 
         Box(
             modifier = Modifier.width(200.dp).height(80.dp)//.padding(bottom = 8.dp)

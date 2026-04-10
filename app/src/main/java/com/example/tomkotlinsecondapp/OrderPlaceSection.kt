@@ -11,6 +11,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -31,21 +34,25 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.delay
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
 
 @Composable
 fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
 {
 
-    var orderConfirm by remember {mutableStateOf(false)}
+    val keyboardController = LocalSoftwareKeyboardController.current
 
-    val context = LocalContext.current
+    var tfText by rememberSaveable {mutableStateOf("")}
 
-    val view = LocalView.current
+    //var orderPlace by rememberSaveable { mutableStateOf(orderPlaceG.value)}
 
-    //var orderPlace by remember { mutableStateOf(false)}
+    var orderConfirm by rememberSaveable {mutableStateOf(false)}
 
     fun confirmData()
     {
@@ -65,7 +72,16 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
         instanceInd.intValue ++
     }
 
-    LaunchedEffect(orderConfirm)
+    fun dialogDismiss()
+    {
+        orderPlaceG.value = false
+
+        orderConfirm = false
+
+        customerInputVal.value = ""
+    }
+
+    /*LaunchedEffect(orderConfirm)
     {
 
         delay(6000L)
@@ -74,13 +90,18 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
 
         orderPlaceG.value = false
 
-    }
+        tfText = ""
+
+    }*/
 
     if(orderPlaceG.value)
     {
         AlertDialog(
             onDismissRequest = {},
             title = {},
+            /*properties = DialogProperties(
+                usePlatformDefaultWidth = false
+            ),*/
             text = {
                 Column(
                     modifier = Modifier.height(400.dp).width(400.dp),
@@ -101,7 +122,13 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
                                 fontFamily = FontFamily.Monospace
                             )
                         },
-                        singleLine = true
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                        keyboardActions = KeyboardActions (
+                            onDone = {
+                                keyboardController?.hide()
+                                }
+                            )
                     )
 
                     Box(modifier = Modifier.height(30.dp).width(80.dp))
@@ -139,7 +166,7 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
     if(orderConfirm)
     {
         AlertDialog(
-            onDismissRequest = {},
+            onDismissRequest = {dialogDismiss()},
             title = {Text("Order confirmed!" + "\nSpecifications: ", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
             text = {Text(text = " Customer name: ${guitarViewModel.orderList.last().customer}" +
                     "\n Model: ${guitarViewModel.orderList.last().model}" +
