@@ -99,4 +99,6 @@ val cameraInd = mutableIntStateOf(value = 0)
 
 var orderPlaceG = mutableStateOf(false)
 
+var orderListFullG = mutableStateOf(false)
+
 val instanceInd = mutableIntStateOf(0)
