@@ -54,8 +54,6 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
 
     val focusManager = LocalFocusManager.current
 
-    val contextToast = LocalContext.current
-
     var orderConfirm by rememberSaveable {mutableStateOf(false)}
 
     var orderListFinal by remember {mutableStateOf(false)}
@@ -82,13 +80,23 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
         }
     }
 
-    fun dialogDismiss()
+    fun dialogDismiss(input: Boolean = true)
     {
-        orderPlaceG.value = false
+        if(input)
+        {
+            orderPlaceG.value = false
 
-        orderConfirm = false
+            orderConfirm = false
 
-        customerInputVal.value = ""
+            customerInputVal.value = ""
+        }
+
+        else
+        {
+            orderListFullG.value = false
+
+            orderListFinal = false
+        }
     }
 
     fun listReset()
@@ -203,12 +211,24 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
 
                     }
                    },
-            confirmButton = {Box(Modifier.background(Color(66, 203, 245), RoundedCornerShape(10.dp)).width(100.dp).height(40.dp)
-                            .border(3.dp, Color.Black, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center) {
-                        TextButton({dialogDismiss()}) {Text("Confirm", modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
-                            .width(70.dp).height(40.dp), fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold,
-                            color = Color.Black)}
-            }})
+            confirmButton = {
+                        Box(
+                            Modifier.background(Color(66, 203, 245), RoundedCornerShape(10.dp)).width(120.dp).height(55.dp)
+                            .border(3.dp, Color.Black, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center
+                        )
+                        {
+                        TextButton(
+                                onClick = {dialogDismiss()},
+                                modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
+                                                .width(90.dp).height(35.dp)
+                            )
+                            {
+                                Text("Confirm",
+                                    fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold,
+                                color = Color.Black)
+                            }
+                        }
+            })
     }
 
     if(orderListFullG.value)
@@ -220,30 +240,45 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
             {
 
                 for (i in 0 until guitarViewModel.orderList.size) {
-                    Text(text = "\nCustomer ${i+1}: ${guitarViewModel.orderList[i].customer}",
-                        lineHeight = 25.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                    Text(
+                        text = "\nCustomer ${i+1}: ${guitarViewModel.orderList[i].customer}",
+                        lineHeight = 25.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold
+                    )
                 }
 
             }
             },
-            confirmButton = {Box(Modifier.background(Color(66, 203, 245), RoundedCornerShape(10.dp)).width(100.dp).height(40.dp)
-                .border(3.dp, Color.Black, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center) {
-                TextButton({orderListFinal = true}) {Text("Confirm", modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
-                    .width(70.dp).height(40.dp), fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold,
-                    color = Color.Black)}
-            }})
+            confirmButton = {
+                Box(
+                    Modifier.background(Color(66, 203, 245), RoundedCornerShape(10.dp)).height(55.dp).width(120.dp)
+                .border(3.dp, Color.Black, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center)
+                {
+                TextButton(
+                    onClick = {orderListFinal = true},
+                    modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
+                                        .height(35.dp).width(90.dp)
+                    )
+                    {
+                        Text("Confirm",
+                            fontWeight = FontWeight.Bold,
+                        color = Color.Black)
+                    }
+                }
+            })
     }
 
     if(orderListFinal)
     {
         AlertDialog(
-            onDismissRequest = {orderListFinal = false},
+            onDismissRequest = {dialogDismiss(false)},
             title = {Text("Do you want to clear the list?",
                     fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
             text = {Column(verticalArrangement = Arrangement.Top, horizontalAlignment = Alignment.CenterHorizontally)
             {
 
                 Text("\nTo clear, press the red button, otherwise, press exit at the bottom:", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+
+                Box(modifier = Modifier.height(20.dp).width(40.dp))
 
                 Box(
                     modifier = Modifier.width(200.dp).height(80.dp)
@@ -270,12 +305,25 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
 
             }
             },
-            confirmButton = {Box(Modifier.background(Color(66, 203, 245), RoundedCornerShape(10.dp)).width(100.dp).height(40.dp)
-                .border(3.dp, Color.Black, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center) {
-                TextButton({orderListFinal = false}) {Text("Exit", modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
-                    .width(70.dp).height(40.dp), fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold,
-                    color = Color.Black)}
-            }})
+            confirmButton = {
+                Box(
+                    modifier = Modifier.background(Color(66, 203, 245), RoundedCornerShape(10.dp)).width(120.dp).height(55.dp)
+                .border(3.dp, Color.Black, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center)
+                {
+                TextButton(
+                    onClick = {dialogDismiss(false)},
+                    modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
+                                        .height(35.dp).width(90.dp)
+                )
+                    {
+                        Text(
+                            text = "Exit",
+                            fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold,
+                            color = Color.Black
+                        )
+                    }
+                }
+            })
     }
 
     if(orderRemove)
@@ -284,9 +332,9 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
             onDismissRequest = {},
             title = {Text("Orders Removed!", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
             text = {Column(verticalArrangement = Arrangement.Top)
-            {
+                {
 
-            }
+                }
             },
             confirmButton = {})
     }
