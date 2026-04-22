@@ -44,76 +44,111 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.delay
 
 @Composable
-fun DropDownSection()
+fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
 {
+
+    val orderState by guitarViewModel.orderState.collectAsStateWithLifecycle()
 
     var dropped by remember {mutableStateOf(false)}
 
     var scaleLengthDropped by remember {mutableStateOf( false)}
 
-    //var instanceInd by remember { mutableIntStateOf(0) }
-
     val guitarNames = listOf("Telecaster", "Growler")
 
     val scaleLengths = listOf(25.5, 25.0, 24.75, 24.0)
 
-    //var orderPlaceG by rememberSaveable {mutableStateOf(false)}
-
-    //var orderConfirm by rememberSaveable {mutableStateOf(false)}
-
-
-        Box(
-            modifier = Modifier.width(200.dp).height(80.dp)//.padding(bottom = 8.dp)
-                .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
-                .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
-            contentAlignment = Alignment.Center
-        )
-        {
-
-            TextButton(
-                onClick = { dropped = true },
-                modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp)).width(150.dp)
-            ) {
-                Text(
-                    text = modelIndVal.value,
-                    color = Color.Black,
-                    fontFamily = FontFamily.Monospace,
-                    fontWeight = FontWeight.Bold
+    Box(
+        modifier = Modifier.width(200.dp).height(80.dp)//.padding(bottom = 8.dp)
+            .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
+            .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
+        contentAlignment = Alignment.Center
+    )
+    {
+        TextButton(
+            onClick = { dropped = true },
+            modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp)).width(150.dp)
+        ) {
+            Text(
+                text = modelIndVal.value,
+                color = Color.Black,
+                fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.Bold
+            )
+        }
+        DropdownMenu(
+            expanded = dropped,
+            onDismissRequest = { dropped = false },
+            modifier = Modifier.border(4.dp, Color.Black, RoundedCornerShape(16.dp))
+                .background(Color.White, RoundedCornerShape(16.dp))
+        ) {
+            guitarNames.forEach { guitarName ->
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            "Model: $guitarName",
+                            color = Color.Black,
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold
+                        ) },
+                    onClick = {
+                        modelIndVal.value = guitarName
+                        dropped = false },
+                    //contentPadding = MenuDefaults.DropdownMenuItemContentPadding,
+                    modifier = Modifier.width(200.dp)
+                        .background(color = Color.Transparent, RoundedCornerShape(16.dp))
                 )
             }
-
-            DropdownMenu(
-                expanded = dropped,
-                onDismissRequest = { dropped = false },
-                modifier = Modifier.border(4.dp, Color.Black, RoundedCornerShape(16.dp))
-                    .background(Color.White, RoundedCornerShape(16.dp))
-            ) {
-                guitarNames.forEach { guitarName ->
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                "Model: $guitarName",
-                                color = Color.Black,
-                                fontFamily = FontFamily.Monospace,
-                                fontWeight = FontWeight.Bold
-                            )
-                        },
-                        onClick = {
-                            modelIndVal.value = guitarName
-                            dropped = false
-                        },
-                        //contentPadding = MenuDefaults.DropdownMenuItemContentPadding,
-                        modifier = Modifier.width(200.dp)
-                            .background(color = Color.Transparent, RoundedCornerShape(16.dp))
-                    )
-                }
+        }
+    }
+    Box(
+        modifier = Modifier.width(200.dp).height(80.dp)
+            .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
+            .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
+        contentAlignment = Alignment.Center
+    )
+    {
+        TextButton(
+            onClick = { scaleLengthDropped = true },
+            modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp)).width(150.dp)
+        ) {
+            Text(
+                text = "Scale Length: ${scaleLengthInd.doubleValue} in.",
+                color = Color.Black,
+                fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.Bold
+            )
+        }
+        DropdownMenu(
+            expanded = scaleLengthDropped,
+            onDismissRequest = { scaleLengthDropped = false },
+            modifier = Modifier.border(4.dp, Color.Black, RoundedCornerShape(16.dp))
+                .background(Color.White, RoundedCornerShape(16.dp))
+        ) {
+            scaleLengths.forEach { scaleLength ->
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            scaleLength.toString() + "in.",
+                            color = Color.Black,
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold
+                        ) },
+                    onClick = {
+                        scaleLengthInd.doubleValue = scaleLength
+                        scaleLengthDropped = false },
+                    modifier = Modifier.background(Color.Transparent, RoundedCornerShape(16.dp))
+                        .width(200.dp)
+                )
             }
         }
-
+    }
+    if(orderState.instanceInd < 5)
+    {
         Box(
             modifier = Modifier.width(200.dp).height(80.dp)
                 .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
@@ -122,91 +157,41 @@ fun DropDownSection()
         )
         {
             TextButton(
-                onClick = { scaleLengthDropped = true },
-                modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp)).width(150.dp)
+                onClick = { guitarViewModel.updateOrderState(2, true) },
+                modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp))
+                    .width(150.dp)
             ) {
                 Text(
-                    text = "Scale Length: ${scaleLengthInd.doubleValue}",
+                    text = "Place Order",
                     color = Color.Black,
                     fontFamily = FontFamily.Monospace,
                     fontWeight = FontWeight.Bold
                 )
             }
-
-            DropdownMenu(
-                expanded = scaleLengthDropped,
-                onDismissRequest = { scaleLengthDropped = false },
-                modifier = Modifier.border(4.dp, Color.Black, RoundedCornerShape(16.dp))
-                    .background(Color.White, RoundedCornerShape(16.dp))
+        }
+    }
+    else
+    {
+        Box(
+            modifier = Modifier.width(200.dp).height(80.dp)
+                .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
+                .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
+            contentAlignment = Alignment.Center
+        )
+        {
+            TextButton(
+                onClick = { guitarViewModel.updateOrderState(1,true) },
+                modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp))
+                    .width(150.dp)
             ) {
-                scaleLengths.forEach { scaleLength ->
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                scaleLength.toString(),
-                                color = Color.Black,
-                                fontFamily = FontFamily.Monospace,
-                                fontWeight = FontWeight.Bold
-                            )
-                        },
-                        onClick = {
-                            scaleLengthInd.doubleValue = scaleLength
-                            scaleLengthDropped = false
-                        },
-
-                        modifier = Modifier.background(Color.Transparent, RoundedCornerShape(16.dp))
-                            .width(200.dp)
-                    )
-                }
+                Text(
+                    text = "View Order List",
+                    color = Color.Black,
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
-
-        if(instanceInd.intValue < 5)
-        {
-            Box(
-                modifier = Modifier.width(200.dp).height(80.dp)
-                    .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
-                    .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
-                contentAlignment = Alignment.Center
-            )
-            {
-                TextButton(
-                    onClick = { orderPlaceG.value = true },
-                    modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp))
-                        .width(150.dp)
-                ) {
-                    Text(
-                        text = "Place Order",
-                        color = Color.Black,
-                        fontFamily = FontFamily.Monospace,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-        }
-
-        else
-        {
-            Box(
-                modifier = Modifier.width(200.dp).height(80.dp)
-                    .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
-                    .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
-                contentAlignment = Alignment.Center
-            )
-            {
-                TextButton(
-                    onClick = { orderListFullG.value = true },
-                    modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp))
-                        .width(150.dp)
-                ) {
-                    Text(
-                        text = "View Order List",
-                        color = Color.Black,
-                        fontFamily = FontFamily.Monospace,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-        }
+    }
 
 }

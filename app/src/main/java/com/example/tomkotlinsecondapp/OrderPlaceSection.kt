@@ -44,6 +44,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlin.collections.get
 
 @Composable
@@ -53,6 +54,8 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
     val keyboardController = LocalSoftwareKeyboardController.current
 
     val focusManager = LocalFocusManager.current
+
+    val orderState by guitarViewModel.orderState.collectAsStateWithLifecycle()
 
     var orderConfirm by rememberSaveable {mutableStateOf(false)}
 
@@ -76,7 +79,7 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
 
             orderConfirm = true
 
-            instanceInd.intValue++
+            guitarViewModel.updateOrderState(3, true)
         }
     }
 
@@ -84,7 +87,7 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
     {
         if(input)
         {
-            orderPlaceG.value = false
+            guitarViewModel.updateOrderState(2, false)
 
             orderConfirm = false
 
@@ -93,7 +96,7 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
 
         else
         {
-            orderListFullG.value = false
+            guitarViewModel.updateOrderState(1, false)
 
             orderListFinal = false
         }
@@ -101,11 +104,11 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
 
     fun listReset()
     {
-        orderListFullG.value = false
+        guitarViewModel.updateOrderState(1, false)
 
         guitarViewModel.orderList.clear()
 
-        instanceInd.intValue = 0
+        guitarViewModel.updateOrderState(3, false)
 
         orderRemove = true
     }
@@ -120,7 +123,7 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
         orderListFinal = false
     }
 
-    if(orderPlaceG.value)
+    if(orderState.orderPlaceG)
     {
         AlertDialog(
             onDismissRequest = {},
@@ -207,7 +210,7 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
                                 lineHeight = 25.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                         }
 
-                        Text("\nAvailable order slots: ${5 - instanceInd.intValue}", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                        Text("\nAvailable order slots: ${5 - orderState.instanceInd}", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
 
                     }
                    },
@@ -231,10 +234,12 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
             })
     }
 
-    if(orderListFullG.value)
+    //guitarViewModel.
+
+    if(orderState.orderListFull)
     {
         AlertDialog(
-            onDismissRequest = {orderListFullG.value = false},
+            onDismissRequest = {guitarViewModel.updateOrderState(1,false)},
             title = {Text("Order slots full!" + "\nCustomer list: ", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
             text = {Column(verticalArrangement = Arrangement.Top)
             {

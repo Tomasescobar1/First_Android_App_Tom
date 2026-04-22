@@ -96,9 +96,3 @@ val customerInputVal = mutableStateOf("")
 val colorIndVal = mutableStateOf(value = false)
 val scaleLengthInd = mutableDoubleStateOf(value = 25.5)
 val cameraInd = mutableIntStateOf(value = 0)
-
-var orderPlaceG = mutableStateOf(false)
-
-var orderListFullG = mutableStateOf(false)
-
-val instanceInd = mutableIntStateOf(0)
