@@ -54,6 +54,8 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
 
     val orderState by guitarViewModel.orderState.collectAsStateWithLifecycle()
 
+    val cDataState by guitarViewModel.dataState.collectAsStateWithLifecycle()
+
     var dropped by remember {mutableStateOf(false)}
 
     var scaleLengthDropped by remember {mutableStateOf( false)}
@@ -74,7 +76,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
             modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp)).width(150.dp)
         ) {
             Text(
-                text = modelIndVal.value,
+                text = cDataState.modelIndVal,
                 color = Color.Black,
                 fontFamily = FontFamily.Monospace,
                 fontWeight = FontWeight.Bold
@@ -96,7 +98,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
                             fontWeight = FontWeight.Bold
                         ) },
                     onClick = {
-                        modelIndVal.value = guitarName
+                        guitarViewModel.updateDataState(2, guitarName, 0.0)
                         dropped = false },
                     //contentPadding = MenuDefaults.DropdownMenuItemContentPadding,
                     modifier = Modifier.width(200.dp)
@@ -117,7 +119,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
             modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp)).width(150.dp)
         ) {
             Text(
-                text = "Scale Length: ${scaleLengthInd.doubleValue} in.",
+                text = "Scale Length: ${cDataState.scaleLengthInd} in.",
                 color = Color.Black,
                 fontFamily = FontFamily.Monospace,
                 fontWeight = FontWeight.Bold
@@ -139,7 +141,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
                             fontWeight = FontWeight.Bold
                         ) },
                     onClick = {
-                        scaleLengthInd.doubleValue = scaleLength
+                        guitarViewModel.updateDataState(4, " ", scaleLength)
                         scaleLengthDropped = false },
                     modifier = Modifier.background(Color.Transparent, RoundedCornerShape(16.dp))
                         .width(200.dp)

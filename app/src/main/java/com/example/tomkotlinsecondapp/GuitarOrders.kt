@@ -19,8 +19,22 @@ data class OrderUIState (
     var instanceInd: Int = 0
 )
 
+data class OrderDataState (
+    var colorInput: String = "White",
+    var modelIndVal: String = "Telecaster",
+    var customerInputVal: String = " ",
+    var scaleLengthInd: Double = 25.5,
+    var cameraInd: Int = 0
+)
+
 class GuitarOrder : ViewModel()
 {
+
+    private val _dataState = MutableStateFlow(OrderDataState())
+
+    val dataState: StateFlow<OrderDataState> = _dataState.asStateFlow()
+
+    var camIncrement = mutableIntStateOf(0)
 
     private val _orderState = MutableStateFlow(OrderUIState())
 
@@ -28,6 +42,32 @@ class GuitarOrder : ViewModel()
     var orderList = mutableListOf<Guitar>()
 
     var increment = mutableIntStateOf(0)
+
+    fun updateDataState(input1: Int, input2: String, input3: Double)
+    {
+        when(input1)
+        {
+            1 -> {
+                _dataState.update {currentDstate -> currentDstate.copy(colorInput = input2)}
+            }
+
+            2 -> {
+                _dataState.update {currentDstate -> currentDstate.copy(modelIndVal = input2)}
+            }
+
+            3 -> {
+                _dataState.update {currentDstate -> currentDstate.copy(customerInputVal = input2)}
+            }
+
+            4 -> {
+                _dataState.update {currentDstate -> currentDstate.copy(scaleLengthInd = input3)}
+            }
+
+            5 -> {
+                _dataState.update {currentDstate -> currentDstate.copy(cameraInd = camIncrement.intValue++)}
+            }
+        }
+    }
 
     fun updateOrderState(input1: Int, input2: Boolean)
     {

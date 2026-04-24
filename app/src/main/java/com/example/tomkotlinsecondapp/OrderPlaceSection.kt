@@ -57,6 +57,10 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
 
     val orderState by guitarViewModel.orderState.collectAsStateWithLifecycle()
 
+    val cDataState by guitarViewModel.dataState.collectAsStateWithLifecycle()
+
+    var customerInputLocal by remember {mutableStateOf(" ")}
+
     var orderConfirm by rememberSaveable {mutableStateOf(false)}
 
     var orderListFinal by remember {mutableStateOf(false)}
@@ -65,13 +69,15 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
 
     fun confirmData()
     {
-        if(customerInputVal.value != "")
+        if(customerInputLocal != " ")
         {
+            //guitarViewModel.updateDataState(3, customerInputLocal, 0.0)
+
             guitarViewModel.addListElement(
-                customerInputVal.value,
-                modelIndVal.value,
-                colorInput.value,
-                scaleLengthInd.doubleValue
+                customerInputLocal,
+                cDataState.modelIndVal,
+                cDataState.colorInput,
+                cDataState.scaleLengthInd
             )
             for (i in 0 until guitarViewModel.orderList.size) {
                 println(guitarViewModel.orderList[i].customer)
@@ -91,7 +97,7 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
 
             orderConfirm = false
 
-            customerInputVal.value = ""
+            customerInputLocal = " "
         }
 
         else
@@ -141,8 +147,8 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
                     )
                     OutlinedTextField(
 
-                        value = customerInputVal.value,
-                        onValueChange = { customerInputVal.value = it },
+                        value = customerInputLocal,
+                        onValueChange = { customerInputLocal = it },
                         label = {
                             Text(
                                 text = "Your name here.",

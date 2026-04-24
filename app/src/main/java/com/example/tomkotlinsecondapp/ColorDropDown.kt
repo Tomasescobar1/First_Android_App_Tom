@@ -23,6 +23,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 fun cameraToggle()
 {
@@ -35,8 +37,10 @@ fun cameraToggle()
 }
 
 @Composable
-fun ColorDropDown()
+fun ColorDropDown(guitarViewModel: GuitarOrder = viewModel())
 {
+    val cDataState by guitarViewModel.dataState.collectAsStateWithLifecycle()
+
     var dropped by remember {mutableStateOf(false)}
 
     val guitarColors = listOf("White", "Red", "Sky Blue", "Olive Green")
@@ -56,7 +60,7 @@ fun ColorDropDown()
     {
 
         TextButton(onClick = {dropped =  true}, modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp)).width(150.dp)) {
-            Text(text = "Color: ${colorInput.value}", color = Color.Black, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+            Text(text = "Color: ${cDataState.colorInput}", color = Color.Black, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
         }
 
         DropdownMenu(
@@ -69,9 +73,8 @@ fun ColorDropDown()
                 DropdownMenuItem(
                     text = {Text(guitarColor, color = Color.Black, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
                     onClick = {
-                        colorInput.value =  guitarColor
+                        guitarViewModel.updateDataState(1, guitarColor, 0.0)
                         dropped = false
-
                     },
                     //contentPadding = MenuDefaults.DropdownMenuItemContentPadding,
                     modifier = Modifier.width(200.dp)

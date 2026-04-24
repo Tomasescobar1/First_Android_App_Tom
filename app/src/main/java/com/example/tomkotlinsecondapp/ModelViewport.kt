@@ -47,6 +47,8 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.zIndex
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.romainguy.kotlin.math.Float3
 import io.github.sceneview.Scene
 import io.github.sceneview.SceneView
@@ -74,8 +76,11 @@ import kotlin.math.roundToInt
 //import androidx.compose.material3
 
 @Composable
-fun GuitarViewPort()
+fun GuitarViewPort(guitarViewModel: GuitarOrder = viewModel())
 {
+
+    val cDataState by guitarViewModel.dataState.collectAsStateWithLifecycle()
+
     val engine = rememberEngine()
 
     val modelLoaderDef = rememberModelLoader(engine)
@@ -135,9 +140,9 @@ fun GuitarViewPort()
         .height(900.dp).width(400.dp).background(Color.White), contentAlignment = Alignment.Center,)
     {
 
-        LaunchedEffect(colorInput.value, modelIndVal.value) {
+        LaunchedEffect(cDataState.colorInput, cDataState.modelIndVal) {
 
-            when (colorInput.value)
+            when (cDataState.colorInput)
             {
                 "Red" -> {
                     modelNode.setMaterialInstance(colorMaterialRed)
@@ -157,7 +162,7 @@ fun GuitarViewPort()
             }
         }
 
-        LaunchedEffect(colorInput.value, modelIndVal.value, cameraInd.intValue)
+        LaunchedEffect(cDataState.colorInput, cDataState.modelIndVal, cameraInd.intValue)
         {
             isLoading = true
 
@@ -174,7 +179,7 @@ fun GuitarViewPort()
             }
         }
 
-        key(colorInput.value, modelIndVal.value, cameraInd.intValue)
+        key(cDataState.colorInput, cDataState.modelIndVal, cameraInd.intValue)
         {
             Scene(
                 modifier = Modifier.fillMaxSize().border(6.dp, Color.White)
@@ -192,7 +197,7 @@ fun GuitarViewPort()
 
                 childNodes = rememberNodes {
 
-                    when (modelIndVal.value)
+                    when (cDataState.modelIndVal)
                     {
                         "Telecaster" -> {
                             modelNode = ModelNode(
