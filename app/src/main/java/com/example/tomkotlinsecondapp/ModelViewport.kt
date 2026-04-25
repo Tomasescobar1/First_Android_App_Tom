@@ -162,7 +162,7 @@ fun GuitarViewPort(guitarViewModel: GuitarOrder = viewModel())
             }
         }
 
-        LaunchedEffect(cDataState.colorInput, cDataState.modelIndVal, cameraInd.intValue)
+        LaunchedEffect(cDataState.colorInput, cDataState.modelIndVal, cDataState.cameraInd)
         {
             isLoading = true
 
@@ -179,7 +179,7 @@ fun GuitarViewPort(guitarViewModel: GuitarOrder = viewModel())
             }
         }
 
-        key(cDataState.colorInput, cDataState.modelIndVal, cameraInd.intValue)
+        key(cDataState.colorInput, cDataState.modelIndVal, cDataState.cameraInd)
         {
             Scene(
                 modifier = Modifier.fillMaxSize().border(6.dp, Color.White)
@@ -258,7 +258,7 @@ fun GuitarViewPort(guitarViewModel: GuitarOrder = viewModel())
 
                 cameraNode = rememberCameraNode(engine)
                 {
-                    when(cameraInd.intValue)
+                    when(cDataState.cameraInd)
                     {
                         0 -> {
                             cameraPosition = Float3(0.0f, 0.0f, 1.3f)

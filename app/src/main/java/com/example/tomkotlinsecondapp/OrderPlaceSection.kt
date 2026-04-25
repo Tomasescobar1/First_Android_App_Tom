@@ -59,7 +59,7 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
 
     val cDataState by guitarViewModel.dataState.collectAsStateWithLifecycle()
 
-    var customerInputLocal by remember {mutableStateOf(" ")}
+    var customerInputLocal by remember {mutableStateOf("")}
 
     var orderConfirm by rememberSaveable {mutableStateOf(false)}
 
@@ -69,9 +69,8 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
 
     fun confirmData()
     {
-        if(customerInputLocal != " ")
+        if(customerInputLocal != "")
         {
-            //guitarViewModel.updateDataState(3, customerInputLocal, 0.0)
 
             guitarViewModel.addListElement(
                 customerInputLocal,
@@ -97,7 +96,7 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
 
             orderConfirm = false
 
-            customerInputLocal = " "
+            customerInputLocal = ""
         }
 
         else
@@ -239,8 +238,6 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
                         }
             })
     }
-
-    //guitarViewModel.
 
     if(orderState.orderListFull)
     {

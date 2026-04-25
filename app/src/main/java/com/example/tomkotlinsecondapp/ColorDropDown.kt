@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 
-fun cameraToggle()
+/*fun cameraToggle()
 {
     cameraInd.intValue ++
 
@@ -34,11 +34,16 @@ fun cameraToggle()
     {
         cameraInd.intValue = 0
     }
-}
+}*/
 
 @Composable
 fun ColorDropDown(guitarViewModel: GuitarOrder = viewModel())
 {
+    fun cameraToggle()
+    {
+        guitarViewModel.updateDataState(5, " ", 0.0)
+    }
+
     val cDataState by guitarViewModel.dataState.collectAsStateWithLifecycle()
 
     var dropped by remember {mutableStateOf(false)}

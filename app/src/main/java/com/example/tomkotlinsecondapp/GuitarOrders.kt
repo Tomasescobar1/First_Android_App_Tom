@@ -22,7 +22,7 @@ data class OrderUIState (
 data class OrderDataState (
     var colorInput: String = "White",
     var modelIndVal: String = "Telecaster",
-    var customerInputVal: String = " ",
+    var customerInputVal: String = "",
     var scaleLengthInd: Double = 25.5,
     var cameraInd: Int = 0
 )
@@ -65,6 +65,13 @@ class GuitarOrder : ViewModel()
 
             5 -> {
                 _dataState.update {currentDstate -> currentDstate.copy(cameraInd = camIncrement.intValue++)}
+
+                if(camIncrement.intValue > 3)
+                {
+                    camIncrement.intValue = 0
+
+                    _dataState.update {currentDstate -> currentDstate.copy(cameraInd = camIncrement.intValue)}
+                }
             }
         }
     }

@@ -71,7 +71,6 @@ import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.window.Dialog
 import com.example.tomkotlinsecondapp.ui.theme.TomKotlinSecondAppTheme
-//import com.example.tomkotlinsecondapp.Guitar
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -88,11 +87,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
-val colorInput = mutableStateOf(value = "White")
-val modelIndVal = mutableStateOf(value = "Telecaster")
-
-val customerInputVal = mutableStateOf("")
-val colorIndVal = mutableStateOf(value = false)
-val scaleLengthInd = mutableDoubleStateOf(value = 25.5)
-val cameraInd = mutableIntStateOf(value = 0)
