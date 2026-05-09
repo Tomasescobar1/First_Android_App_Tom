@@ -16,6 +16,7 @@ data class Guitar (
 data class OrderUIState (
     var orderListFull: Boolean = false,
     var orderPlaceG: Boolean = false,
+    var orderUpdate: Boolean = true,
     var instanceInd: Int = 0
 )
 
@@ -39,7 +40,25 @@ class GuitarOrder : ViewModel()
     private val _orderState = MutableStateFlow(OrderUIState())
 
     val orderState: StateFlow<OrderUIState> = _orderState.asStateFlow()
+
+    private val _deployedState = MutableStateFlow(false)
+
+    val deployedState: StateFlow<Boolean> = _deployedState.asStateFlow()
     var orderList = mutableListOf<Guitar>()
+
+    /*var dbOrderList = hashMapOf(
+        "Customer" to " ",
+        "Model" to " ",
+        "Color" to " ",
+        "ScaleLength" to 0.0
+    )*/
+
+    var dbOrderList: MutableMap<String, Any> = mutableMapOf(
+        "Customer" to " ",
+        "Model" to " ",
+        "Color" to " ",
+        "Scale Length" to 0.0
+    )
 
     var increment = mutableIntStateOf(0)
 
@@ -73,6 +92,14 @@ class GuitarOrder : ViewModel()
                     _dataState.update {currentDstate -> currentDstate.copy(cameraInd = camIncrement.intValue)}
                 }
             }
+
+            6 -> {
+                _deployedState.update { !it }
+            }
+
+            7 -> {
+                _deployedState.update{false}
+            }
         }
     }
 
@@ -102,6 +129,17 @@ class GuitarOrder : ViewModel()
                     _orderState.update { currentState -> currentState.copy(instanceInd = 0)}
                 }
             }
+
+            4 -> {
+                if(input2)
+                {
+                    _orderState.update { currentState -> currentState.copy(orderUpdate = true) }
+                }
+                else
+                {
+                    _orderState.update { currentState -> currentState.copy(orderUpdate = false) }
+                }
+            }
         }
     }
 
@@ -110,6 +148,14 @@ class GuitarOrder : ViewModel()
         val newGuitar = Guitar(customer, model, color, scaleLength)
 
         orderList.add(newGuitar)
+
+        dbOrderList.replace("Customer", orderList.last().customer.lowercase())
+
+        dbOrderList.replace("Model", orderList.last().model)
+
+        dbOrderList.replace("Color", orderList.last().color)
+
+        dbOrderList.replace("Scale Length", orderList.last().scaleLength)
 
         println("Added ${orderList.last().color}")
     }

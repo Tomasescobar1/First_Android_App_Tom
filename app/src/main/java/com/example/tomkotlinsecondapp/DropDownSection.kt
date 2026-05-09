@@ -20,7 +20,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -46,6 +45,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.toObjects
 import kotlinx.coroutines.delay
 
 @Composable
@@ -56,13 +58,159 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
 
     val cDataState by guitarViewModel.dataState.collectAsStateWithLifecycle()
 
+    val focusManager = LocalFocusManager.current
+
+    val keyboardController = LocalSoftwareKeyboardController.current
+
     var dropped by remember {mutableStateOf(false)}
+
+    var findTextBoxInd by remember {mutableStateOf(false)}
 
     var scaleLengthDropped by remember {mutableStateOf( false)}
 
+    var customerInputLocal by  remember{mutableStateOf("")}
+
+    var foundDocumentId by remember{mutableStateOf("")}
+
+    var foundOrderMap: MutableMap<String, Any> = mutableMapOf()
+
+    var orderFoundInd by remember{mutableStateOf(false)}
+
+    var orderFindFail by remember{mutableStateOf(false)}
+
+    var orderUpdateFail by remember{mutableStateOf(false)}
+
+    var orderModInd by remember{mutableStateOf(false)}
+
+    var orderDeleteInd by remember{mutableStateOf(false)}
+
+    var orderDeleteConfirm by remember{mutableStateOf(false)}
+
+    var orderUpdateInd by remember{mutableStateOf(false)}
+
     val guitarNames = listOf("Telecaster", "Growler")
 
+    var orderContent by remember {mutableStateOf("")}
+
     val scaleLengths = listOf(25.5, 25.0, 24.75, 24.0)
+
+    val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+
+    fun dialogDismiss(input:Boolean = true)
+    {
+        orderFoundInd = false
+
+        findTextBoxInd = false
+
+        customerInputLocal = ""
+
+        if(input)
+        {
+            guitarViewModel.updateOrderState(4, true)
+        }
+        else
+        {
+            guitarViewModel.updateOrderState(4, false)
+        }
+    }
+
+    fun orderUpdate()
+    {
+            //val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+
+            val documentRef = db.collection("Orders").document(foundDocumentId)
+
+            if(customerInputLocal != "")
+            {
+                guitarViewModel.addListElement(
+                    customerInputLocal,
+                    cDataState.modelIndVal,
+                    cDataState.colorInput,
+                    cDataState.scaleLengthInd
+                )
+            }
+
+            documentRef.update(guitarViewModel.dbOrderList).addOnSuccessListener {
+
+                customerInputLocal = ""
+
+                orderUpdateInd = true
+
+                orderContent = guitarViewModel.dbOrderList.entries.joinToString("\n") { entry -> "${entry.key}: ${entry.value}"}
+
+            }.addOnFailureListener {}
+    }
+
+
+    fun orderFind(input: String = "")
+    {
+        //val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+
+        if(input != "")
+        {
+            db.collection("Orders").whereEqualTo("Customer", input.lowercase())
+                .get().addOnSuccessListener{ documents ->
+                    for (document in documents) {
+                        if (document.data["Customer"] == input.lowercase()) {
+                            foundDocumentId = document.id
+
+                            println(document.data)
+
+                            //document.data["Customer"] = input.lowercase()
+
+                            val foundOrder: MutableMap<String, Any>? = document.data
+
+                            if (foundOrder != null) {
+                                foundOrderMap = foundOrder
+                            }
+
+                            //println("This is the mapped data found in FB: $foundOrderMap")
+
+                            orderContent = foundOrderMap.entries.joinToString("\n") { entry -> "${entry.key}: ${entry.value}" }
+
+                            //println("This is the string: $orderContent")
+
+                            orderFoundInd = true
+
+                            break
+                        }
+                    }
+                }.addOnFailureListener {}
+        }
+    }
+
+    fun orderDelete()
+    {
+        if(foundDocumentId != "")
+        {
+            db.collection("Orders").document(foundDocumentId).delete()
+                .addOnSuccessListener {
+                    orderDeleteInd = true
+                }.addOnFailureListener {  }
+        }
+    }
+
+    LaunchedEffect(orderUpdateInd)
+    {
+        delay(3000L)
+
+        orderUpdateInd = false
+
+        orderModInd = false
+    }
+
+    LaunchedEffect(orderDeleteInd)
+    {
+        delay(3000L)
+
+        orderDeleteInd = false
+
+        orderDeleteConfirm = false
+
+        orderFoundInd = false
+
+        findTextBoxInd = false
+    }
 
     Box(
         modifier = Modifier.width(200.dp).height(80.dp)//.padding(bottom = 8.dp)
@@ -149,8 +297,11 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
             }
         }
     }
-    if(orderState.instanceInd < 5)
+
+    if(orderState.instanceInd > 0)
     {
+
+
         Box(
             modifier = Modifier.width(200.dp).height(80.dp)
                 .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
@@ -159,16 +310,363 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
         )
         {
             TextButton(
-                onClick = { guitarViewModel.updateOrderState(2, true) },
+                onClick = { findTextBoxInd = true },
                 modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp))
                     .width(150.dp)
             ) {
                 Text(
-                    text = "Place Order",
+                    text = "Find your order",
                     color = Color.Black,
                     fontFamily = FontFamily.Monospace,
                     fontWeight = FontWeight.Bold
                 )
+            }
+        }
+    }
+
+    if(findTextBoxInd)
+    {
+        AlertDialog(
+            onDismissRequest = { findTextBoxInd = false},
+            title = {},
+            text = {
+                Column(
+                    modifier = Modifier.height(400.dp).width(400.dp),
+                    verticalArrangement = Arrangement.Top,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Please type in your name to find your order.",
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold
+                    )
+                    OutlinedTextField(
+
+                        value = customerInputLocal,
+                        onValueChange = { customerInputLocal = it },
+                        label = {
+                            Text(
+                                text = "Your name here.",
+                                fontFamily = FontFamily.Monospace
+                            )
+                        },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                        keyboardActions = KeyboardActions (
+                            onDone = {
+                                keyboardController?.hide()
+                                focusManager.clearFocus()
+                            }
+                        )
+                    )
+
+                    Box(modifier = Modifier.height(30.dp).width(80.dp))
+
+                    Box(
+                        modifier = Modifier.width(200.dp).height(80.dp)
+                            .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
+                            .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
+                        contentAlignment = Alignment.Center
+                    )
+                    {
+                        TextButton(
+                            onClick = { orderFind(customerInputLocal) },
+                            modifier = Modifier.background(
+                                Color.White,
+                                RoundedCornerShape(12.dp)
+                            )
+                                .width(150.dp)
+                        ) {
+                            Text(
+                                text = "Find Order",
+                                color = Color.Black,
+                                fontFamily = FontFamily.Monospace,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+
+            },
+            confirmButton = {}
+        )
+    }
+
+    if(orderFoundInd)
+    {
+        AlertDialog(
+            onDismissRequest = {},
+            title = {Text("Order found!" + "\nSpecifications: ", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
+            text = {Column(verticalArrangement = Arrangement.Top)
+            {
+                Text(
+                    text = orderContent, overflow = TextOverflow.Clip,
+                    lineHeight = 30.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+
+                Box(
+                    Modifier.background(Color(66, 203, 245), RoundedCornerShape(10.dp)).width(170.dp).height(55.dp)
+                        .border(3.dp, Color.Black, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center
+                )
+                {
+                    TextButton(
+                        onClick = {dialogDismiss(false)},
+                        modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
+                            .width(150.dp).height(35.dp)
+                    )
+                    {
+                        Text("Modify order",
+                            fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold,
+                            color = Color.Black)
+                    }
+                }
+
+                Box(modifier = Modifier.height(30.dp).width(80.dp))
+
+                Box(
+                    Modifier.background(Color(245, 66, 87), RoundedCornerShape(10.dp)).width(170.dp).height(55.dp)
+                        .border(3.dp, Color.Black, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center
+                )
+                {
+                    TextButton(
+                        onClick = { orderDeleteConfirm = true },
+                        modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
+                            .width(150.dp).height(35.dp)
+                    )
+                    {
+                        Text("Delete order",
+                            fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold,
+                            color = Color.Black)
+                    }
+                }
+
+            }
+            },
+            confirmButton = {
+                Box(
+                    Modifier.background(Color(66, 203, 245), RoundedCornerShape(10.dp)).width(120.dp).height(55.dp)
+                        .border(3.dp, Color.Black, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center
+                )
+                {
+                    TextButton(
+                        onClick = {dialogDismiss()},
+                        modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
+                            .width(90.dp).height(35.dp)
+                    )
+                    {
+                        Text("Confirm",
+                            fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold,
+                            color = Color.Black)
+                    }
+                }
+            })
+    }
+
+    if(orderModInd)
+    {
+        AlertDialog(
+            onDismissRequest = {},
+            title = {},
+            text = {
+                Column(
+                    modifier = Modifier.height(400.dp).width(400.dp),
+                    verticalArrangement = Arrangement.Top,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Please type in your name to modify the order.",
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold
+                    )
+                    OutlinedTextField(
+
+                        value = customerInputLocal,
+                        onValueChange = { customerInputLocal = it },
+                        label = {
+                            Text(
+                                text = "Your name here.",
+                                fontFamily = FontFamily.Monospace
+                            )
+                        },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                        keyboardActions = KeyboardActions (
+                            onDone = {
+                                keyboardController?.hide()
+                                focusManager.clearFocus()
+                            }
+                        )
+                    )
+
+                    Box(modifier = Modifier.height(30.dp).width(80.dp))
+
+                    Box(
+                        modifier = Modifier.width(200.dp).height(80.dp)
+                            .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
+                            .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
+                        contentAlignment = Alignment.Center
+                    )
+                    {
+                        TextButton(
+                            onClick = { orderUpdate() },
+                            modifier = Modifier.background(
+                                Color.White,
+                                RoundedCornerShape(12.dp)
+                            )
+                                .width(150.dp)
+                        ) {
+                            Text(
+                                text = "Confirm",
+                                color = Color.Black,
+                                fontFamily = FontFamily.Monospace,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+
+            },
+            confirmButton = {}
+        )
+    }
+
+    if(orderDeleteConfirm)
+    {
+        AlertDialog(
+            onDismissRequest = {},
+            title = {Text("Confirm order delete?", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
+            text = {Column(verticalArrangement = Arrangement.Top)
+            {
+                Box(
+                    modifier = Modifier.width(200.dp).height(80.dp)
+                        .background(Color(245, 66, 87), RoundedCornerShape(16.dp))
+                        .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
+                    contentAlignment = Alignment.Center
+                )
+                {
+                    TextButton(
+                        onClick = { orderDelete() },
+                        modifier = Modifier.background(
+                            Color.White,
+                            RoundedCornerShape(12.dp)
+                        )
+                            .width(150.dp)
+                    ) {
+                        Text(
+                            text = "Confirm",
+                            color = Color.Black,
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+            },
+            confirmButton = {})
+    }
+
+    if(orderDeleteInd)
+    {
+        AlertDialog(
+            onDismissRequest = {},
+            title = {Text("Order deleted successfully!" + "\n Specs:", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
+            text = {Column(verticalArrangement = Arrangement.Top)
+            {
+                Text(
+                    text = orderContent, overflow = TextOverflow.Clip,
+                    lineHeight = 30.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+            }
+            },
+            confirmButton = {})
+    }
+
+    if(orderUpdateInd)
+    {
+        AlertDialog(
+            onDismissRequest = {},
+            title = {Text("Order updated!" + "\n Specifications:", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
+            text = {Column(verticalArrangement = Arrangement.Top)
+            {
+                Text(
+                    text = orderContent, overflow = TextOverflow.Clip,
+                    lineHeight = 30.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+            }
+            },
+            confirmButton = {})
+    }
+
+    if(orderFindFail)
+    {
+        AlertDialog(
+            onDismissRequest = {},
+            title = {Text("Order not found!", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
+            text = {Column(verticalArrangement = Arrangement.Top)
+            {
+
+            }
+            },
+            confirmButton = {})
+    }
+
+    if(orderUpdateFail)
+    {
+        AlertDialog(
+            onDismissRequest = {},
+            title = {Text("Failed to update order!", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
+            text = {Column(verticalArrangement = Arrangement.Top)
+            {
+
+            }
+            },
+            confirmButton = {})
+    }
+
+
+    if(orderState.instanceInd < 5)
+    {
+        if(orderState.orderUpdate)
+        {
+            Box(
+                modifier = Modifier.width(200.dp).height(80.dp)
+                    .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
+                    .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
+                contentAlignment = Alignment.Center
+            )
+            {
+                TextButton(
+                    onClick = { guitarViewModel.updateOrderState(2, true) },
+                    modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp))
+                        .width(150.dp)
+                ) {
+                    Text(
+                        text = "Place Order",
+                        color = Color.Black,
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
+        else
+        {
+            Box(
+                modifier = Modifier.width(200.dp).height(80.dp)
+                    .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
+                    .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
+                contentAlignment = Alignment.Center
+            )
+            {
+                TextButton(
+                    onClick = { orderModInd = true },
+                    modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp))
+                        .width(150.dp)
+                ) {
+                    Text(
+                        text = "Update Order",
+                        color = Color.Black,
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
     }

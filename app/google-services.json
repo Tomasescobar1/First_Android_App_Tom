@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "443758218420",
+    "project_id": "ptii-fb-project",
+    "storage_bucket": "ptii-fb-project.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:443758218420:android:f018cee13e362a39fd1be1",
+        "android_client_info": {
+          "package_name": "com.example.tomkotlinsecondapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD_lU_Led3dMGqqJ0khimuQIps5ok5BZIg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

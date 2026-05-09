@@ -137,7 +137,15 @@ fun GuitarViewPort(guitarViewModel: GuitarOrder = viewModel())
     )
 
     Box(modifier = Modifier
-        .height(900.dp).width(400.dp).background(Color.White), contentAlignment = Alignment.Center,)
+        .height(900.dp).width(400.dp).background(Color.White).pointerInput(Unit){
+            detectTapGestures(
+                onTap = {offset ->
+
+                    guitarViewModel.updateDataState(7, " ", 0.0)
+
+                }
+            )
+        }, contentAlignment = Alignment.Center,)
     {
 
         LaunchedEffect(cDataState.colorInput, cDataState.modelIndVal) {
@@ -182,7 +190,15 @@ fun GuitarViewPort(guitarViewModel: GuitarOrder = viewModel())
         key(cDataState.colorInput, cDataState.modelIndVal, cDataState.cameraInd)
         {
             Scene(
-                modifier = Modifier.fillMaxSize().border(6.dp, Color.White)
+                modifier = Modifier.pointerInput(Unit){
+                    detectTapGestures(
+                        onTap = {offset ->
+
+                            guitarViewModel.updateDataState(7, " ", 0.0)
+
+                        }
+                    )
+                }.fillMaxSize().border(6.dp, Color.White)
                     .align(Alignment.Center),
 
                 engine = engine,

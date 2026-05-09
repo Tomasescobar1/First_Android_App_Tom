@@ -1,7 +1,9 @@
 package com.example.tomkotlinsecondapp
 
 import android.content.Context
+import android.os.Build
 import android.view.inputmethod.InputMethodManager
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -46,10 +48,16 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlin.collections.get
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.firestore
 
 @Composable
 fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
 {
+
+
 
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -63,9 +71,33 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
 
     var orderConfirm by rememberSaveable {mutableStateOf(false)}
 
+    var orderLoadFailInd by rememberSaveable {mutableStateOf(false)}
+
     var orderListFinal by remember {mutableStateOf(false)}
 
     var orderRemove by remember {mutableStateOf(false)}
+
+    fun addDataToFirebase()
+    {
+        val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+
+        val dbOrders: CollectionReference = db.collection("Orders")
+
+        dbOrders.add(guitarViewModel.dbOrderList).addOnSuccessListener {
+            orderConfirm = true
+
+            guitarViewModel.updateOrderState(3, true)
+
+            println("Added order to Firebase successfully.")
+
+        }.addOnFailureListener {
+            orderLoadFailInd = true
+
+            println("Failed to add order to Firebase.")
+
+            guitarViewModel.orderList.removeAt(guitarViewModel.orderList.lastIndex)
+        }
+    }
 
     fun confirmData()
     {
@@ -82,21 +114,26 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
                 println(guitarViewModel.orderList[i].customer)
             }
 
-            orderConfirm = true
-
-            guitarViewModel.updateOrderState(3, true)
+            addDataToFirebase()
         }
     }
 
-    fun dialogDismiss(input: Boolean = true)
+    fun dialogDismiss(input: Boolean = true, input2: Boolean)
     {
-        if(input)
+        if(input && input2)
         {
             guitarViewModel.updateOrderState(2, false)
 
             orderConfirm = false
 
             customerInputLocal = ""
+        }
+
+        else if(input)
+        {
+            orderLoadFailInd = false
+
+            guitarViewModel.updateOrderState(2, false)
         }
 
         else
@@ -199,7 +236,7 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
     if(orderConfirm)
     {
         AlertDialog(
-            onDismissRequest = {dialogDismiss()},
+            onDismissRequest = {dialogDismiss(input = true, input2 = true)},
             title = {Text("Order confirmed!" + "\nSpecifications: ", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
             text = {Column(verticalArrangement = Arrangement.Top)
                     {
@@ -226,7 +263,7 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
                         )
                         {
                         TextButton(
-                                onClick = {dialogDismiss()},
+                                onClick = {dialogDismiss(true, true)},
                                 modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
                                                 .width(90.dp).height(35.dp)
                             )
@@ -236,6 +273,35 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
                                 color = Color.Black)
                             }
                         }
+            })
+    }
+
+    if(orderLoadFailInd)
+    {
+        AlertDialog(
+            onDismissRequest = {dialogDismiss(true, false)},
+            title = {Text("Failed to place order!", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
+            text = {Column(verticalArrangement = Arrangement.Top)
+            {
+
+            }
+            },
+            confirmButton = {
+                Box(
+                    Modifier.background(Color(245,66,87), RoundedCornerShape(10.dp)).height(55.dp).width(120.dp)
+                        .border(3.dp, Color.Black, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center)
+                {
+                    TextButton(
+                        onClick = {dialogDismiss(true, false)},
+                        modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
+                            .height(35.dp).width(90.dp)
+                    )
+                    {
+                        Text("Confirm",
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black)
+                    }
+                }
             })
     }
 
@@ -278,8 +344,8 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
     if(orderListFinal)
     {
         AlertDialog(
-            onDismissRequest = {dialogDismiss(false)},
-            title = {Text("Do you want to clear the list?",
+            onDismissRequest = {dialogDismiss(false, false)},
+            title = {Text("Do you want to clear the list (local action)?",
                     fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
             text = {Column(verticalArrangement = Arrangement.Top, horizontalAlignment = Alignment.CenterHorizontally)
             {
@@ -319,7 +385,7 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
                 .border(3.dp, Color.Black, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center)
                 {
                 TextButton(
-                    onClick = {dialogDismiss(false)},
+                    onClick = {dialogDismiss(false, false)},
                     modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
                                         .height(35.dp).width(90.dp)
                 )

@@ -26,15 +26,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 
-/*fun cameraToggle()
-{
-    cameraInd.intValue ++
-
-    if(cameraInd.intValue > 3)
-    {
-        cameraInd.intValue = 0
-    }
-}*/
 
 @Composable
 fun ColorDropDown(guitarViewModel: GuitarOrder = viewModel())
@@ -54,7 +45,7 @@ fun ColorDropDown(guitarViewModel: GuitarOrder = viewModel())
         .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
         .border(4.dp, Color.Black, RoundedCornerShape(16.dp)), contentAlignment = Alignment.Center)
     {
-        TextButton(onClick = {cameraToggle()}, modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp)).width(150.dp)) {
+        TextButton(onClick = {guitarViewModel.updateDataState(5, " ", 0.0)}, modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp)).width(150.dp)) {
             Text(text = "Camera Toggle", color = Color.Black, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
         }
     }

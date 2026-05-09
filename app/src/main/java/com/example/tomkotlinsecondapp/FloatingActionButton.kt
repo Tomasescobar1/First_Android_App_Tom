@@ -19,6 +19,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -30,12 +31,18 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlin.math.roundToInt
 
 @Composable
-fun FABComponent() {
+fun FABComponent(guitarViewModel: GuitarOrder = viewModel()) {
 
-    var isDeployed by remember {mutableStateOf(false)}
+    val isDeployed by guitarViewModel.deployedState.collectAsStateWithLifecycle()
+
+    val orderUIState by guitarViewModel.orderState.collectAsStateWithLifecycle()
+
+    var dropdownSize by remember{mutableIntStateOf(400)}
 
     var fabOffset by remember {mutableStateOf(Offset(0f, 0f))}
 
@@ -43,14 +50,19 @@ fun FABComponent() {
 
     fun containerBackground()
     {
-        isDeployed = !isDeployed
+        guitarViewModel.updateDataState(6, " ", 0.0)
 
         if(isDeployed)
         {
-            colorOffset = Color.Transparent
+            colorOffset = Color(66, 203, 240)
         }
 
-        else colorOffset = Color(66, 203, 240)
+        else colorOffset = Color.Transparent
+    }
+
+    if(orderUIState.instanceInd > 0)
+    {
+        dropdownSize = 480
     }
 
     FloatingActionButton (
@@ -75,7 +87,7 @@ fun FABComponent() {
         AnimatedVisibility(visible = isDeployed)
         {
             Column(
-                modifier = Modifier.zIndex(2f).width(200.dp).height(400.dp),
+                modifier = Modifier.zIndex(2f).width(200.dp).height(dropdownSize.dp),
                 verticalArrangement = Arrangement.Bottom,
                 horizontalAlignment = Alignment.Start
             )

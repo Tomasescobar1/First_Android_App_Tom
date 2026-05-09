@@ -12,6 +12,8 @@ composeBom = "2024.09.00"
 lifecycleViewmodelCompose = "2.10.0"
 sceneview = "2.3.1"
 googleFilament = "1.68.3"
+googleGmsGoogleServices = "4.4.4"
+firebaseFirestore = "26.2.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -32,9 +34,11 @@ androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-te
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 scene-view-lib = { name = "sceneview", group = "io.github.sceneview", version.ref = "sceneview"}
 google-filament = {name = "com.google.android.filament", group = "filament-android", version.ref = "googleFilament"}
+firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
 
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
