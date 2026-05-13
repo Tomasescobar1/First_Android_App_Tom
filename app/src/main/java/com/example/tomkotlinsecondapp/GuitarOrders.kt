@@ -1,10 +1,14 @@
 package com.example.tomkotlinsecondapp
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 data class Guitar (
     var customer: String = "Tom",
@@ -16,6 +20,7 @@ data class Guitar (
 data class OrderUIState (
     var orderListFull: Boolean = false,
     var orderPlaceG: Boolean = false,
+    var orderSuccess: Boolean = false,
     var orderUpdate: Boolean = true,
     var instanceInd: Int = 0
 )
@@ -46,13 +51,6 @@ class GuitarOrder : ViewModel()
     val deployedState: StateFlow<Boolean> = _deployedState.asStateFlow()
     var orderList = mutableListOf<Guitar>()
 
-    /*var dbOrderList = hashMapOf(
-        "Customer" to " ",
-        "Model" to " ",
-        "Color" to " ",
-        "ScaleLength" to 0.0
-    )*/
-
     var dbOrderList: MutableMap<String, Any> = mutableMapOf(
         "Customer" to " ",
         "Model" to " ",
@@ -61,6 +59,14 @@ class GuitarOrder : ViewModel()
     )
 
     var increment = mutableIntStateOf(0)
+
+    private val _isLoading = MutableStateFlow(false)
+
+    val isLoading = _isLoading.asStateFlow()
+
+    val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+
+    val dbOrders = db.collection("Orders")
 
     fun updateDataState(input1: Int, input2: String, input3: Double)
     {
@@ -115,19 +121,15 @@ class GuitarOrder : ViewModel()
 
             2 -> {
                 _orderState.update { currentState -> currentState.copy(orderPlaceG = input2) }
+
+                if(!input2)
+                {
+                    _orderState.update { currentState -> currentState.copy(orderSuccess = false) }
+                }
             }
 
             3 -> {
-                if(input2)
-                {
-                    increment.intValue ++
-
-                    _orderState.update { currentState -> currentState.copy(instanceInd = increment.intValue) }
-                }
-                else
-                {
-                    _orderState.update { currentState -> currentState.copy(instanceInd = 0)}
-                }
+                _orderState.update { currentState -> currentState.copy(instanceInd = 0)}
             }
 
             4 -> {
@@ -159,4 +161,30 @@ class GuitarOrder : ViewModel()
 
         println("Added ${orderList.last().color}")
     }
+
+    fun addDataToFirestore(inputData: MutableMap<String, Any>)
+    {
+        if(_isLoading.value) return
+
+        _isLoading.value = true
+
+        viewModelScope.launch {
+            try {
+                dbOrders.add(inputData).await()
+
+                increment.intValue++
+
+                _orderState.update{currentState -> currentState.copy(instanceInd = increment.intValue)}
+
+                _orderState.update{currentState -> currentState.copy(orderSuccess = true)}
+            }
+            catch (e: Exception) {
+                println("Failed to add data, crap!")
+            }
+            finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
 }

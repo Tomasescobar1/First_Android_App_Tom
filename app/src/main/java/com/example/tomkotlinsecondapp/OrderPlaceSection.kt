@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -19,6 +20,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -56,9 +58,6 @@ import com.google.firebase.firestore.firestore
 @Composable
 fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
 {
-
-
-
     val keyboardController = LocalSoftwareKeyboardController.current
 
     val focusManager = LocalFocusManager.current
@@ -67,37 +66,17 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
 
     val cDataState by guitarViewModel.dataState.collectAsStateWithLifecycle()
 
-    var customerInputLocal by remember {mutableStateOf("")}
+    val loadingState by guitarViewModel.isLoading.collectAsStateWithLifecycle()
 
-    var orderConfirm by rememberSaveable {mutableStateOf(false)}
+    var loadingTrigger by remember {mutableStateOf(false)}
+
+    var customerInputLocal by remember {mutableStateOf("")}
 
     var orderLoadFailInd by rememberSaveable {mutableStateOf(false)}
 
     var orderListFinal by remember {mutableStateOf(false)}
 
     var orderRemove by remember {mutableStateOf(false)}
-
-    fun addDataToFirebase()
-    {
-        val db: FirebaseFirestore = FirebaseFirestore.getInstance()
-
-        val dbOrders: CollectionReference = db.collection("Orders")
-
-        dbOrders.add(guitarViewModel.dbOrderList).addOnSuccessListener {
-            orderConfirm = true
-
-            guitarViewModel.updateOrderState(3, true)
-
-            println("Added order to Firebase successfully.")
-
-        }.addOnFailureListener {
-            orderLoadFailInd = true
-
-            println("Failed to add order to Firebase.")
-
-            guitarViewModel.orderList.removeAt(guitarViewModel.orderList.lastIndex)
-        }
-    }
 
     fun confirmData()
     {
@@ -113,8 +92,6 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
             for (i in 0 until guitarViewModel.orderList.size) {
                 println(guitarViewModel.orderList[i].customer)
             }
-
-            addDataToFirebase()
         }
     }
 
@@ -123,8 +100,6 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
         if(input && input2)
         {
             guitarViewModel.updateOrderState(2, false)
-
-            orderConfirm = false
 
             customerInputLocal = ""
         }
@@ -153,6 +128,19 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
         guitarViewModel.updateOrderState(3, false)
 
         orderRemove = true
+    }
+
+    LaunchedEffect(loadingTrigger)
+    {
+        if(loadingTrigger) {
+            confirmData()
+
+            delay(400L)
+
+            guitarViewModel.addDataToFirestore(guitarViewModel.dbOrderList)
+
+            loadingTrigger = false
+        }
     }
 
     LaunchedEffect(orderRemove)
@@ -211,12 +199,13 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
                     )
                     {
                         TextButton(
-                            onClick = { confirmData() },
+                            onClick = { loadingTrigger = true },
                             modifier = Modifier.background(
                                 Color.White,
                                 RoundedCornerShape(12.dp)
                             )
-                                .width(150.dp)
+                                .width(150.dp),
+                            enabled = !loadingState
                         ) {
                             Text(
                                 text = "Place Order",
@@ -226,6 +215,16 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
                             )
                         }
                     }
+
+                    Box(modifier = Modifier.height(30.dp).width(80.dp))
+
+                    if(loadingState)
+                    {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(40.dp),
+                            strokeWidth = 4.dp
+                        )
+                    }
                 }
 
             },
@@ -233,10 +232,10 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
         )
     }
 
-    if(orderConfirm)
+    if(orderState.orderSuccess)
     {
         AlertDialog(
-            onDismissRequest = {dialogDismiss(input = true, input2 = true)},
+            onDismissRequest = {dialogDismiss(input2 = true)},
             title = {Text("Order confirmed!" + "\nSpecifications: ", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
             text = {Column(verticalArrangement = Arrangement.Top)
                     {
@@ -263,7 +262,7 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
                         )
                         {
                         TextButton(
-                                onClick = {dialogDismiss(true, true)},
+                                onClick = {dialogDismiss(input2 = true)},
                                 modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
                                                 .width(90.dp).height(35.dp)
                             )
