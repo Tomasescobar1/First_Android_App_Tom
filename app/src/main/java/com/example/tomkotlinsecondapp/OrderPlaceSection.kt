@@ -72,6 +72,8 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
 
     var customerInputLocal by remember {mutableStateOf("")}
 
+    var orderLoadSuccess by remember {mutableStateOf(false)}
+
     var orderLoadFailInd by rememberSaveable {mutableStateOf(false)}
 
     var orderListFinal by remember {mutableStateOf(false)}
@@ -101,6 +103,8 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
         {
             guitarViewModel.updateOrderState(2, false)
 
+            orderLoadSuccess = false
+
             customerInputLocal = ""
         }
 
@@ -109,6 +113,8 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
             orderLoadFailInd = false
 
             guitarViewModel.updateOrderState(2, false)
+
+            guitarViewModel.updateOrderState(5, false)
         }
 
         else
@@ -130,14 +136,24 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
         orderRemove = true
     }
 
-    LaunchedEffect(loadingTrigger)
+    LaunchedEffect(loadingState)
     {
-        if(loadingTrigger) {
+        if(loadingState)
+        {
             confirmData()
 
-            delay(400L)
+            loadingTrigger = true
 
             guitarViewModel.addDataToFirestore(guitarViewModel.dbOrderList)
+
+            delay(2000L)
+
+            if(orderState.orderSuccess)
+            {
+                orderLoadSuccess = true
+            }
+
+            guitarViewModel.updateOrderState(4, false)
 
             loadingTrigger = false
         }
@@ -198,32 +214,36 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
                         contentAlignment = Alignment.Center
                     )
                     {
-                        TextButton(
-                            onClick = { loadingTrigger = true },
-                            modifier = Modifier.background(
-                                Color.White,
-                                RoundedCornerShape(12.dp)
-                            )
-                                .width(150.dp),
-                            enabled = !loadingState
-                        ) {
-                            Text(
-                                text = "Place Order",
-                                color = Color.Black,
-                                fontFamily = FontFamily.Monospace,
-                                fontWeight = FontWeight.Bold
-                            )
+                        if(!loadingTrigger)
+                        {
+                            TextButton(
+                                onClick = { guitarViewModel.updateOrderState(4, true) },
+                                modifier = Modifier.background(
+                                    Color.White,
+                                    RoundedCornerShape(12.dp)
+                                )
+                                    .width(150.dp)
+                            ) {
+                                Text(
+                                    text = "Place Order",
+                                    color = Color.Black,
+                                    fontFamily = FontFamily.Monospace,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
-                    }
-
-                    Box(modifier = Modifier.height(30.dp).width(80.dp))
-
-                    if(loadingState)
-                    {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(40.dp),
-                            strokeWidth = 4.dp
-                        )
+                        else
+                        {
+                            Box(modifier = Modifier.height(50.dp).width(150.dp).background(Color.White, RoundedCornerShape(12.dp)),
+                                contentAlignment = Alignment.Center)
+                            {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(40.dp),
+                                    strokeWidth = 4.dp, color = Color.White,
+                                    trackColor = Color(66, 203,245)
+                                )
+                            }
+                        }
                     }
                 }
 
@@ -232,7 +252,7 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
         )
     }
 
-    if(orderState.orderSuccess)
+    if(orderLoadSuccess)
     {
         AlertDialog(
             onDismissRequest = {dialogDismiss(input2 = true)},
@@ -275,7 +295,7 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
             })
     }
 
-    if(orderLoadFailInd)
+    if(orderState.orderFail)
     {
         AlertDialog(
             onDismissRequest = {dialogDismiss(true, false)},

@@ -21,6 +21,7 @@ data class OrderUIState (
     var orderListFull: Boolean = false,
     var orderPlaceG: Boolean = false,
     var orderSuccess: Boolean = false,
+    var orderFail: Boolean = false,
     var orderUpdate: Boolean = true,
     var instanceInd: Int = 0
 )
@@ -121,26 +122,20 @@ class GuitarOrder : ViewModel()
 
             2 -> {
                 _orderState.update { currentState -> currentState.copy(orderPlaceG = input2) }
-
-                if(!input2)
-                {
-                    _orderState.update { currentState -> currentState.copy(orderSuccess = false) }
-                }
             }
 
             3 -> {
+                increment.intValue = 0
+
                 _orderState.update { currentState -> currentState.copy(instanceInd = 0)}
             }
 
             4 -> {
-                if(input2)
-                {
-                    _orderState.update { currentState -> currentState.copy(orderUpdate = true) }
-                }
-                else
-                {
-                    _orderState.update { currentState -> currentState.copy(orderUpdate = false) }
-                }
+                _isLoading.value = input2
+            }
+
+            5 -> {
+                _orderState.update {currentState -> currentState.copy(orderFail = false)}
             }
         }
     }
@@ -164,25 +159,22 @@ class GuitarOrder : ViewModel()
 
     fun addDataToFirestore(inputData: MutableMap<String, Any>)
     {
-        if(_isLoading.value) return
-
-        _isLoading.value = true
-
         viewModelScope.launch {
-            try {
+            try
+            {
                 dbOrders.add(inputData).await()
 
                 increment.intValue++
 
-                _orderState.update{currentState -> currentState.copy(instanceInd = increment.intValue)}
+                _orderState.update { currentState -> currentState.copy(instanceInd = increment.intValue) }
 
-                _orderState.update{currentState -> currentState.copy(orderSuccess = true)}
+                _orderState.update { currentState -> currentState.copy(orderSuccess = true) }
             }
-            catch (e: Exception) {
+            catch (e: Exception)
+            {
+                _orderState.update { currentState -> currentState.copy(orderFail = true)}
+
                 println("Failed to add data, crap!")
-            }
-            finally {
-                _isLoading.value = false
             }
         }
     }
