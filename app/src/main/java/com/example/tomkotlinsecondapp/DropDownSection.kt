@@ -9,11 +9,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -58,6 +60,10 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
 
     val cDataState by guitarViewModel.dataState.collectAsStateWithLifecycle()
 
+    val foundOrderString by guitarViewModel.foundOrderString.collectAsStateWithLifecycle()
+
+    val updatedOrderString by guitarViewModel.updatedOrderString.collectAsStateWithLifecycle()
+
     val focusManager = LocalFocusManager.current
 
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -70,11 +76,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
 
     var customerInputLocal by  remember{mutableStateOf("")}
 
-    var foundDocumentId by remember{mutableStateOf("")}
-
-    var foundOrderMap: MutableMap<String, Any> = mutableMapOf()
-
-    var orderFoundInd by remember{mutableStateOf(false)}
+    var loadingTrigger by remember {mutableStateOf(false)}
 
     var orderFindFail by remember{mutableStateOf(false)}
 
@@ -82,134 +84,76 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
 
     var orderModInd by remember{mutableStateOf(false)}
 
-    var orderDeleteInd by remember{mutableStateOf(false)}
-
     var orderDeleteConfirm by remember{mutableStateOf(false)}
 
     var orderUpdateInd by remember{mutableStateOf(false)}
 
     val guitarNames = listOf("Telecaster", "Growler")
 
-    var orderContent by remember {mutableStateOf("")}
-
     val scaleLengths = listOf(25.5, 25.0, 24.75, 24.0)
 
-    val db: FirebaseFirestore = FirebaseFirestore.getInstance()
-
-    fun dialogDismiss(input:Boolean = true)
+    fun dialogDismiss(input:Boolean = false)
     {
-        orderFoundInd = false
-
         findTextBoxInd = false
 
         customerInputLocal = ""
 
         if(input)
         {
-            guitarViewModel.updateOrderState(4, true)
+            guitarViewModel.updateOrderState(7, false)
         }
-        else
-        {
-            guitarViewModel.updateOrderState(4, false)
-        }
+
+        guitarViewModel.updateOrderState(6, false)
+
+        guitarViewModel.updateOrderState(4, false)
     }
 
-    fun orderUpdate()
+    LaunchedEffect(loadingTrigger)
     {
-            //val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+        if(loadingTrigger)
+        {
+            guitarViewModel.orderUpdate(customerInputLocal, cDataState.modelIndVal,
+                cDataState.colorInput, cDataState.scaleLengthInd)
 
-            val documentRef = db.collection("Orders").document(foundDocumentId)
+            delay(1500L)
 
-            if(customerInputLocal != "")
+            if(orderState.updateSuccess)
             {
-                guitarViewModel.addListElement(
-                    customerInputLocal,
-                    cDataState.modelIndVal,
-                    cDataState.colorInput,
-                    cDataState.scaleLengthInd
-                )
-            }
+                loadingTrigger = false
 
-            documentRef.update(guitarViewModel.dbOrderList).addOnSuccessListener {
-
-                customerInputLocal = ""
+                guitarViewModel.updateOrderState(8, false)
 
                 orderUpdateInd = true
-
-                orderContent = guitarViewModel.dbOrderList.entries.joinToString("\n") { entry -> "${entry.key}: ${entry.value}"}
-
-            }.addOnFailureListener {}
-    }
-
-
-    fun orderFind(input: String = "")
-    {
-        //val db: FirebaseFirestore = FirebaseFirestore.getInstance()
-
-        if(input != "")
-        {
-            db.collection("Orders").whereEqualTo("Customer", input.lowercase())
-                .get().addOnSuccessListener{ documents ->
-                    for (document in documents) {
-                        if (document.data["Customer"] == input.lowercase()) {
-                            foundDocumentId = document.id
-
-                            println(document.data)
-
-                            //document.data["Customer"] = input.lowercase()
-
-                            val foundOrder: MutableMap<String, Any>? = document.data
-
-                            if (foundOrder != null) {
-                                foundOrderMap = foundOrder
-                            }
-
-                            //println("This is the mapped data found in FB: $foundOrderMap")
-
-                            orderContent = foundOrderMap.entries.joinToString("\n") { entry -> "${entry.key}: ${entry.value}" }
-
-                            //println("This is the string: $orderContent")
-
-                            orderFoundInd = true
-
-                            break
-                        }
-                    }
-                }.addOnFailureListener {}
-        }
-    }
-
-    fun orderDelete()
-    {
-        if(foundDocumentId != "")
-        {
-            db.collection("Orders").document(foundDocumentId).delete()
-                .addOnSuccessListener {
-                    orderDeleteInd = true
-                }.addOnFailureListener {  }
+            }
         }
     }
 
     LaunchedEffect(orderUpdateInd)
     {
-        delay(3000L)
+        if(orderUpdateInd)
+        {
+            delay(3000L)
 
-        orderUpdateInd = false
+            orderUpdateInd = false
 
-        orderModInd = false
+            orderModInd = false
+        }
     }
 
-    LaunchedEffect(orderDeleteInd)
+    LaunchedEffect(orderState.orderDelete)
     {
-        delay(3000L)
+        if(orderState.orderDelete)
+        {
+            delay(3000L)
 
-        orderDeleteInd = false
+            guitarViewModel.updateOrderState(9, false)
 
-        orderDeleteConfirm = false
+            guitarViewModel.updateOrderState(6, false)
 
-        orderFoundInd = false
+            orderDeleteConfirm = false
 
-        findTextBoxInd = false
+            findTextBoxInd = false
+        }
     }
 
     Box(
@@ -327,7 +271,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
     if(findTextBoxInd)
     {
         AlertDialog(
-            onDismissRequest = { findTextBoxInd = false},
+            onDismissRequest = {  },
             title = {},
             text = {
                 Column(
@@ -370,7 +314,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
                     )
                     {
                         TextButton(
-                            onClick = { orderFind(customerInputLocal) },
+                            onClick = { guitarViewModel.orderFind(customerInputLocal) },
                             modifier = Modifier.background(
                                 Color.White,
                                 RoundedCornerShape(12.dp)
@@ -392,7 +336,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
         )
     }
 
-    if(orderFoundInd)
+    if(orderState.orderFoundInd)
     {
         AlertDialog(
             onDismissRequest = {},
@@ -400,7 +344,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
             text = {Column(verticalArrangement = Arrangement.Top)
             {
                 Text(
-                    text = orderContent, overflow = TextOverflow.Clip,
+                    text = foundOrderString, overflow = TextOverflow.Clip,
                     lineHeight = 30.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
 
                 Box(
@@ -409,7 +353,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
                 )
                 {
                     TextButton(
-                        onClick = {dialogDismiss(false)},
+                        onClick = {dialogDismiss(true)},
                         modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
                             .width(150.dp).height(35.dp)
                     )
@@ -506,21 +450,37 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
                         contentAlignment = Alignment.Center
                     )
                     {
-                        TextButton(
-                            onClick = { orderUpdate() },
-                            modifier = Modifier.background(
-                                Color.White,
-                                RoundedCornerShape(12.dp)
-                            )
-                                .width(150.dp)
-                        ) {
-                            Text(
-                                text = "Confirm",
-                                color = Color.Black,
-                                fontFamily = FontFamily.Monospace,
-                                fontWeight = FontWeight.Bold
-                            )
+                        if(loadingTrigger)
+                        {
+                            Box(modifier = Modifier.height(50.dp).width(150.dp).background(Color.White, RoundedCornerShape(12.dp)),
+                                contentAlignment = Alignment.Center)
+                            {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(40.dp),
+                                    strokeWidth = 4.dp, color = Color.White,
+                                    trackColor = Color(66, 203,245)
+                                )
+                            }
                         }
+                        else
+                        {
+                            TextButton(
+                                onClick = { loadingTrigger = true },
+                                modifier = Modifier.background(
+                                    Color.White,
+                                    RoundedCornerShape(12.dp)
+                                )
+                                    .width(150.dp)
+                            ) {
+                                Text(
+                                    text = "Confirm",
+                                    color = Color.Black,
+                                    fontFamily = FontFamily.Monospace,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+
                     }
                 }
 
@@ -544,7 +504,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
                 )
                 {
                     TextButton(
-                        onClick = { orderDelete() },
+                        onClick = { guitarViewModel.orderDelete() },
                         modifier = Modifier.background(
                             Color.White,
                             RoundedCornerShape(12.dp)
@@ -564,7 +524,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
             confirmButton = {})
     }
 
-    if(orderDeleteInd)
+    if(orderState.orderDelete)
     {
         AlertDialog(
             onDismissRequest = {},
@@ -572,7 +532,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
             text = {Column(verticalArrangement = Arrangement.Top)
             {
                 Text(
-                    text = orderContent, overflow = TextOverflow.Clip,
+                    text = foundOrderString, overflow = TextOverflow.Clip,
                     lineHeight = 30.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
             }
             },
@@ -587,7 +547,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
             text = {Column(verticalArrangement = Arrangement.Top)
             {
                 Text(
-                    text = orderContent, overflow = TextOverflow.Clip,
+                    text = updatedOrderString, overflow = TextOverflow.Clip,
                     lineHeight = 30.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
             }
             },

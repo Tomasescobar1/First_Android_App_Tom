@@ -1,5 +1,6 @@
 package com.example.tomkotlinsecondapp
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.firestore.FirebaseFirestore
@@ -22,7 +23,15 @@ data class OrderUIState (
     var orderPlaceG: Boolean = false,
     var orderSuccess: Boolean = false,
     var orderFail: Boolean = false,
+    var updateLoad: Boolean = false,
+    var updateSuccess: Boolean = false,
+    var updateLoadFail: Boolean = false,
     var orderUpdate: Boolean = true,
+    var orderUpdateFail: Boolean = false,
+    var orderFoundInd: Boolean = false,
+    var orderFoundFail: Boolean = false,
+    var orderDelete: Boolean = false,
+    var orderDeleteFail: Boolean = false,
     var instanceInd: Int = 0
 )
 
@@ -69,6 +78,16 @@ class GuitarOrder : ViewModel()
 
     val dbOrders = db.collection("Orders")
 
+    private val _foundOrderString = MutableStateFlow("")
+
+    val foundOrderString = _foundOrderString.asStateFlow()
+
+    var foundDocumentId: String = ""
+
+    private val _updatedOrderString = MutableStateFlow("")
+
+    val updatedOrderString = _updatedOrderString.asStateFlow()
+
     fun updateDataState(input1: Int, input2: String, input3: Double)
     {
         when(input1)
@@ -112,8 +131,6 @@ class GuitarOrder : ViewModel()
 
     fun updateOrderState(input1: Int, input2: Boolean)
     {
-        //var increment:Int = 0
-
         when(input1)
         {
             1 -> {
@@ -136,6 +153,27 @@ class GuitarOrder : ViewModel()
 
             5 -> {
                 _orderState.update {currentState -> currentState.copy(orderFail = false)}
+            }
+
+            6 -> {
+                _orderState.update {currentState -> currentState.copy(orderFoundInd = false)}
+
+                if(input2)
+                {
+                    _orderState.update {currentState -> currentState.copy(orderFoundFail = false)}
+                }
+            }
+
+            7 -> {
+                _orderState.update {currentState -> currentState.copy(orderUpdate = false)}
+            }
+
+            8 -> {
+                _orderState.update {currentState -> currentState.copy(updateSuccess = false)}
+            }
+
+            9 -> {
+                _orderState.update {currentState -> currentState.copy(orderDelete = false)}
             }
         }
     }
@@ -162,6 +200,8 @@ class GuitarOrder : ViewModel()
         viewModelScope.launch {
             try
             {
+                _isLoading.value = true
+
                 dbOrders.add(inputData).await()
 
                 increment.intValue++
@@ -175,6 +215,92 @@ class GuitarOrder : ViewModel()
                 _orderState.update { currentState -> currentState.copy(orderFail = true)}
 
                 println("Failed to add data, crap!")
+            }
+        }
+    }
+
+    fun orderFind(input: String = "")
+    {
+        if(input != "")
+        {
+            viewModelScope.launch {
+                try
+                {
+                    val snapshot = dbOrders.whereEqualTo("Customer", input.lowercase()).get().await()
+
+                    for(document in snapshot.documents)
+                    {
+                        if(document.data?.get("Customer") == input.lowercase()) {
+
+                            foundDocumentId = document.id
+
+                            val foundOrder: MutableMap<String, Any>? = document.data
+
+                            if(foundOrder != null)
+                            {
+                                _foundOrderString.value = foundOrder.entries.joinToString(separator = "\n") { entry -> "${entry.key}: ${entry.value}" }
+                            }
+
+                            _orderState.update {currentState -> currentState.copy(orderFoundInd = true)}
+
+                            break
+                        }
+                    }
+                }
+                catch (e: Exception)
+                {
+                    _orderState.update {currentState -> currentState.copy(orderFoundFail = true)}
+                }
+            }
+        }
+    }
+
+    fun orderUpdate(customer: String = "", model: String = "Telecaster", color: String = "White", scaleLength: Double = 25.5)
+    {
+        val documentRef = dbOrders.document(foundDocumentId)
+
+        if(customer != "")
+        {
+            addListElement(
+                customer,
+                model,
+                color,
+                scaleLength
+            )
+
+            viewModelScope.launch {
+                try
+                {
+                    documentRef.update(dbOrderList).await()
+
+                    _updatedOrderString.value = dbOrderList.entries.joinToString(separator = "\n") { entry -> "${entry.key}: ${entry.value}" }
+
+                    _orderState.update {currentState -> currentState.copy(updateSuccess = true)}
+                }
+                catch (e: Exception)
+                {
+                    _orderState.update {currentState -> currentState.copy(orderUpdateFail = true)}
+                }
+            }
+
+        }
+    }
+
+    fun orderDelete()
+    {
+        if(foundDocumentId != "")
+        {
+            viewModelScope.launch {
+                try
+                {
+                    dbOrders.document(foundDocumentId).delete().await()
+
+                    _orderState.update {currentState -> currentState.copy(orderDelete = true)}
+                }
+                catch (e: Exception)
+                {
+                    _orderState.update {currentState -> currentState.copy(orderDeleteFail = true)}
+                }
             }
         }
     }

@@ -74,8 +74,6 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
 
     var orderLoadSuccess by remember {mutableStateOf(false)}
 
-    var orderLoadFailInd by rememberSaveable {mutableStateOf(false)}
-
     var orderListFinal by remember {mutableStateOf(false)}
 
     var orderRemove by remember {mutableStateOf(false)}
@@ -110,8 +108,6 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
 
         else if(input)
         {
-            orderLoadFailInd = false
-
             guitarViewModel.updateOrderState(2, false)
 
             guitarViewModel.updateOrderState(5, false)

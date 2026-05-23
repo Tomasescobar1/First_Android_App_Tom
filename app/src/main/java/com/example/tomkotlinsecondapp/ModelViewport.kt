@@ -257,8 +257,6 @@ fun GuitarViewPort(guitarViewModel: GuitarOrder = viewModel())
                             componentsNode.rotation = Rotation(0.0f, 0.0f, 90.0f)
 
                             componentsNode.position = Position(0.0f, -0.3f, 0.0f)
-
-                            //cameraOrbitHome = Float3(0.0f, 0.0f, 1.1f)
                         }
                     }
 
