@@ -58,6 +58,14 @@ import com.google.firebase.firestore.firestore
 @Composable
 fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
 {
+
+    data class LocalStateClass (
+        val loadingTrigger: Boolean = false,
+        val orderLoadSuccess: Boolean = false,
+        val orderRemove: Boolean = false,
+        val orderListFinal: Boolean = false
+    )
+
     val keyboardController = LocalSoftwareKeyboardController.current
 
     val focusManager = LocalFocusManager.current
@@ -68,21 +76,14 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
 
     val loadingState by guitarViewModel.isLoading.collectAsStateWithLifecycle()
 
-    var loadingTrigger by remember {mutableStateOf(false)}
-
     var customerInputLocal by remember {mutableStateOf("")}
 
-    var orderLoadSuccess by remember {mutableStateOf(false)}
-
-    var orderListFinal by remember {mutableStateOf(false)}
-
-    var orderRemove by remember {mutableStateOf(false)}
+    var localStateManager by remember {mutableStateOf(LocalStateClass())}
 
     fun confirmData()
     {
         if(customerInputLocal != "")
         {
-
             guitarViewModel.addListElement(
                 customerInputLocal,
                 cDataState.modelIndVal,
@@ -101,7 +102,7 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
         {
             guitarViewModel.updateOrderState(2, false)
 
-            orderLoadSuccess = false
+            localStateManager = localStateManager.copy(orderLoadSuccess = true)
 
             customerInputLocal = ""
         }
@@ -117,7 +118,7 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
         {
             guitarViewModel.updateOrderState(1, false)
 
-            orderListFinal = false
+            localStateManager = localStateManager.copy(orderListFinal = false)
         }
     }
 
@@ -129,7 +130,7 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
 
         guitarViewModel.updateOrderState(3, false)
 
-        orderRemove = true
+        localStateManager = localStateManager.copy(orderRemove = true)
     }
 
     LaunchedEffect(loadingState)
@@ -138,7 +139,7 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
         {
             confirmData()
 
-            loadingTrigger = true
+            localStateManager = localStateManager.copy(loadingTrigger = true)
 
             guitarViewModel.addDataToFirestore(guitarViewModel.dbOrderList)
 
@@ -146,23 +147,22 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
 
             if(orderState.orderSuccess)
             {
-                orderLoadSuccess = true
+                localStateManager = localStateManager.copy(orderLoadSuccess = true)
             }
 
             guitarViewModel.updateOrderState(4, false)
 
-            loadingTrigger = false
+            localStateManager = localStateManager.copy(loadingTrigger = false)
         }
     }
 
-    LaunchedEffect(orderRemove)
+    LaunchedEffect(localStateManager.orderRemove)
     {
-
         delay(3000L)
 
-        orderRemove = false
+        localStateManager = localStateManager.copy(orderRemove = false)
 
-        orderListFinal = false
+        localStateManager = localStateManager.copy(orderListFinal = false)
     }
 
     if(orderState.orderPlaceG)
@@ -210,7 +210,7 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
                         contentAlignment = Alignment.Center
                     )
                     {
-                        if(!loadingTrigger)
+                        if(!localStateManager.loadingTrigger)
                         {
                             TextButton(
                                 onClick = { guitarViewModel.updateOrderState(4, true) },
@@ -248,7 +248,7 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
         )
     }
 
-    if(orderLoadSuccess)
+    if(localStateManager.orderLoadSuccess)
     {
         AlertDialog(
             onDismissRequest = {dialogDismiss(input2 = true)},
@@ -343,7 +343,7 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
                 .border(3.dp, Color.Black, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center)
                 {
                 TextButton(
-                    onClick = {orderListFinal = true},
+                    onClick = { localStateManager = localStateManager.copy(orderListFinal = true) },
                     modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
                                         .height(35.dp).width(90.dp)
                     )
@@ -356,7 +356,7 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
             })
     }
 
-    if(orderListFinal)
+    if(localStateManager.orderListFinal)
     {
         AlertDialog(
             onDismissRequest = {dialogDismiss(false, false)},
@@ -415,7 +415,7 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
             })
     }
 
-    if(orderRemove)
+    if(localStateManager.orderRemove)
     {
         AlertDialog(
             onDismissRequest = {},

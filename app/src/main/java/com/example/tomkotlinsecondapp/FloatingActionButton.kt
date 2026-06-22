@@ -40,9 +40,7 @@ fun FABComponent(guitarViewModel: GuitarOrder = viewModel()) {
 
     val isDeployed by guitarViewModel.deployedState.collectAsStateWithLifecycle()
 
-    val orderUIState by guitarViewModel.orderState.collectAsStateWithLifecycle()
-
-    var dropdownSize by remember{mutableIntStateOf(400)}
+    //val orderUIState by guitarViewModel.orderState.collectAsStateWithLifecycle()
 
     var fabOffset by remember {mutableStateOf(Offset(0f, 0f))}
 
@@ -58,11 +56,6 @@ fun FABComponent(guitarViewModel: GuitarOrder = viewModel()) {
         }
 
         else colorOffset = Color.Transparent
-    }
-
-    if(orderUIState.instanceInd > 0)
-    {
-        dropdownSize = 480
     }
 
     FloatingActionButton (
@@ -87,7 +80,7 @@ fun FABComponent(guitarViewModel: GuitarOrder = viewModel()) {
         AnimatedVisibility(visible = isDeployed)
         {
             Column(
-                modifier = Modifier.zIndex(2f).width(200.dp).height(dropdownSize.dp),
+                modifier = Modifier.zIndex(2f).width(200.dp).height(480.dp),
                 verticalArrangement = Arrangement.Bottom,
                 horizontalAlignment = Alignment.Start
             )

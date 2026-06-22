@@ -23,6 +23,7 @@ data class OrderUIState (
     var orderPlaceG: Boolean = false,
     var orderSuccess: Boolean = false,
     var orderFail: Boolean = false,
+    var orderSearchLoad: Boolean = false,
     var updateLoad: Boolean = false,
     var updateSuccess: Boolean = false,
     var updateLoadFail: Boolean = false,
@@ -30,6 +31,7 @@ data class OrderUIState (
     var orderUpdateFail: Boolean = false,
     var orderFoundInd: Boolean = false,
     var orderFoundFail: Boolean = false,
+    var orderFoundFailMode: Boolean = false,
     var orderDelete: Boolean = false,
     var orderDeleteFail: Boolean = false,
     var instanceInd: Int = 0
@@ -161,11 +163,13 @@ class GuitarOrder : ViewModel()
                 if(input2)
                 {
                     _orderState.update {currentState -> currentState.copy(orderFoundFail = false)}
+
+                    _orderState.update {currentState -> currentState.copy(orderFoundFailMode = false)}
                 }
             }
 
             7 -> {
-                _orderState.update {currentState -> currentState.copy(orderUpdate = false)}
+                _orderState.update {currentState -> currentState.copy(orderUpdate = input2)}
             }
 
             8 -> {
@@ -174,6 +178,10 @@ class GuitarOrder : ViewModel()
 
             9 -> {
                 _orderState.update {currentState -> currentState.copy(orderDelete = false)}
+            }
+
+            10 -> {
+                _orderState.update {currentState -> currentState.copy(orderSearchLoad = false)}
             }
         }
     }
@@ -223,6 +231,8 @@ class GuitarOrder : ViewModel()
     {
         if(input != "")
         {
+            _orderState.update{currentState -> currentState.copy(orderSearchLoad = true)}
+
             viewModelScope.launch {
                 try
                 {
@@ -246,9 +256,16 @@ class GuitarOrder : ViewModel()
                             break
                         }
                     }
+
+                    if(!orderState.value.orderFoundInd)
+                    {
+                        _orderState.update {currentState -> currentState.copy(orderFoundFail = true)}
+                    }
                 }
                 catch (e: Exception)
                 {
+                    _orderState.update {currentState -> currentState.copy(orderFoundFailMode = true)}
+
                     _orderState.update {currentState -> currentState.copy(orderFoundFail = true)}
                 }
             }

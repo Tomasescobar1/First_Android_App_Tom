@@ -56,6 +56,23 @@ import kotlinx.coroutines.delay
 fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
 {
 
+    data class LocalStates(
+        val dropped: Boolean = false,
+        val findTextBoxInd: Boolean = false,
+        val scaleLengthDropped: Boolean = false,
+        val searchLoadTrigger: Boolean = false,
+        val loadingUpdateTrigger: Boolean = false,
+        val orderFoundInd: Boolean = false,
+        val orderFindFail: Boolean = false,
+        val orderFindFailInd: Boolean = false,
+        val orderUpdateInd: Boolean = false,
+        val orderUpdateFail: Boolean = false,
+        val orderModInd: Boolean = false,
+        val orderDeleteConfirm: Boolean = false,
+    )
+
+    var localStates by remember {mutableStateOf(LocalStates())}
+
     val orderState by guitarViewModel.orderState.collectAsStateWithLifecycle()
 
     val cDataState by guitarViewModel.dataState.collectAsStateWithLifecycle()
@@ -68,25 +85,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
 
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    var dropped by remember {mutableStateOf(false)}
-
-    var findTextBoxInd by remember {mutableStateOf(false)}
-
-    var scaleLengthDropped by remember {mutableStateOf( false)}
-
-    var customerInputLocal by  remember{mutableStateOf("")}
-
-    var loadingTrigger by remember {mutableStateOf(false)}
-
-    var orderFindFail by remember{mutableStateOf(false)}
-
-    var orderUpdateFail by remember{mutableStateOf(false)}
-
-    var orderModInd by remember{mutableStateOf(false)}
-
-    var orderDeleteConfirm by remember{mutableStateOf(false)}
-
-    var orderUpdateInd by remember{mutableStateOf(false)}
+    var customerInputLocal by remember {mutableStateOf("")}
 
     val guitarNames = listOf("Telecaster", "Growler")
 
@@ -94,9 +93,11 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
 
     fun dialogDismiss(input:Boolean = false)
     {
-        findTextBoxInd = false
+        localStates = localStates.copy(findTextBoxInd = false)
 
         customerInputLocal = ""
+
+        localStates = localStates.copy(orderFoundInd = false)
 
         if(input)
         {
@@ -108,35 +109,39 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
         guitarViewModel.updateOrderState(4, false)
     }
 
-    LaunchedEffect(loadingTrigger)
+    LaunchedEffect(localStates.loadingUpdateTrigger)
     {
-        if(loadingTrigger)
+        if(localStates.loadingUpdateTrigger)
         {
             guitarViewModel.orderUpdate(customerInputLocal, cDataState.modelIndVal,
                 cDataState.colorInput, cDataState.scaleLengthInd)
+
+            customerInputLocal = ""
 
             delay(1500L)
 
             if(orderState.updateSuccess)
             {
-                loadingTrigger = false
+                localStates = localStates.copy(loadingUpdateTrigger = false)
 
                 guitarViewModel.updateOrderState(8, false)
 
-                orderUpdateInd = true
+                localStates = localStates.copy(orderUpdateInd = true)
             }
         }
     }
 
-    LaunchedEffect(orderUpdateInd)
+    LaunchedEffect(localStates.orderUpdateInd)
     {
-        if(orderUpdateInd)
+        if(localStates.orderUpdateInd)
         {
             delay(3000L)
 
-            orderUpdateInd = false
+            guitarViewModel.updateOrderState(7, true)
 
-            orderModInd = false
+            localStates = localStates.copy(orderUpdateInd = false)
+
+            localStates = localStates.copy(orderModInd = false)
         }
     }
 
@@ -150,9 +155,52 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
 
             guitarViewModel.updateOrderState(6, false)
 
-            orderDeleteConfirm = false
+            localStates = localStates.copy(orderDeleteConfirm = false)
 
-            findTextBoxInd = false
+            localStates = localStates.copy(findTextBoxInd = false)
+        }
+    }
+
+    LaunchedEffect(orderState.orderSearchLoad)
+    {
+        if(orderState.orderSearchLoad)
+        {
+            localStates = localStates.copy(searchLoadTrigger = true)
+
+            delay(3000L)
+
+            localStates = localStates.copy(searchLoadTrigger = false)
+
+            guitarViewModel.updateOrderState(10, false)
+
+            if(orderState.orderFoundInd)
+            {
+                localStates = localStates.copy(orderFoundInd = true)
+            }
+            else if(orderState.orderFoundFail)
+            {
+                localStates = localStates.copy(orderFindFailInd = true)
+            }
+        }
+    }
+
+    LaunchedEffect(localStates.orderFindFailInd)
+    {
+        if(orderState.orderFoundFail && localStates.orderFindFailInd)
+        {
+            localStates = localStates.copy(orderFindFail = true)
+
+            delay(1500L)
+
+            guitarViewModel.updateOrderState(6, true)
+
+            localStates = localStates.copy(orderFindFail = false)
+
+            localStates= localStates.copy(orderFindFailInd = false)
+
+            localStates = localStates.copy(findTextBoxInd = false)
+
+            customerInputLocal = ""
         }
     }
 
@@ -164,7 +212,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
     )
     {
         TextButton(
-            onClick = { dropped = true },
+            onClick = { localStates = localStates.copy(dropped = true) },
             modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp)).width(150.dp)
         ) {
             Text(
@@ -175,10 +223,10 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
             )
         }
         DropdownMenu(
-            expanded = dropped,
-            onDismissRequest = { dropped = false },
-            modifier = Modifier.border(4.dp, Color.Black, RoundedCornerShape(16.dp))
-                .background(Color.White, RoundedCornerShape(16.dp))
+            expanded = localStates.dropped,
+            onDismissRequest = { localStates = localStates.copy(dropped = false) },
+            modifier = Modifier.border(4.dp, Color.Black, RoundedCornerShape(4.dp))
+                .background(Color.White)
         ) {
             guitarNames.forEach { guitarName ->
                 DropdownMenuItem(
@@ -191,10 +239,8 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
                         ) },
                     onClick = {
                         guitarViewModel.updateDataState(2, guitarName, 0.0)
-                        dropped = false },
-                    //contentPadding = MenuDefaults.DropdownMenuItemContentPadding,
-                    modifier = Modifier.width(200.dp)
-                        .background(color = Color.Transparent, RoundedCornerShape(16.dp))
+                        localStates = localStates.copy(dropped = false) },
+                    modifier = Modifier.background(Color.Transparent).width(200.dp)
                 )
             }
         }
@@ -207,7 +253,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
     )
     {
         TextButton(
-            onClick = { scaleLengthDropped = true },
+            onClick = { localStates = localStates.copy(scaleLengthDropped = true) },
             modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp)).width(150.dp)
         ) {
             Text(
@@ -218,10 +264,10 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
             )
         }
         DropdownMenu(
-            expanded = scaleLengthDropped,
-            onDismissRequest = { scaleLengthDropped = false },
-            modifier = Modifier.border(4.dp, Color.Black, RoundedCornerShape(16.dp))
-                .background(Color.White, RoundedCornerShape(16.dp))
+            expanded = localStates.scaleLengthDropped,
+            onDismissRequest = { localStates = localStates.copy(scaleLengthDropped = false) },
+            modifier = Modifier.border(4.dp, Color.Black, RoundedCornerShape(4.dp))
+                .background(Color.White)
         ) {
             scaleLengths.forEach { scaleLength ->
                 DropdownMenuItem(
@@ -234,41 +280,35 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
                         ) },
                     onClick = {
                         guitarViewModel.updateDataState(4, " ", scaleLength)
-                        scaleLengthDropped = false },
-                    modifier = Modifier.background(Color.Transparent, RoundedCornerShape(16.dp))
-                        .width(200.dp)
+                        localStates = localStates.copy(scaleLengthDropped = false) },
+                    modifier = Modifier.background(Color.Transparent).width(200.dp)
                 )
             }
         }
     }
 
-    if(orderState.instanceInd > 0)
+    Box(
+        modifier = Modifier.width(200.dp).height(80.dp)
+            .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
+            .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
+        contentAlignment = Alignment.Center
+    )
     {
-
-
-        Box(
-            modifier = Modifier.width(200.dp).height(80.dp)
-                .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
-                .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
-            contentAlignment = Alignment.Center
-        )
-        {
-            TextButton(
-                onClick = { findTextBoxInd = true },
-                modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp))
-                    .width(150.dp)
-            ) {
-                Text(
-                    text = "Find your order",
-                    color = Color.Black,
-                    fontFamily = FontFamily.Monospace,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+        TextButton(
+            onClick = { localStates = localStates.copy(findTextBoxInd = true) },
+            modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp))
+                .width(150.dp)
+        ) {
+            Text(
+                text = "Find your order",
+                color = Color.Black,
+                fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 
-    if(findTextBoxInd)
+    if(localStates.findTextBoxInd)
     {
         AlertDialog(
             onDismissRequest = {  },
@@ -313,20 +353,35 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
                         contentAlignment = Alignment.Center
                     )
                     {
-                        TextButton(
-                            onClick = { guitarViewModel.orderFind(customerInputLocal) },
-                            modifier = Modifier.background(
-                                Color.White,
-                                RoundedCornerShape(12.dp)
-                            )
-                                .width(150.dp)
-                        ) {
-                            Text(
-                                text = "Find Order",
-                                color = Color.Black,
-                                fontFamily = FontFamily.Monospace,
-                                fontWeight = FontWeight.Bold
-                            )
+                        if(localStates.searchLoadTrigger)
+                        {
+                            Box(modifier = Modifier.height(50.dp).width(150.dp).background(Color.White, RoundedCornerShape(12.dp)),
+                                contentAlignment = Alignment.Center)
+                            {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(40.dp),
+                                    strokeWidth = 4.dp, color = Color.White,
+                                    trackColor = Color(66, 203,245)
+                                )
+                            }
+                        }
+                        else
+                        {
+                            TextButton(
+                                onClick = { guitarViewModel.orderFind(customerInputLocal) },
+                                modifier = Modifier.background(
+                                    Color.White,
+                                    RoundedCornerShape(12.dp)
+                                )
+                                    .width(150.dp)
+                            ) {
+                                Text(
+                                    text = "Find Order",
+                                    color = Color.Black,
+                                    fontFamily = FontFamily.Monospace,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
                     }
                 }
@@ -336,7 +391,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
         )
     }
 
-    if(orderState.orderFoundInd)
+    if(localStates.orderFoundInd)
     {
         AlertDialog(
             onDismissRequest = {},
@@ -372,7 +427,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
                 )
                 {
                     TextButton(
-                        onClick = { orderDeleteConfirm = true },
+                        onClick = { localStates = localStates.copy(orderDeleteConfirm = true) },
                         modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
                             .width(150.dp).height(35.dp)
                     )
@@ -405,7 +460,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
             })
     }
 
-    if(orderModInd)
+    if(localStates.orderModInd)
     {
         AlertDialog(
             onDismissRequest = {},
@@ -450,7 +505,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
                         contentAlignment = Alignment.Center
                     )
                     {
-                        if(loadingTrigger)
+                        if(localStates.loadingUpdateTrigger)
                         {
                             Box(modifier = Modifier.height(50.dp).width(150.dp).background(Color.White, RoundedCornerShape(12.dp)),
                                 contentAlignment = Alignment.Center)
@@ -465,7 +520,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
                         else
                         {
                             TextButton(
-                                onClick = { loadingTrigger = true },
+                                onClick = { localStates = localStates.copy(loadingUpdateTrigger = true) },
                                 modifier = Modifier.background(
                                     Color.White,
                                     RoundedCornerShape(12.dp)
@@ -489,7 +544,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
         )
     }
 
-    if(orderDeleteConfirm)
+    if(localStates.orderDeleteConfirm)
     {
         AlertDialog(
             onDismissRequest = {},
@@ -539,7 +594,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
             confirmButton = {})
     }
 
-    if(orderUpdateInd)
+    if(localStates.orderUpdateInd)
     {
         AlertDialog(
             onDismissRequest = {},
@@ -554,24 +609,27 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
             confirmButton = {})
     }
 
-    if(orderFindFail)
+    if(localStates.orderFindFail)
     {
         AlertDialog(
             onDismissRequest = {},
             title = {Text("Order not found!", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
             text = {Column(verticalArrangement = Arrangement.Top)
             {
-
+                if(orderState.orderFoundFailMode)
+                {
+                    Text(text = "Failed to connect to server.")
+                }
             }
             },
             confirmButton = {})
     }
 
-    if(orderUpdateFail)
+    if(localStates.orderUpdateFail)
     {
         AlertDialog(
             onDismissRequest = {},
-            title = {Text("Failed to update order!", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
+            title = {Text("Failed to connect to server and update order!", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
             text = {Column(verticalArrangement = Arrangement.Top)
             {
 
@@ -616,7 +674,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
             )
             {
                 TextButton(
-                    onClick = { orderModInd = true },
+                    onClick = { localStates = localStates.copy(orderModInd = true) },
                     modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp))
                         .width(150.dp)
                 ) {
