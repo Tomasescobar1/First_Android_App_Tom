@@ -18,6 +18,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -70,6 +71,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.zIndex
 import com.example.tomkotlinsecondapp.ui.theme.TomKotlinSecondAppTheme
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
@@ -83,10 +85,21 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             TomKotlinSecondAppTheme {
-                Column(modifier = Modifier.fillMaxWidth().fillMaxHeight().padding(top = 70.dp, bottom = 70.dp),
-                    verticalArrangement = Arrangement.Top, horizontalAlignment = Alignment.CenterHorizontally)
+                Box(
+                    modifier = Modifier.fillMaxWidth().fillMaxHeight().background(Color.Transparent)
+                        .zIndex(2f).clickable{},
+                    contentAlignment = Alignment.Center
+                )
                 {
-                    GuitarViewPort()
+                    Column(
+                        modifier = Modifier.fillMaxWidth().fillMaxHeight()
+                            .padding(top = 70.dp, bottom = 70.dp).zIndex(1f),
+                        verticalArrangement = Arrangement.Top,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    )
+                    {
+                        GuitarViewPort()
+                    }
                 }
             }
         }

@@ -51,6 +51,7 @@ import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.toObjects
 import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
@@ -118,7 +119,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
 
             customerInputLocal = ""
 
-            delay(1500L)
+            delay(1500L.milliseconds)
 
             if(orderState.updateSuccess)
             {
@@ -167,7 +168,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
         {
             localStates = localStates.copy(searchLoadTrigger = true)
 
-            delay(3000L)
+            delay(3000L.milliseconds)
 
             localStates = localStates.copy(searchLoadTrigger = false)
 
@@ -190,7 +191,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
         {
             localStates = localStates.copy(orderFindFail = true)
 
-            delay(1500L)
+            delay(1500L.milliseconds)
 
             guitarViewModel.updateOrderState(6, true)
 

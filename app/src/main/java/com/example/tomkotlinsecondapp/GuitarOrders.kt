@@ -45,6 +45,11 @@ data class OrderDataState (
     var cameraInd: Int = 0
 )
 
+data class FloatingActionState(
+    var deployedState: Boolean = false,
+    var invBackground: Boolean = false
+)
+
 class GuitarOrder : ViewModel()
 {
 
@@ -58,9 +63,9 @@ class GuitarOrder : ViewModel()
 
     val orderState: StateFlow<OrderUIState> = _orderState.asStateFlow()
 
-    private val _deployedState = MutableStateFlow(false)
+    private val _deployedState = MutableStateFlow(FloatingActionState())
 
-    val deployedState: StateFlow<Boolean> = _deployedState.asStateFlow()
+    val deployedState: StateFlow<FloatingActionState> = _deployedState.asStateFlow()
     var orderList = mutableListOf<Guitar>()
 
     var dbOrderList: MutableMap<String, Any> = mutableMapOf(
@@ -122,11 +127,11 @@ class GuitarOrder : ViewModel()
             }
 
             6 -> {
-                _deployedState.update { !it }
+                _deployedState.update { currentState -> currentState.copy(deployedState = !currentState.deployedState) }
             }
 
             7 -> {
-                _deployedState.update{false}
+                _deployedState.update{ currentState -> currentState.copy(deployedState = false)}
             }
         }
     }

@@ -40,8 +40,6 @@ fun FABComponent(guitarViewModel: GuitarOrder = viewModel()) {
 
     val isDeployed by guitarViewModel.deployedState.collectAsStateWithLifecycle()
 
-    //val orderUIState by guitarViewModel.orderState.collectAsStateWithLifecycle()
-
     var fabOffset by remember {mutableStateOf(Offset(0f, 0f))}
 
     var colorOffset by remember {mutableStateOf(Color(66, 203, 240))}
@@ -50,7 +48,7 @@ fun FABComponent(guitarViewModel: GuitarOrder = viewModel()) {
     {
         guitarViewModel.updateDataState(6, " ", 0.0)
 
-        if(isDeployed)
+        if(isDeployed.deployedState)
         {
             colorOffset = Color(66, 203, 240)
         }
@@ -77,7 +75,7 @@ fun FABComponent(guitarViewModel: GuitarOrder = viewModel()) {
             tint = Color.Black
         )
 
-        AnimatedVisibility(visible = isDeployed)
+        AnimatedVisibility(visible = isDeployed.deployedState)
         {
             Column(
                 modifier = Modifier.zIndex(2f).width(200.dp).height(480.dp),
