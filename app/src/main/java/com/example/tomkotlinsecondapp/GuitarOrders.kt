@@ -127,7 +127,7 @@ class GuitarOrder : ViewModel()
             }
 
             6 -> {
-                _deployedState.update { currentState -> currentState.copy(deployedState = !currentState.deployedState) }
+                _deployedState.update { currentState -> currentState.copy(deployedState = true) }
             }
 
             7 -> {

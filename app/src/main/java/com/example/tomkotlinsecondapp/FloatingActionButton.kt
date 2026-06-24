@@ -3,6 +3,7 @@ package com.example.tomkotlinsecondapp
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -44,21 +45,20 @@ fun FABComponent(guitarViewModel: GuitarOrder = viewModel()) {
 
     var colorOffset by remember {mutableStateOf(Color(66, 203, 240))}
 
-    fun containerBackground()
+    colorOffset = if(isDeployed.deployedState)
     {
-        guitarViewModel.updateDataState(6, " ", 0.0)
+        Color.Transparent
+    }
 
-        if(isDeployed.deployedState)
-        {
-            colorOffset = Color(66, 203, 240)
-        }
-
-        else colorOffset = Color.Transparent
+    else
+    {
+        Color(66, 203, 240)
     }
 
     FloatingActionButton (
-        onClick = { containerBackground() },
+        onClick = { guitarViewModel.updateDataState(6, " ", 0.0) },
         modifier = Modifier.padding(start = 10.dp, bottom = 10.dp).zIndex(2f)
+            .clickable(interactionSource = null, indication = null){  }
             .offset { IntOffset(fabOffset.x.roundToInt(), fabOffset.y.roundToInt()) }
             .pointerInput(Unit) {
                 detectDragGestures { change, dragAmount ->

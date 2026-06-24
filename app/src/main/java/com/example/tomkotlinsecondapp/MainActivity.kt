@@ -72,6 +72,7 @@ import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.zIndex
+import com.example.tomkotlinsecondapp.ui.theme.HomeScreen
 import com.example.tomkotlinsecondapp.ui.theme.TomKotlinSecondAppTheme
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
@@ -79,28 +80,12 @@ import com.google.firebase.firestore.firestore
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
 
-        //val dataBase = Firebase.firestore
-
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             TomKotlinSecondAppTheme {
-                Box(
-                    modifier = Modifier.fillMaxWidth().fillMaxHeight().background(Color.Transparent)
-                        .zIndex(2f).clickable{},
-                    contentAlignment = Alignment.Center
-                )
-                {
-                    Column(
-                        modifier = Modifier.fillMaxWidth().fillMaxHeight()
-                            .padding(top = 70.dp, bottom = 70.dp).zIndex(1f),
-                        verticalArrangement = Arrangement.Top,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    )
-                    {
-                        GuitarViewPort()
-                    }
-                }
+
+                HomeScreen()
             }
         }
     }
