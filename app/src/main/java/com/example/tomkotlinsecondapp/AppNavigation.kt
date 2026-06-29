@@ -16,23 +16,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.rememberNavController
+import kotlinx.serialization.Serializable
 
-@Composable fun MainScreen(guitarViewModel: GuitarOrder = viewModel())
+@Serializable
+object MainScreen
+
+@Composable fun AppNavigation()
 {
-    Box(
-        modifier = Modifier.fillMaxSize().background(Color.Transparent).zIndex(2f)
-            .clickable(interactionSource = null, indication = null){ guitarViewModel.updateDataState(7, " ", 0.0) },
-        contentAlignment = Alignment.Center
-    )
-    {
-        Column(
-            modifier = Modifier.fillMaxWidth().fillMaxHeight()
-                .padding(top = 70.dp, bottom = 70.dp).zIndex(1f),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally
-        )
-        {
-            GuitarViewPort()
-        }
+     val navController = rememberNavController()
+
+    NavHost(
+        navController = navController,
+        startDestination = MainScreen
+    ){
+
     }
 }
