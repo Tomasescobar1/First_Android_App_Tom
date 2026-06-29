@@ -5,12 +5,15 @@ import android.icu.text.Transliterator
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -72,14 +75,15 @@ import io.github.sceneview.rememberView
 import com.example.tomkotlinsecondapp.ColorDropDown
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
-
-//import androidx.compose.material3
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun GuitarViewPort(guitarViewModel: GuitarOrder = viewModel())
 {
 
     val cDataState by guitarViewModel.dataState.collectAsStateWithLifecycle()
+
+    val fDataState by guitarViewModel.deployedState.collectAsStateWithLifecycle()
 
     val engine = rememberEngine()
 
@@ -137,15 +141,7 @@ fun GuitarViewPort(guitarViewModel: GuitarOrder = viewModel())
     )
 
     Box(modifier = Modifier
-        .height(900.dp).width(400.dp).background(Color.White).pointerInput(Unit){
-            detectTapGestures(
-                onTap = {offset ->
-
-                    guitarViewModel.updateDataState(7, " ", 0.0)
-
-                }
-            )
-        }, contentAlignment = Alignment.Center,)
+        .height(900.dp).width(400.dp).background(Color.White), contentAlignment = Alignment.Center,)
     {
 
         LaunchedEffect(cDataState.colorInput, cDataState.modelIndVal) {
@@ -174,7 +170,7 @@ fun GuitarViewPort(guitarViewModel: GuitarOrder = viewModel())
         {
             isLoading = true
 
-            delay(1500L)
+            delay(1500L.milliseconds)
 
             isLoading = false
         }
@@ -185,6 +181,20 @@ fun GuitarViewPort(guitarViewModel: GuitarOrder = viewModel())
             {
                 CircularProgressIndicator(modifier = Modifier.size(100.dp), strokeWidth = 10.dp, trackColor = Color(66, 203, 245), color = Color.White)
             }
+        }
+
+        if(fDataState.deployedState)
+        {
+            Box(
+                modifier = Modifier.fillMaxWidth().fillMaxHeight().background(Color.Transparent)
+                    .zIndex(2f)
+                    .clickable(
+                        interactionSource = null,
+                        indication = null
+                    ) { guitarViewModel.updateDataState(7, " ", 0.0) },
+                contentAlignment = Alignment.Center
+            )
+            {}
         }
 
         key(cDataState.colorInput, cDataState.modelIndVal, cDataState.cameraInd)

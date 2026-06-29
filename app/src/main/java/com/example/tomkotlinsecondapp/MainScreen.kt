@@ -1,4 +1,4 @@
-package com.example.tomkotlinsecondapp.ui.theme
+package com.example.tomkotlinsecondapp
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -15,13 +16,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.tomkotlinsecondapp.GuitarOrder
-import com.example.tomkotlinsecondapp.GuitarViewPort
 
-@Composable fun HomeScreen(guitarViewModel: GuitarOrder = viewModel())
+@Composable fun MainScreen(guitarViewModel: GuitarOrder = viewModel())
 {
     Box(
-        modifier = Modifier.fillMaxWidth().fillMaxHeight().background(Color.Transparent).zIndex(2f)
+        modifier = Modifier.fillMaxSize().background(Color.Transparent).zIndex(2f)
             .clickable(interactionSource = null, indication = null){ guitarViewModel.updateDataState(7, " ", 0.0) },
         contentAlignment = Alignment.Center
     )

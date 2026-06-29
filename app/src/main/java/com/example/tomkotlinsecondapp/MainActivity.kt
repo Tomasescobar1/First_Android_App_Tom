@@ -72,7 +72,7 @@ import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.zIndex
-import com.example.tomkotlinsecondapp.ui.theme.HomeScreen
+import com.example.tomkotlinsecondapp.MainScreen
 import com.example.tomkotlinsecondapp.ui.theme.TomKotlinSecondAppTheme
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
@@ -84,8 +84,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             TomKotlinSecondAppTheme {
-
-                HomeScreen()
+                MainScreen()
             }
         }
     }
