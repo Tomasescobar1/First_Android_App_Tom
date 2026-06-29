@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 
-@Composable fun MainScreen(guitarViewModel: GuitarOrder = viewModel())
+@Composable fun MainScreen(guitarViewModel: GuitarOrder = viewModel(), onNavigateToDetails:() -> Unit)
 {
     Box(
         modifier = Modifier.fillMaxSize().background(Color.Transparent).zIndex(2f)

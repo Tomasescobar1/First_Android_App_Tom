@@ -18,10 +18,14 @@ import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.composable
 import kotlinx.serialization.Serializable
 
 @Serializable
 object MainScreen
+
+@Serializable
+object DetailsScreen
 
 @Composable fun AppNavigation()
 {
@@ -31,6 +35,14 @@ object MainScreen
         navController = navController,
         startDestination = MainScreen
     ){
+
+        composable<MainScreen> {
+            MainScreen(onNavigateToDetails = {navController.navigate(DetailsScreen)})
+        }
+
+        composable<DetailsScreen> {
+            DetailsScreen(onNavigateBack = {navController.popBackStack()})
+        }
 
     }
 }
