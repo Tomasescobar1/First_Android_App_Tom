@@ -2,6 +2,7 @@ package com.example.tomkotlinsecondapp
 
 import android.graphics.drawable.Icon
 import android.icu.text.Transliterator
+import android.view.Choreographer
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -31,6 +32,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -73,6 +75,8 @@ import io.github.sceneview.rememberRenderer
 import io.github.sceneview.rememberScene
 import io.github.sceneview.rememberView
 import com.example.tomkotlinsecondapp.ColorDropDown
+import com.google.android.filament.MaterialInstance
+import io.github.sceneview.safeDestroyMaterialInstance
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
@@ -93,11 +97,15 @@ fun GuitarViewPort(guitarViewModel: GuitarOrder = viewModel())
 
     var isLoading by remember {mutableStateOf(true)}
 
+    var cameraNode1 = rememberCameraNode(engine)
+
     var cameraOrbitHome = Float3(0.0f, 0.0f, 1.3f)
 
     var cameraPosition = Float3(0.0f, 0.0f, 1.3f)
 
     var cameraRotation = Float3(0.0f, 0.0f, 0.0f)
+
+    var cameraNodeDef = rememberCameraNode(engine){position = cameraPosition; rotation = cameraRotation}
 
     val colorMaterialRed = materialLoaderDef.createColorInstance(
         color = Color.Red,
@@ -200,15 +208,7 @@ fun GuitarViewPort(guitarViewModel: GuitarOrder = viewModel())
         key(cDataState.colorInput, cDataState.modelIndVal, cDataState.cameraInd)
         {
             Scene(
-                modifier = Modifier.pointerInput(Unit){
-                    detectTapGestures(
-                        onTap = {offset ->
-
-                            guitarViewModel.updateDataState(7, " ", 0.0)
-
-                        }
-                    )
-                }.fillMaxSize().border(6.dp, Color.White)
+                modifier = Modifier.fillMaxSize().border(6.dp, Color.White)
                     .align(Alignment.Center),
 
                 engine = engine,
@@ -280,47 +280,10 @@ fun GuitarViewPort(guitarViewModel: GuitarOrder = viewModel())
 
                 },
 
-                cameraNode = rememberCameraNode(engine)
-                {
-                    when(cDataState.cameraInd)
-                    {
-                        0 -> {
-                            cameraPosition = Float3(0.0f, 0.0f, 1.3f)
-
-                            cameraRotation = Float3(0.0f, 0.0f, 0.0f)
-                        }
-
-                        1 -> {
-                            cameraPosition = Float3(0.25f, 0.6f, 1.3f)
-
-                            cameraRotation = Float3(-21.0f, 10.0f, 0.0f)
-                        }
-
-                        2 -> {
-                            cameraPosition = Float3(0.5f, 1.2f, 1.3f)
-
-                            cameraRotation = Float3(-21.0f, 10.0f, 0.0f)
-                        }
-
-                        3 -> {
-                            cameraPosition = Float3(1.0f, 2.4f, 1.3f)
-
-                            cameraRotation = Float3(-21.0f, 10.0f, 0.0f)
-                        }
-                    }
-
-                    position = Position(cameraPosition)
-
-                    rotation = Rotation(cameraRotation)
-                },
-
-                cameraManipulator = rememberCameraManipulator(cameraOrbitHome),
-
-                mainLightNode = rememberMainLightNode(engine){
-                    intensity = 100_000.0f
-                },
+                cameraNode = cameraNodeDef
 
             )
+
         }
 
         Column(modifier = Modifier.width(400.dp).height(900.dp).zIndex(1f)

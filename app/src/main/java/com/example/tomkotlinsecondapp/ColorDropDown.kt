@@ -30,27 +30,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 @Composable
 fun ColorDropDown(guitarViewModel: GuitarOrder = viewModel())
 {
-    fun cameraToggle()
-    {
-        guitarViewModel.updateDataState(5, " ", 0.0)
-    }
-
     val cDataState by guitarViewModel.dataState.collectAsStateWithLifecycle()
 
     var dropped by remember {mutableStateOf(false)}
 
     val guitarColors = listOf("White", "Red", "Sky Blue", "Olive Green")
 
-    Box(modifier = Modifier.width(200.dp).height(80.dp)//.padding(start = 8.dp)
-        .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
-        .border(4.dp, Color.Black, RoundedCornerShape(16.dp)), contentAlignment = Alignment.Center)
-    {
-        TextButton(onClick = {guitarViewModel.updateDataState(5, " ", 0.0)}, modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp)).width(150.dp)) {
-            Text(text = "Camera Toggle", color = Color.Black, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-        }
-    }
-
-    Box(modifier = Modifier.width(200.dp).height(80.dp)//.padding(start = 8.dp)
+    Box(modifier = Modifier.width(200.dp).height(80.dp)
         .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
         .border(4.dp, Color.Black, RoundedCornerShape(16.dp)), contentAlignment = Alignment.Center)
     {
@@ -72,7 +58,6 @@ fun ColorDropDown(guitarViewModel: GuitarOrder = viewModel())
                         guitarViewModel.updateDataState(1, guitarColor, 0.0)
                         dropped = false
                     },
-                    //contentPadding = MenuDefaults.DropdownMenuItemContentPadding,
                     modifier = Modifier.width(200.dp)
                 )
             }

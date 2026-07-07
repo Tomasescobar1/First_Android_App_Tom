@@ -84,7 +84,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             TomKotlinSecondAppTheme {
-                MainScreen()
+
+                AppNavigation()
+
             }
         }
     }

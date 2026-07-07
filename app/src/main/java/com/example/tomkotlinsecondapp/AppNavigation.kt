@@ -1,5 +1,8 @@
 package com.example.tomkotlinsecondapp
 
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -20,28 +23,59 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.composable
 import kotlinx.serialization.Serializable
+import kotlin.time.Duration.Companion.milliseconds
 
 @Serializable
-object MainScreen
+object MainRoute
 
 @Serializable
-object DetailsScreen
+object MenuRoute
+
+@Serializable
+object DetailsRoute
 
 @Composable fun AppNavigation()
 {
-     val navController = rememberNavController()
+     val navigationController = rememberNavController()
 
     NavHost(
-        navController = navController,
-        startDestination = MainScreen
-    ){
-
-        composable<MainScreen> {
-            MainScreen(onNavigateToDetails = {navController.navigate(DetailsScreen)})
+        navController = navigationController,
+        startDestination = DetailsRoute,
+        enterTransition = {
+            slideIntoContainer(
+                AnimatedContentTransitionScope.SlideDirection.Start, tween(700)
+            )
+        },
+        exitTransition = {
+            slideOutOfContainer(
+                AnimatedContentTransitionScope.SlideDirection.Start, tween(300)
+            )
+        },
+        popEnterTransition = {
+            slideIntoContainer(
+                AnimatedContentTransitionScope.SlideDirection.End, tween(700)
+            )
+        },
+        popExitTransition = {
+            slideOutOfContainer(
+                AnimatedContentTransitionScope.SlideDirection.End, tween(300)
+            )
+        }
+    )
+    {
+        composable<DetailsRoute>
+        {
+            DetailsScreen(onNavigateToMenu = { navigationController.navigate(MenuRoute) })
         }
 
-        composable<DetailsScreen> {
-            DetailsScreen(onNavigateBack = {navController.popBackStack()})
+        composable<MenuRoute>
+        {
+            MenuScreen(onNavigateToMain = { navigationController.navigate(MainRoute) })
+        }
+
+        composable<MainRoute>
+        {
+            MainScreen()
         }
 
     }

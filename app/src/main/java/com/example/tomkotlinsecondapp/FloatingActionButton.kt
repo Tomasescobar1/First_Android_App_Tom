@@ -1,5 +1,6 @@
 package com.example.tomkotlinsecondapp
 
+import android.app.Activity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.foundation.background
@@ -7,6 +8,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,11 +16,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -30,8 +37,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -41,6 +53,10 @@ import kotlin.math.roundToInt
 fun FABComponent(guitarViewModel: GuitarOrder = viewModel()) {
 
     val isDeployed by guitarViewModel.deployedState.collectAsStateWithLifecycle()
+
+    val context = LocalContext.current
+
+    //var exitToggle by remember {mutableStateOf(false)}
 
     var fabOffset by remember {mutableStateOf(Offset(0f, 0f))}
 
@@ -88,7 +104,84 @@ fun FABComponent(guitarViewModel: GuitarOrder = viewModel()) {
                 ColorDropDown()
 
                 DropDownSection()
+
+                Box(
+                    modifier = Modifier.width(200.dp).height(80.dp)
+                        .background(Color(245, 66, 87), RoundedCornerShape(16.dp))
+                        .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
+                    contentAlignment = Alignment.Center
+                )
+                {
+                    TextButton(
+                        onClick = { guitarViewModel.updateDataState(5, "", 0.0) },
+                        modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp))
+                            .width(150.dp)
+                    ) {
+                        Text(
+                            text = "Exit App",
+                            color = Color.Black,
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
             }
+        }
+
+        if(isDeployed.exitDeploy)
+        {
+            AlertDialog(
+                modifier = Modifier.fillMaxWidth().wrapContentSize(Alignment.Center),
+                onDismissRequest = {},
+                title = {Text("You are about to leave the app...", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
+                text = {
+                    Column( modifier = Modifier.fillMaxWidth().wrapContentWidth(Alignment.CenterHorizontally),
+                        verticalArrangement = Arrangement.Top, horizontalAlignment = Alignment.CenterHorizontally )
+                    {
+                        Text(
+                            text = "Are your sure?", overflow = TextOverflow.Clip,
+                            lineHeight = 30.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+
+                        Box(
+                            Modifier.padding(top = 10.dp).background(Color(66, 203, 245), RoundedCornerShape(15.dp)).width(245.dp).height(65.dp)
+                                .border(3.dp, Color.Black, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center
+                        )
+                        {
+                            TextButton(
+                               onClick = { guitarViewModel.updateDataState(5, "", 0.0, true) },
+                                modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
+                                    .width(225.dp).height(45.dp)
+                            )
+                            {
+                                Text("No, continue on the app",
+                                    fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold,
+                                    color = Color.Black)
+                            }
+                        }
+
+                        Box(modifier = Modifier.height(30.dp).width(80.dp))
+
+                        Box(
+                            Modifier.background(Color(245, 66, 87), RoundedCornerShape(15.dp)).width(245.dp).height(65.dp)
+                                .border(3.dp, Color.Black, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center
+                        )
+                        {
+                            TextButton(
+                                onClick = { (context as? Activity)?.finish() },
+                                modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
+                                    .width(225.dp).height(45.dp)
+                            )
+                            {
+                                Text("Yes, leave the app",
+                                    fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold,
+                                    color = Color.Black)
+                            }
+                        }
+
+                    }
+                },
+                confirmButton = {}
+            )
         }
     }
 }

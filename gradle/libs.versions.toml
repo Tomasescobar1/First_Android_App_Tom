@@ -17,6 +17,7 @@ firebaseFirestore = "26.2.0"
 androidx-navigation = "2.9.8"
 
 [libraries]
+
 androidx-navigation-compose = {group = "androidx.navigation", name = "navigation-compose", version.ref = "androidx-navigation"}
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-viewmodel-ktx = {group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "androidx-lifecycle" }
@@ -43,4 +44,5 @@ firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }

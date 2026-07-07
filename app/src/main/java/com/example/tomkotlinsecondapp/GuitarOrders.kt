@@ -47,7 +47,8 @@ data class OrderDataState (
 
 data class FloatingActionState(
     var deployedState: Boolean = false,
-    var invBackground: Boolean = false
+    var invBackground: Boolean = false,
+    var exitDeploy: Boolean = false
 )
 
 class GuitarOrder : ViewModel()
@@ -56,8 +57,6 @@ class GuitarOrder : ViewModel()
     private val _dataState = MutableStateFlow(OrderDataState())
 
     val dataState: StateFlow<OrderDataState> = _dataState.asStateFlow()
-
-    var camIncrement = mutableIntStateOf(0)
 
     private val _orderState = MutableStateFlow(OrderUIState())
 
@@ -95,7 +94,7 @@ class GuitarOrder : ViewModel()
 
     val updatedOrderString = _updatedOrderString.asStateFlow()
 
-    fun updateDataState(input1: Int, input2: String, input3: Double)
+    fun updateDataState(input1: Int, input2: String, input3: Double, input4: Boolean = false)
     {
         when(input1)
         {
@@ -116,13 +115,11 @@ class GuitarOrder : ViewModel()
             }
 
             5 -> {
-                _dataState.update {currentDstate -> currentDstate.copy(cameraInd = camIncrement.intValue++)}
+                _deployedState.update {currentState -> currentState.copy(exitDeploy = true)}
 
-                if(camIncrement.intValue > 3)
+                if(input4)
                 {
-                    camIncrement.intValue = 0
-
-                    _dataState.update {currentDstate -> currentDstate.copy(cameraInd = camIncrement.intValue)}
+                    _deployedState.update {currentState -> currentState.copy(exitDeploy = false)}
                 }
             }
 

@@ -54,6 +54,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
@@ -102,7 +103,7 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
         {
             guitarViewModel.updateOrderState(2, false)
 
-            localStateManager = localStateManager.copy(orderLoadSuccess = true)
+            localStateManager = localStateManager.copy(orderLoadSuccess = false)
 
             customerInputLocal = ""
         }
@@ -143,7 +144,7 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
 
             guitarViewModel.addDataToFirestore(guitarViewModel.dbOrderList)
 
-            delay(2000L)
+            delay(2000L.milliseconds)
 
             if(orderState.orderSuccess)
             {
@@ -158,7 +159,7 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
 
     LaunchedEffect(localStateManager.orderRemove)
     {
-        delay(3000L)
+        delay(3000L.milliseconds)
 
         localStateManager = localStateManager.copy(orderRemove = false)
 

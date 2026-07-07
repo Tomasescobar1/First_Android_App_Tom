@@ -136,7 +136,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
     {
         if(localStates.orderUpdateInd)
         {
-            delay(3000L)
+            delay(3000L.milliseconds)
 
             guitarViewModel.updateOrderState(7, true)
 
@@ -150,7 +150,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
     {
         if(orderState.orderDelete)
         {
-            delay(3000L)
+            delay(3000L.milliseconds)
 
             guitarViewModel.updateOrderState(9, false)
 
@@ -206,7 +206,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
     }
 
     Box(
-        modifier = Modifier.width(200.dp).height(80.dp)//.padding(bottom = 8.dp)
+        modifier = Modifier.width(200.dp).height(80.dp)
             .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
             .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
         contentAlignment = Alignment.Center
