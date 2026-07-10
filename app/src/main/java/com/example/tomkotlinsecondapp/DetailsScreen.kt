@@ -3,10 +3,14 @@ package com.example.tomkotlinsecondapp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -20,15 +24,20 @@ import androidx.compose.ui.unit.dp
 
 @Composable fun DetailsScreen(onNavigateToMenu: () -> Unit)
 {
-    Box(modifier = Modifier.fillMaxWidth().fillMaxHeight().background(Color.White), contentAlignment = Alignment.Center)
+    Column(modifier = Modifier.fillMaxSize().background(Color.White).padding(top = 200.dp), verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally)
     {
         Box(modifier = Modifier.background(Color.White, RoundedCornerShape(16.dp)).width(200.dp).height(50.dp))
         {
             Text(
                 text = "Hello, this is the details screen.",
-                color = Color.Black
+                color = Color.Black,
+                fontFamily = FontFamily.Monospace,
+                fontWeight= FontWeight.Bold
             )
         }
+
+        Box(modifier = Modifier.width(200.dp).height(200.dp))
 
         Box(
             modifier = Modifier.width(200.dp).height(80.dp)

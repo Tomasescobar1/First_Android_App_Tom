@@ -80,7 +80,7 @@ fun Context.triggerAppReboot()
     {
         AlertDialog(
             modifier = Modifier.fillMaxWidth().wrapContentSize(Alignment.Center),
-            onDismissRequest = {},
+            onDismissRequest = { restartToggle = false },
             title = {Text("You are about to leave for the main menu...", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
             text = {
                 Column( modifier = Modifier.fillMaxWidth().wrapContentWidth(Alignment.CenterHorizontally),
@@ -96,7 +96,7 @@ fun Context.triggerAppReboot()
                     )
                     {
                         TextButton(
-                            onClick = { guitarViewModel.updateDataState(5, "", 0.0, true) },
+                            onClick = { restartToggle = false },
                             modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
                                 .width(225.dp).height(65.dp)
                         )
