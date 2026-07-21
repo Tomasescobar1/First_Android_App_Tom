@@ -142,7 +142,7 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
 
             localStateManager = localStateManager.copy(loadingTrigger = true)
 
-            guitarViewModel.addDataToFirestore(guitarViewModel.dbOrderList)
+            guitarViewModel.addDataToFirestore(inputOrderData = guitarViewModel.dbOrderList)
 
             delay(2000L.milliseconds)
 

@@ -1,6 +1,7 @@
 package com.example.tomkotlinsecondapp
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.firestore.FirebaseFirestore
@@ -34,7 +35,9 @@ data class OrderUIState (
     var orderFoundFailMode: Boolean = false,
     var orderDelete: Boolean = false,
     var orderDeleteFail: Boolean = false,
-    var instanceInd: Int = 0
+    var instanceInd: Int = 0,
+    var maintenanceSuccess: Boolean = false,
+    var maintenanceFail: Boolean = false
 )
 
 data class OrderDataState (
@@ -80,9 +83,15 @@ class GuitarOrder : ViewModel()
 
     val isLoading = _isLoading.asStateFlow()
 
+    private val _maintenanceLoading = MutableStateFlow(false)
+
+    val maintenanceLoading = _maintenanceLoading.asStateFlow()
+
     val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
     val dbOrders = db.collection("Orders")
+
+    val dbMaintenance = db.collection("Maintenance")
 
     private val _foundOrderString = MutableStateFlow("")
 
@@ -156,7 +165,14 @@ class GuitarOrder : ViewModel()
             }
 
             5 -> {
-                _orderState.update {currentState -> currentState.copy(orderFail = false)}
+                if(!input2)
+                {
+                    _orderState.update { currentState -> currentState.copy(orderFail = false) }
+                }
+                else
+                {
+                    _orderState.update {currentState -> currentState.copy(maintenanceFail = false)}
+                }
             }
 
             6 -> {
@@ -185,6 +201,14 @@ class GuitarOrder : ViewModel()
             10 -> {
                 _orderState.update {currentState -> currentState.copy(orderSearchLoad = false)}
             }
+
+            11 -> {
+                _orderState.update {currentState -> currentState.copy(maintenanceSuccess = false)}
+            }
+
+            12 -> {
+                _maintenanceLoading.value = input2
+            }
         }
     }
 
@@ -205,33 +229,56 @@ class GuitarOrder : ViewModel()
         println("Added ${orderList.last().color}")
     }
 
-    fun addDataToFirestore(inputData: MutableMap<String, Any>)
+    fun addDataToFirestore(inputOrderData: MutableMap<String, Any> = mutableMapOf(), inputMaintenanceData: MutableMap<String, Any> = mutableMapOf(), serviceOption: Boolean = false)
     {
         viewModelScope.launch {
-            try
-            {
-                _isLoading.value = true
+                try
+                {
+                    if(!serviceOption)
+                    {
+                        _isLoading.value = true
 
-                dbOrders.add(inputData).await()
+                        dbOrders.add(inputOrderData).await()
 
-                increment.intValue++
+                        increment.intValue++
 
-                _orderState.update { currentState -> currentState.copy(instanceInd = increment.intValue) }
+                        _orderState.update { currentState -> currentState.copy(instanceInd = increment.intValue) }
 
-                _orderState.update { currentState -> currentState.copy(orderSuccess = true) }
-            }
-            catch (e: Exception)
-            {
-                _orderState.update { currentState -> currentState.copy(orderFail = true)}
+                        _orderState.update { currentState -> currentState.copy(orderSuccess = true) }
 
-                println("Failed to add data, crap!")
-            }
+                        println("Added order to Firestore, yaaaay!")
+                    }
+                    else
+                    {
+                        _maintenanceLoading.value = true
+
+                        dbMaintenance.add(inputMaintenanceData).await()
+
+                        _orderState.update {currentState -> currentState.copy(maintenanceSuccess = true)}
+
+                        println("Added maintenance to Firestore, yaaaay!")
+                    }
+
+                }
+                catch (e: Exception)
+                {
+                    if(serviceOption)
+                    {
+                        _orderState.update { currentState -> currentState.copy(maintenanceFail = true) }
+                    }
+                    else
+                    {
+                        _orderState.update { currentState -> currentState.copy(orderFail = true) }
+                    }
+
+                    println("Failed to add data, crap!")
+                }
         }
     }
 
-    fun orderFind(input: String = "")
+    fun orderFind(input: String = "", orderType: Boolean = false)
     {
-        if(input != "")
+        if(input != "" && !orderType)
         {
             _orderState.update{currentState -> currentState.copy(orderSearchLoad = true)}
 
