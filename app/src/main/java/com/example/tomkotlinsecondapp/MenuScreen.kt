@@ -27,6 +27,8 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
@@ -37,6 +39,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -44,6 +47,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -53,8 +57,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -75,20 +82,27 @@ import kotlin.time.Duration.Companion.milliseconds
         var maintenanceToggle: Boolean = false,
         var maintenanceLoadingTrigger: Boolean = false,
         var maintenanceSuccessLocal: Boolean = false,
-        var checkListToggle: Boolean = false
+        var checkListToggle: Boolean = false,
+        var nameInputToggle: Boolean = false
     )
 
     var localStateManager by remember {mutableStateOf(LocalStateClass())}
+
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    val focusManager = LocalFocusManager.current
 
     val orderState by guitarViewModel.orderState.collectAsStateWithLifecycle()
 
     val maintenanceLoading by guitarViewModel.maintenanceLoading.collectAsStateWithLifecycle()
 
-    val maintenanceMapList = mutableMapOf<String, Any>()
+    var nameStorage by remember { mutableStateOf("") }
 
-    val maintenanceArray = remember {mutableStateListOf<String>()}
+    val maintenanceMapList = remember { mutableStateMapOf<String, Any>() }
 
-    var colorOffset by remember {mutableStateOf(Color(66, 203, 240))}
+    val maintenanceArray = remember { mutableStateListOf<String>() }
+
+    var colorOffset by remember { mutableStateOf(Color(66, 203, 240)) }
 
     var buttonSizeOffset by remember { mutableDoubleStateOf(0.0) }
 
@@ -126,15 +140,17 @@ import kotlin.time.Duration.Companion.milliseconds
 
     fun maintenanceTypeConversion()
     {
+        maintenanceMapList.put("Name", nameStorage.lowercase())
+
+        maintenanceArray.add(nameStorage)
+
         for(i in 0 until maintenanceItems.size)
         {
             if(maintenanceItems[i].isChecked)
             {
-                maintenanceMapList.put(maintenanceItems[i].title, i)
+                maintenanceMapList.put(maintenanceItems[i].title, i+1)
 
                 maintenanceArray.add(maintenanceItems[i].title)
-
-
             }
         }
     }
@@ -142,6 +158,8 @@ import kotlin.time.Duration.Companion.milliseconds
     fun dialogDismiss()
     {
         localStateManager = localStateManager.copy(checkListToggle = false)
+
+        localStateManager = localStateManager.copy(nameInputToggle = false)
 
         guitarViewModel.updateOrderState(11, false)
 
@@ -415,32 +433,16 @@ import kotlin.time.Duration.Companion.milliseconds
                                 .border(3.dp, Color.Black, RoundedCornerShape(15.dp)), contentAlignment = Alignment.Center
                         )
                         {
-                            if(!localStateManager.maintenanceLoadingTrigger)
+                            TextButton(
+                                onClick = { localStateManager = localStateManager.copy(nameInputToggle = true) },
+                                modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
+                                    .width(200.dp).height(50.dp)
+                            )
                             {
-                                TextButton(
-                                    onClick = { guitarViewModel.updateOrderState(12, true) },
-                                    modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
-                                     .width(200.dp).height(50.dp)
-                                )
-                                {
-                                    Text("Schedule maintenance",
-                                        fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold,
-                                        color = Color.Black)
-                                }
+                                Text("Schedule maintenance",
+                                    fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold,
+                                    color = Color.Black)
                             }
-                            else
-                            {
-                                Box(modifier = Modifier.height(50.dp).width(200.dp).background(Color.White, RoundedCornerShape(12.dp)),
-                                    contentAlignment = Alignment.Center)
-                                {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.size(40.dp),
-                                        strokeWidth = 4.dp, color = Color.White,
-                                        trackColor = Color(66, 203,245)
-                                    )
-                                }
-                            }
-
                         }
 
                         Box(modifier = Modifier.height(30.dp).width(40.dp))
@@ -468,6 +470,89 @@ import kotlin.time.Duration.Companion.milliseconds
             )
         }
 
+        if(localStateManager.nameInputToggle)
+        {
+            AlertDialog(
+                onDismissRequest = {},
+                title = {},
+                text = {
+                    Column(
+                        modifier = Modifier.height(400.dp).width(400.dp),
+                        verticalArrangement = Arrangement.Top,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Please type in your name to place the order.",
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold
+                        )
+                        OutlinedTextField(
+
+                            value = nameStorage,
+                            onValueChange = { nameStorage = it },
+                            label = {
+                                Text(
+                                    text = "Your name here.",
+                                    fontFamily = FontFamily.Monospace
+                                )
+                            },
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                            keyboardActions = KeyboardActions (
+                                onDone = {
+                                    keyboardController?.hide()
+                                    focusManager.clearFocus()
+                                }
+                            )
+                        )
+
+                        Box(modifier = Modifier.height(30.dp).width(80.dp))
+
+                        Box(
+                            modifier = Modifier.width(200.dp).height(80.dp)
+                                .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
+                                .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
+                            contentAlignment = Alignment.Center
+                        )
+                        {
+                            if(!localStateManager.maintenanceLoadingTrigger)
+                            {
+                                TextButton(
+                                    onClick = { guitarViewModel.updateOrderState(12, true) },
+                                    modifier = Modifier.background(
+                                        Color.White,
+                                        RoundedCornerShape(12.dp)
+                                    )
+                                        .width(150.dp)
+                                ) {
+                                    Text(
+                                        text = "Request maintenance",
+                                        color = Color.Black,
+                                        fontFamily = FontFamily.Monospace,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+                            else
+                            {
+                                Box(modifier = Modifier.height(50.dp).width(150.dp).background(Color.White, RoundedCornerShape(12.dp)),
+                                    contentAlignment = Alignment.Center)
+                                {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(40.dp),
+                                        strokeWidth = 4.dp, color = Color.White,
+                                        trackColor = Color(66, 203,245)
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                },
+                confirmButton = {}
+            )
+        }
+
         if(localStateManager.maintenanceSuccessLocal)
         {
             AlertDialog(
@@ -475,7 +560,9 @@ import kotlin.time.Duration.Companion.milliseconds
                 title = {Text("Maintenance confirmed!" + "\nDetails: ", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
                 text = {Column (verticalArrangement = Arrangement.Top)
                 {
-                    for(i in 0 until maintenanceArray.size)
+                    Text(text = "Name: ${maintenanceArray[0]}")
+
+                    for(i in 1 until maintenanceArray.size)
                     {
                         Text(text = "- ${maintenanceArray[i]}", lineHeight = 30.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
 
