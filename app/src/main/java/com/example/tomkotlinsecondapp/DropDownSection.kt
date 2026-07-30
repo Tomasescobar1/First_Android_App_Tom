@@ -82,6 +82,8 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
 
     val updatedOrderString by guitarViewModel.updatedOrderString.collectAsStateWithLifecycle()
 
+    val offlineState by guitarViewModel.isOffline.collectAsStateWithLifecycle()
+
     val focusManager = LocalFocusManager.current
 
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -297,6 +299,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
     {
         TextButton(
             onClick = { localStates = localStates.copy(findTextBoxInd = true) },
+            enabled = !offlineState,
             modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp))
                 .width(150.dp)
         ) {
@@ -653,6 +656,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
             {
                 TextButton(
                     onClick = { guitarViewModel.updateOrderState(2, true) },
+                    enabled = !offlineState,
                     modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp))
                         .width(150.dp)
                 ) {

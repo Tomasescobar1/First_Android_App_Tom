@@ -72,6 +72,15 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+
+fun formatDayMonthYear(timeStampMillis: Long): String{
+    val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy").withZone(ZoneId.systemDefault())
+
+    return formatter.format(Instant.ofEpochMilli(timeStampMillis))
+}
 
 @Composable fun MenuScreen(onNavigateToMain: () -> Unit, guitarViewModel: GuitarOrder = viewModel())
 {
@@ -83,7 +92,11 @@ import kotlin.time.Duration.Companion.milliseconds
         var maintenanceLoadingTrigger: Boolean = false,
         var maintenanceSuccessLocal: Boolean = false,
         var checkListToggle: Boolean = false,
-        var nameInputToggle: Boolean = false
+        var nameInputToggle: Boolean = false,
+    )
+
+    data class TrackedValue(
+        val createdAt: Long = System.currentTimeMillis()
     )
 
     var localStateManager by remember {mutableStateOf(LocalStateClass())}
@@ -96,17 +109,32 @@ import kotlin.time.Duration.Companion.milliseconds
 
     val maintenanceLoading by guitarViewModel.maintenanceLoading.collectAsStateWithLifecycle()
 
+    val offlineState by guitarViewModel.isOffline.collectAsStateWithLifecycle()
+
+    val dateStorage by remember {mutableStateOf(TrackedValue())}
+
     var nameStorage by remember { mutableStateOf("") }
 
     val maintenanceMapList = remember { mutableStateMapOf<String, Any>() }
 
     val maintenanceArray = remember { mutableStateListOf<String>() }
 
-    var colorOffset by remember { mutableStateOf(Color(66, 203, 240)) }
+    var colorOffset by remember { mutableStateOf(Color(66, 203, 245)) }
 
     var buttonSizeOffset by remember { mutableDoubleStateOf(0.0) }
 
-    colorOffset = Color(66, 203, 240)
+    var offlineSignToggle by remember { mutableDoubleStateOf(100.0) }
+
+    if(offlineState)
+    {
+        offlineSignToggle = 0.0
+    }
+    else
+    {
+        offlineSignToggle = 100.0
+    }
+
+    //colorOffset = Color(66, 203, 240)
 
     class MaintenanceData(val id: Int, val title: String, val initialChecked: Boolean = false)
     {
@@ -146,6 +174,11 @@ import kotlin.time.Duration.Companion.milliseconds
 
         for(i in 0 until maintenanceItems.size)
         {
+            if(i == 1)
+            {
+                maintenanceMapList.put("Date of creation", formatDayMonthYear(dateStorage.createdAt))
+            }
+
             if(maintenanceItems[i].isChecked)
             {
                 maintenanceMapList.put(maintenanceItems[i].title, i+1)
@@ -155,15 +188,20 @@ import kotlin.time.Duration.Companion.milliseconds
         }
     }
 
-    fun dialogDismiss()
+    fun dialogDismiss(input: Boolean = false)
     {
         localStateManager = localStateManager.copy(checkListToggle = false)
 
         localStateManager = localStateManager.copy(nameInputToggle = false)
 
-        guitarViewModel.updateOrderState(11, false)
+        guitarViewModel.updateOrderState(11, true)
 
         localStateManager = localStateManager.copy(maintenanceSuccessLocal = false)
+
+        if(input)
+        {
+            guitarViewModel.updateOrderState(11, false)
+        }
     }
 
 
@@ -192,9 +230,33 @@ import kotlin.time.Duration.Companion.milliseconds
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize().background(Color.White).padding(top = 150.dp), verticalArrangement = Arrangement.Top,
+    Column(modifier = Modifier.fillMaxSize().background(Color.White).padding(top = (100 + offlineSignToggle).dp), verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally)
     {
+
+        if(offlineState)
+        {
+            Box(
+                modifier = Modifier.background(Color(245,66,87), RoundedCornerShape(16.dp))
+                    .border(4.dp, Color.Black, RoundedCornerShape(16.dp )).width(250.dp).height(80.dp),
+                contentAlignment = Alignment.Center
+            )
+            {
+                Box(modifier = Modifier.width(210.dp).height(50.dp).background(Color.White, RoundedCornerShape(12.dp)),
+                    contentAlignment = Alignment.Center)
+                {
+                    Text(
+                        text = "Currently Offline.",
+                        color = Color.Black,
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+            Box(modifier = Modifier.height(20.dp).width(200.dp))
+        }
+
         Box(
             modifier = Modifier.background(Color.White, RoundedCornerShape(16.dp)).width(200.dp)
                 .height(50.dp)
@@ -222,7 +284,7 @@ import kotlin.time.Duration.Companion.milliseconds
                         indication = null
                     ) { localStateManager = localStateManager.copy(depSideBar = !localStateManager.depSideBar) }.width((130.0 + buttonSizeOffset).dp).height(130.dp)
                         .border(4.dp, Color.Black)
-                        .background(Color(66, 203, 240))
+                        .background(colorOffset)
                         .padding(top = 10.dp, bottom = 10.dp),
                     contentAlignment = Alignment.Center
                 )
@@ -236,7 +298,7 @@ import kotlin.time.Duration.Companion.milliseconds
                             containerColor = Color.White,
                             contentColor = Color.White,
                             disabledContentColor = Color.White,
-                            disabledContainerColor = Color(66, 203, 240)
+                            disabledContainerColor = colorOffset
                         )
                     )
                     {
@@ -273,13 +335,14 @@ import kotlin.time.Duration.Companion.milliseconds
 
                         Box(
                             modifier = Modifier.width(200.dp).height(80.dp).zIndex(1f)
-                                .background(Color(66, 203, 240), RoundedCornerShape(16.dp))
+                                .background(colorOffset, RoundedCornerShape(16.dp))
                                 .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
                             contentAlignment = Alignment.Center
                         )
                         {
                             TextButton(
                                 onClick = { localStateManager = localStateManager.copy(maintenanceToggle = !localStateManager.maintenanceToggle) },
+                                enabled = !offlineState,
                                 modifier = Modifier.background(
                                     Color.White,
                                     RoundedCornerShape(12.dp)
@@ -303,7 +366,7 @@ import kotlin.time.Duration.Companion.milliseconds
                         {
                             Box(
                                 modifier = Modifier.width(200.dp).height(80.dp).zIndex(1f)
-                                    .background(Color(66, 203, 240), RoundedCornerShape(16.dp))
+                                    .background(colorOffset, RoundedCornerShape(16.dp))
                                     .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
                                 contentAlignment = Alignment.Center
                             )
@@ -328,7 +391,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
                         Box(
                             modifier = Modifier.width(200.dp).height(80.dp)
-                                .background(Color(66, 203, 240), RoundedCornerShape(16.dp))
+                                .background(colorOffset, RoundedCornerShape(16.dp))
                                 .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
                             contentAlignment = Alignment.Center
                         )
@@ -369,7 +432,7 @@ import kotlin.time.Duration.Companion.milliseconds
                             lineHeight = 30.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
 
                         Box(
-                            Modifier.padding(top = 10.dp).background(Color(66, 203, 245), RoundedCornerShape(15.dp)).width(245.dp).height(85.dp)
+                            Modifier.padding(top = 10.dp).background(colorOffset, RoundedCornerShape(15.dp)).width(245.dp).height(85.dp)
                                 .border(3.dp, Color.Black, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center
                         )
                         {
@@ -429,7 +492,7 @@ import kotlin.time.Duration.Companion.milliseconds
                         Box(modifier = Modifier.height(30.dp).width(80.dp))
 
                         Box(
-                            Modifier.padding(top = 10.dp).background(Color(66, 203, 245), RoundedCornerShape(15.dp)).width(230.dp).height(70.dp)
+                            Modifier.padding(top = 10.dp).background(colorOffset, RoundedCornerShape(15.dp)).width(230.dp).height(70.dp)
                                 .border(3.dp, Color.Black, RoundedCornerShape(15.dp)), contentAlignment = Alignment.Center
                         )
                         {
@@ -448,7 +511,7 @@ import kotlin.time.Duration.Companion.milliseconds
                         Box(modifier = Modifier.height(30.dp).width(40.dp))
 
                         Box(
-                            Modifier.padding(top = 10.dp).background(Color(66, 203, 245), RoundedCornerShape(15.dp)).width(230.dp).height(70.dp)
+                            Modifier.padding(top = 10.dp).background(colorOffset, RoundedCornerShape(15.dp)).width(230.dp).height(70.dp)
                                 .border(3.dp, Color.Black, RoundedCornerShape(15.dp)), contentAlignment = Alignment.Center
                         )
                         {
@@ -510,7 +573,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
                         Box(
                             modifier = Modifier.width(200.dp).height(80.dp)
-                                .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
+                                .background(colorOffset, RoundedCornerShape(16.dp))
                                 .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
                             contentAlignment = Alignment.Center
                         )
@@ -541,7 +604,7 @@ import kotlin.time.Duration.Companion.milliseconds
                                     CircularProgressIndicator(
                                         modifier = Modifier.size(40.dp),
                                         strokeWidth = 4.dp, color = Color.White,
-                                        trackColor = Color(66, 203,245)
+                                        trackColor = colorOffset
                                     )
                                 }
                             }
@@ -590,9 +653,34 @@ import kotlin.time.Duration.Companion.milliseconds
                 }
             )
         }
-        /*else if(orderState.maintenanceFail)
-        {
 
-        }*/
+        if(orderState.maintenanceFail)
+        {
+            AlertDialog(
+                onDismissRequest = { dialogDismiss(true) },
+                title = {Text("Failed to place order!", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
+                text = {Column(verticalArrangement = Arrangement.Top)
+                {
+
+                }
+                },
+                confirmButton = {
+                    Box(
+                        Modifier.background(Color(245,66,87), RoundedCornerShape(10.dp)).height(55.dp).width(120.dp)
+                            .border(3.dp, Color.Black, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center)
+                    {
+                        TextButton(
+                            onClick = { dialogDismiss(true) },
+                            modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
+                                .height(35.dp).width(90.dp)
+                        )
+                        {
+                            Text("Confirm",
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Black)
+                        }
+                    }
+                })
+        }
     }
 }

@@ -69,6 +69,8 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
 
     val keyboardController = LocalSoftwareKeyboardController.current
 
+    val context = LocalContext.current
+
     val focusManager = LocalFocusManager.current
 
     val orderState by guitarViewModel.orderState.collectAsStateWithLifecycle()

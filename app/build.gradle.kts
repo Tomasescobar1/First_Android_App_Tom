@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.tomkotlinsecondapp"
-        minSdk = 24
+        minSdk = 28
         //noinspection OldTargetApi
         targetSdk = 36
         versionCode = 1

@@ -3,6 +3,8 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
+import android.app.Application
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,6 +13,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
+
 
 data class Guitar (
     var customer: String = "Tom",
@@ -54,8 +62,10 @@ data class FloatingActionState(
     var exitDeploy: Boolean = false
 )
 
-class GuitarOrder : ViewModel()
+class GuitarOrder(application: Application) : AndroidViewModel(application)
 {
+
+    val contextVar = getApplication<Application>()
 
     private val _dataState = MutableStateFlow(OrderDataState())
 
@@ -102,6 +112,58 @@ class GuitarOrder : ViewModel()
     private val _updatedOrderString = MutableStateFlow("")
 
     val updatedOrderString = _updatedOrderString.asStateFlow()
+
+    private val connectivityManager = application.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+    private val _isOffline = MutableStateFlow(!isCurrentlyOnline())
+
+    val isOffline = _isOffline.asStateFlow()
+
+    private fun isCurrentlyOnline() : Boolean {
+        val activeNetwork = connectivityManager.activeNetwork ?: return false
+        val capabilities = connectivityManager.getNetworkCapabilities(activeNetwork) ?: return false
+        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+    }
+
+    private val networkCallback = object : ConnectivityManager.NetworkCallback()
+    {
+        override fun onAvailable(network: Network) {
+            _isOffline.value = false
+            db.enableNetwork()
+        }
+
+        override fun onLost(network: Network) {
+            _isOffline.value = true
+
+            println("The network is not available.")
+
+            db.disableNetwork()
+        }
+    }
+
+    init
+    {
+
+        if(isOffline.value)
+        {
+            db.disableNetwork()
+        }
+        else
+        {
+            db.enableNetwork()
+        }
+
+        //val request = NetworkRequest.Builder().addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET).build()
+
+        connectivityManager.registerDefaultNetworkCallback(networkCallback)
+    }
+
+    override fun onCleared()
+    {
+        super.onCleared()
+
+        connectivityManager.unregisterNetworkCallback(networkCallback)
+    }
 
     fun updateDataState(input1: Int, input2: String, input3: Double, input4: Boolean = false)
     {
@@ -203,7 +265,14 @@ class GuitarOrder : ViewModel()
             }
 
             11 -> {
-                _orderState.update {currentState -> currentState.copy(maintenanceSuccess = false)}
+                if(input2)
+                {
+                    _orderState.update { currentState -> currentState.copy(maintenanceSuccess = false) }
+                }
+                else
+                {
+                    _orderState.update { currentState -> currentState.copy(maintenanceFail = false)}
+                }
             }
 
             12 -> {
@@ -211,6 +280,7 @@ class GuitarOrder : ViewModel()
             }
         }
     }
+
 
     fun addListElement(customer: String = "Tom", model: String = "Telecaster", color: String = "White", scaleLength: Double = 25.5)
     {
@@ -232,47 +302,44 @@ class GuitarOrder : ViewModel()
     fun addDataToFirestore(inputOrderData: MutableMap<String, Any> = mutableMapOf(), inputMaintenanceData: MutableMap<String, Any> = mutableMapOf(), serviceOption: Boolean = false)
     {
         viewModelScope.launch {
-                try
+            try
+            {
+                if (!serviceOption)
                 {
-                    if(!serviceOption)
-                    {
-                        _isLoading.value = true
+                    _isLoading.value = true
 
-                        dbOrders.add(inputOrderData).await()
+                    dbOrders.add(inputOrderData).await()
 
-                        increment.intValue++
+                    increment.intValue++
 
-                        _orderState.update { currentState -> currentState.copy(instanceInd = increment.intValue) }
+                    _orderState.update { currentState -> currentState.copy(instanceInd = increment.intValue) }
 
-                        _orderState.update { currentState -> currentState.copy(orderSuccess = true) }
+                    _orderState.update { currentState -> currentState.copy(orderSuccess = true) }
 
-                        println("Added order to Firestore, yaaaay!")
-                    }
-                    else
-                    {
-                        _maintenanceLoading.value = true
-
-                        dbMaintenance.add(inputMaintenanceData).await()
-
-                        _orderState.update {currentState -> currentState.copy(maintenanceSuccess = true)}
-
-                        println("Added maintenance to Firestore, yaaaay!")
-                    }
-
+                    println("Added order to Firestore, yaaaay!")
                 }
-                catch (e: Exception)
+                else
                 {
-                    if(serviceOption)
-                    {
-                        _orderState.update { currentState -> currentState.copy(maintenanceFail = true) }
-                    }
-                    else
-                    {
-                        _orderState.update { currentState -> currentState.copy(orderFail = true) }
-                    }
+                    _maintenanceLoading.value = true
 
-                    println("Failed to add data, crap!")
+                    dbMaintenance.add(inputMaintenanceData).await()
+
+                    _orderState.update { currentState -> currentState.copy(maintenanceSuccess = true) }
+
+                    println("Added maintenance to Firestore, yaaaay!")
                 }
+            }
+            catch (e: Exception)
+            {
+                if (serviceOption)
+                {
+                    _orderState.update { currentState -> currentState.copy(maintenanceFail = true) }
+                } else
+                {
+                    _orderState.update { currentState -> currentState.copy(orderFail = true) }
+                }
+                println("Failed to add data, crap!")
+            }
         }
     }
 
