@@ -19,7 +19,6 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 
-
 data class Guitar (
     var customer: String = "Tom",
     var model: String = " Telecaster",
@@ -64,9 +63,6 @@ data class FloatingActionState(
 
 class GuitarOrder(application: Application) : AndroidViewModel(application)
 {
-
-    val contextVar = getApplication<Application>()
-
     private val _dataState = MutableStateFlow(OrderDataState())
 
     val dataState: StateFlow<OrderDataState> = _dataState.asStateFlow()
@@ -119,23 +115,27 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
     val isOffline = _isOffline.asStateFlow()
 
-    private fun isCurrentlyOnline() : Boolean {
+    private fun isCurrentlyOnline() : Boolean
+    {
         val activeNetwork = connectivityManager.activeNetwork ?: return false
+
         val capabilities = connectivityManager.getNetworkCapabilities(activeNetwork) ?: return false
+
         return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
 
     private val networkCallback = object : ConnectivityManager.NetworkCallback()
     {
-        override fun onAvailable(network: Network) {
+        override fun onAvailable(network: Network)
+        {
             _isOffline.value = false
+
             db.enableNetwork()
         }
 
-        override fun onLost(network: Network) {
+        override fun onLost(network: Network)
+        {
             _isOffline.value = true
-
-            println("The network is not available.")
 
             db.disableNetwork()
         }
@@ -143,7 +143,6 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
     init
     {
-
         if(isOffline.value)
         {
             db.disableNetwork()
@@ -153,9 +152,12 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
             db.enableNetwork()
         }
 
-        //val request = NetworkRequest.Builder().addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET).build()
+        val request = NetworkRequest.Builder().addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+            .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+            .build()
 
-        connectivityManager.registerDefaultNetworkCallback(networkCallback)
+        connectivityManager.registerNetworkCallback(request, networkCallback)
     }
 
     override fun onCleared()

@@ -190,6 +190,11 @@ fun formatDayMonthYear(timeStampMillis: Long): String{
 
     fun dialogDismiss(input: Boolean = false)
     {
+        for(i in 0 until maintenanceItems.size)
+        {
+            maintenanceItems[i].isChecked = false
+        }
+
         localStateManager = localStateManager.copy(checkListToggle = false)
 
         localStateManager = localStateManager.copy(nameInputToggle = false)
@@ -477,7 +482,7 @@ fun formatDayMonthYear(timeStampMillis: Long): String{
         {
             AlertDialog(
                 modifier = Modifier.fillMaxWidth().wrapContentSize(Alignment.Center),
-                onDismissRequest = { localStateManager = localStateManager.copy(checkListToggle = false) },
+                onDismissRequest = { dialogDismiss() },
                 title = {Text("Instrument maintenance...", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
                 text = {
                     Column( modifier = Modifier.fillMaxWidth().wrapContentWidth(Alignment.CenterHorizontally),
