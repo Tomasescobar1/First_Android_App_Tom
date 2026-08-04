@@ -70,12 +70,13 @@ import io.github.sceneview.rememberEnvironmentLoader
 import io.github.sceneview.rememberMainLightNode
 import io.github.sceneview.rememberMaterialLoader
 import io.github.sceneview.rememberModelLoader
-import io.github.sceneview.rememberNodes
+//import io.github.sceneview.rememberNodes
 import io.github.sceneview.rememberRenderer
 import io.github.sceneview.rememberScene
 import io.github.sceneview.rememberView
 import com.example.tomkotlinsecondapp.ColorDropDown
 import com.google.android.filament.MaterialInstance
+import io.github.sceneview.rememberModelInstance
 import io.github.sceneview.safeDestroyMaterialInstance
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
@@ -136,7 +137,7 @@ fun GuitarViewPort(guitarViewModel: GuitarOrder = viewModel())
 
     val view = rememberView(engine)
 
-    var modelNode = ModelNode(
+    /*var modelNode = ModelNode(
         modelInstance = modelLoaderDef.createModelInstance("growler_25_inch_body.glb"),
     )
 
@@ -146,7 +147,7 @@ fun GuitarViewPort(guitarViewModel: GuitarOrder = viewModel())
 
     var componentsNode = ModelNode(
         modelInstance = modelLoaderDef.createModelInstance("growler_25_components.glb")
-    )
+    )*/
 
     Box(modifier = Modifier
         .height(900.dp).width(400.dp).background(Color.White), contentAlignment = Alignment.Center,)
@@ -156,7 +157,7 @@ fun GuitarViewPort(guitarViewModel: GuitarOrder = viewModel())
 
             when (cDataState.colorInput)
             {
-                "Red" -> {
+                /*"Red" -> {
                     modelNode.setMaterialInstance(colorMaterialRed)
                 }
 
@@ -170,7 +171,7 @@ fun GuitarViewPort(guitarViewModel: GuitarOrder = viewModel())
 
                 "White" -> {
                     modelNode.setMaterialInstance(colorMaterialWhite)
-                }
+                }*/
             }
         }
 
@@ -207,82 +208,115 @@ fun GuitarViewPort(guitarViewModel: GuitarOrder = viewModel())
 
         key(cDataState.colorInput, cDataState.modelIndVal, cDataState.cameraInd)
         {
-            Scene(
+            SceneView(
                 modifier = Modifier.fillMaxSize().border(6.dp, Color.White)
                     .align(Alignment.Center),
 
                 engine = engine,
 
                 view = view,
+
                 renderer = rememberRenderer(engine),
+
                 scene = rememberScene(engine),
 
                 materialLoader = materialLoaderDef,
 
                 modelLoader = modelLoaderDef,
 
-                childNodes = rememberNodes {
+                cameraNode = cameraNodeDef
+            )
+            {
+                when (cDataState.modelIndVal)
+                {
+                    "Telecaster" -> {
 
-                    when (cDataState.modelIndVal)
-                    {
-                        "Telecaster" -> {
-                            modelNode = ModelNode(
-                                modelInstance = modelLoaderDef.createModelInstance("tele_25_inch_body.glb"),
+                        rememberModelInstance(modelLoaderDef, "tele_25_inch_body.glb")?.let{ model ->
+
+                            ModelNode (
+                                modelInstance = model,
+
+                                //scaleToUnits = 1.0f,
+
+                                position = Position(0.0f, -1.0f, 0.0f),
+
+                                rotation = Rotation (0.0f, 0.0f, 90.0f)
                             )
 
-                            componentsNode = ModelNode(
-                                modelInstance = modelLoaderDef.createModelInstance("tele_25_components.glb")
-                            )
-
-                            modelNode.rotation = Rotation(0.0f,0.0f, 90.0f)
-
-                            modelNode.position = Position(0.0f, -0.32f, 0.0f)
-
-                            neckModelNode.rotation = Rotation(0.0f, 0.0f, 90.0f)
-
-                            neckModelNode.position = Position(0.0f,-0.32f, 0.0f)
-
-                            componentsNode.rotation = Rotation(0.0f, 0.0f, 90.0f)
-
-                            componentsNode.position = Position(0.0f, -0.32f, 0.0f)
                         }
 
-                        "Growler" -> {
-                            modelNode = ModelNode(
-                                modelInstance = modelLoaderDef.createModelInstance("growler_25_inch_body.glb"),
+                        rememberModelInstance(modelLoaderDef, "tele_25_components.glb")?.let{ model ->
+
+                            ModelNode (
+                                modelInstance = model,
+
+                                //scaleToUnits = 1.0f,
+
+                                position = Position(0.0f, -1.0f, 0.0f),
+
+                                rotation = Rotation (0.0f, 0.0f, 90.0f)
                             )
 
-                            componentsNode = ModelNode(
-                                modelInstance = modelLoaderDef.createModelInstance("growler_25_components.glb")
-                            )
-
-                            modelNode.rotation = Rotation(0.0f,0.0f, 90.0f)
-
-                            modelNode.position = Position(0.0f, -0.3f, 0.0f)
-
-                            neckModelNode.rotation = Rotation(0.0f, 0.0f, 90.0f)
-
-                            neckModelNode.position = Position(0.0f,-0.3f, 0.0f)
-
-                            componentsNode.rotation = Rotation(0.0f, 0.0f, 90.0f)
-
-                            componentsNode.position = Position(0.0f, -0.3f, 0.0f)
                         }
+
+                        rememberModelInstance(modelLoaderDef, "25_inch_neck_assembly.glb")?.let{ model ->
+                            ModelNode (
+                                modelInstance = model,
+
+                                //scaleToUnits = 1.0f,
+
+                                position = Position(0.0f, -1.0f, 0.0f),
+
+                                rotation = Rotation (0.0f, 0.0f, 90.0f)
+                            )
+                        }
+
                     }
 
-                    modelNode.setMaterialInstance(colorMaterialWhite)
+                    "Growler" -> {
 
-                    add(modelNode)
+                        rememberModelInstance(modelLoaderDef, "growler_25_inch_body.glb")?.let{ model ->
 
-                    add(neckModelNode)
+                            ModelNode (
+                                modelInstance = model,
 
-                    add(componentsNode)
+                                //scaleToUnits = 1.0f,
 
-                },
+                                position = Position(0.0f, -1.0f, 0.0f),
 
-                cameraNode = cameraNodeDef
+                                rotation = Rotation (0.0f, 0.0f, 90.0f)
+                            )
 
-            )
+                        }
+
+                        rememberModelInstance(modelLoaderDef, "growler_25_components.glb")?.let{ model ->
+
+                            ModelNode (
+                                modelInstance = model,
+
+                                //scaleToUnits = 1.0f,
+
+                                position = Position(0.0f, -1.0f, 0.0f),
+
+                                rotation = Rotation (0.0f, 0.0f, 90.0f)
+                            )
+
+                        }
+
+                        rememberModelInstance(modelLoaderDef, "25_inch_neck_assembly.glb")?.let{ model ->
+                            ModelNode (
+                                modelInstance = model,
+
+                                //scaleToUnits = 1.0f,
+
+                                position = Position(0.0f, -1.0f, 0.0f),
+
+                                rotation = Rotation (0.0f, 0.0f, 90.0f)
+                            )
+                        }
+                    }
+                }
+            }
 
         }
 
