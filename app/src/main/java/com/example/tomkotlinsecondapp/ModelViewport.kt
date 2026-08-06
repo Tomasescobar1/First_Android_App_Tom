@@ -43,6 +43,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.android.filament.Skybox
+import com.google.android.filament.Colors
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
@@ -98,82 +99,21 @@ fun GuitarViewPort(guitarViewModel: GuitarOrder = viewModel())
 
     var isLoading by remember {mutableStateOf(true)}
 
-    var cameraNode1 = rememberCameraNode(engine)
-
     var cameraOrbitHome = Float3(0.0f, 0.0f, 1.3f)
 
     var cameraPosition = Float3(0.0f, 0.0f, 1.3f)
 
-    var cameraRotation = Float3(0.0f, 0.0f, 0.0f)
+    val cameraRotation = Float3(0.0f, 0.0f, -2.6f)
 
-    var cameraNodeDef = rememberCameraNode(engine){position = cameraPosition; rotation = cameraRotation}
-
-    val colorMaterialRed = materialLoaderDef.createColorInstance(
-        color = Color.Red,
-        roughness = 0.0f,
-        metallic = 0.0f,
-    )
-
-    val colorMaterialBlue = materialLoaderDef.createColorInstance(
-        color = Color(red = 66, green = 212, blue = 245),
-        roughness = 0.0f,
-        metallic = 0.0f,
-    )
-
-    val colorMaterialOGreen = materialLoaderDef.createColorInstance(
-        color = Color(red = 37, green = 92, blue = 44),
-        roughness = 0.0f,
-        metallic = 0.0f,
-    )
-
-    val colorMaterialWhite = materialLoaderDef.createColorInstance(
-        color = Color.White,
-        roughness = -10.7f,
-        metallic = 0.0f,
-        reflectance = 0.5f,
-    )
+    val cameraNodeDef = rememberCameraNode(engine){position = cameraPosition; rotation = cameraRotation}
 
     val environmentLoaderDef = rememberEnvironmentLoader(engine)
 
     val view = rememberView(engine)
 
-    /*var modelNode = ModelNode(
-        modelInstance = modelLoaderDef.createModelInstance("growler_25_inch_body.glb"),
-    )
-
-    val neckModelNode = ModelNode(
-        modelInstance = modelLoaderDef.createModelInstance("25_inch_neck_assembly.glb")
-    )
-
-    var componentsNode = ModelNode(
-        modelInstance = modelLoaderDef.createModelInstance("growler_25_components.glb")
-    )*/
-
     Box(modifier = Modifier
         .height(900.dp).width(400.dp).background(Color.White), contentAlignment = Alignment.Center,)
     {
-
-        LaunchedEffect(cDataState.colorInput, cDataState.modelIndVal) {
-
-            when (cDataState.colorInput)
-            {
-                /*"Red" -> {
-                    modelNode.setMaterialInstance(colorMaterialRed)
-                }
-
-                "Sky Blue" -> {
-                    modelNode.setMaterialInstance(colorMaterialBlue)
-                }
-
-                "Olive Green" -> {
-                    modelNode.setMaterialInstance(colorMaterialOGreen)
-                }
-
-                "White" -> {
-                    modelNode.setMaterialInstance(colorMaterialWhite)
-                }*/
-            }
-        }
 
         LaunchedEffect(cDataState.colorInput, cDataState.modelIndVal, cDataState.cameraInd)
         {
@@ -231,26 +171,86 @@ fun GuitarViewPort(guitarViewModel: GuitarOrder = viewModel())
                 {
                     "Telecaster" -> {
 
-                        rememberModelInstance(modelLoaderDef, "tele_25_inch_body.glb")?.let{ model ->
+                        key(cDataState.colorInput)
+                        {
+                            rememberModelInstance(modelLoaderDef, "tele_25_inch_body.glb")?.let { model ->
 
-                            ModelNode (
-                                modelInstance = model,
+                                if(cDataState.colorInput != "Navy Blue")
+                                {
+                                    LaunchedEffect(cDataState.colorInput)
+                                    {
+                                        when (cDataState.colorInput) {
 
-                                //scaleToUnits = 1.0f,
+                                            "Red" -> {
+                                                model.materialInstances.forEach { materialInstance ->
+                                                    materialInstance.setParameter(
+                                                        "baseColorFactor",
+                                                        Colors.RgbaType.SRGB,
+                                                        1.0f,
+                                                        0.0f,
+                                                        0.0f,
+                                                        1.0f
+                                                    )
+                                                }
+                                            }
 
-                                position = Position(0.0f, -1.0f, 0.0f),
+                                            "White" -> {
+                                                model.materialInstances.forEach { materialInstance ->
+                                                    materialInstance.setParameter(
+                                                        "baseColorFactor",
+                                                        Colors.RgbaType.SRGB,
+                                                        1.0f,
+                                                        1.0f,
+                                                        1.0f,
+                                                        1.0f
+                                                    )
+                                                }
+                                            }
 
-                                rotation = Rotation (0.0f, 0.0f, 90.0f)
-                            )
+                                            "Pine Green" -> {
+                                                model.materialInstances.forEach { materialInstance ->
+                                                    materialInstance.setParameter(
+                                                        "baseColorFactor",
+                                                        Colors.RgbaType.SRGB,
+                                                        0.1098039f,
+                                                        0.3411764f,
+                                                        0.1529411f,
+                                                        1.0f
+                                                    )
+                                                }
+                                            }
 
+                                            "Sky Blue" -> {
+                                                model.materialInstances.forEach { materialInstance ->
+                                                    materialInstance.setParameter(
+                                                        "baseColorFactor",
+                                                        Colors.RgbaType.SRGB,
+                                                        0.2588235f,
+                                                        0.8313725f,
+                                                        0.9607843f,
+                                                        1.0f
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                ModelNode(
+                                    modelInstance = model,
+
+                                    position = Position(0.0f, -1.0f, 0.0f),
+
+                                    rotation = Rotation(0.0f, 0.0f, 90.0f)
+                                )
+
+                            }
                         }
 
                         rememberModelInstance(modelLoaderDef, "tele_25_components.glb")?.let{ model ->
 
                             ModelNode (
                                 modelInstance = model,
-
-                                //scaleToUnits = 1.0f,
 
                                 position = Position(0.0f, -1.0f, 0.0f),
 
@@ -262,8 +262,6 @@ fun GuitarViewPort(guitarViewModel: GuitarOrder = viewModel())
                         rememberModelInstance(modelLoaderDef, "25_inch_neck_assembly.glb")?.let{ model ->
                             ModelNode (
                                 modelInstance = model,
-
-                                //scaleToUnits = 1.0f,
 
                                 position = Position(0.0f, -1.0f, 0.0f),
 
@@ -275,26 +273,86 @@ fun GuitarViewPort(guitarViewModel: GuitarOrder = viewModel())
 
                     "Growler" -> {
 
-                        rememberModelInstance(modelLoaderDef, "growler_25_inch_body.glb")?.let{ model ->
+                        key(cDataState.colorInput)
+                        {
+                            rememberModelInstance(modelLoaderDef, "growler_25_inch_body.glb")?.let { model ->
 
-                            ModelNode (
-                                modelInstance = model,
+                                if(cDataState.colorInput != "Navy Blue")
+                                {
+                                    LaunchedEffect(cDataState.colorInput)
+                                    {
+                                        when (cDataState.colorInput) {
 
-                                //scaleToUnits = 1.0f,
+                                            "Red" -> {
+                                                model.materialInstances.forEach { materialInstance ->
+                                                    materialInstance.setParameter(
+                                                        "baseColorFactor",
+                                                        Colors.RgbaType.SRGB,
+                                                        1.0f,
+                                                        0.0f,
+                                                        0.0f,
+                                                        1.0f
+                                                    )
+                                                }
+                                            }
 
-                                position = Position(0.0f, -1.0f, 0.0f),
+                                            "White" -> {
+                                                model.materialInstances.forEach { materialInstance ->
+                                                    materialInstance.setParameter(
+                                                        "baseColorFactor",
+                                                        Colors.RgbaType.SRGB,
+                                                        1.0f,
+                                                        1.0f,
+                                                        1.0f,
+                                                        1.0f
+                                                    )
+                                                }
+                                            }
 
-                                rotation = Rotation (0.0f, 0.0f, 90.0f)
-                            )
+                                            "Pine Green" -> {
+                                                model.materialInstances.forEach { materialInstance ->
+                                                    materialInstance.setParameter(
+                                                        "baseColorFactor",
+                                                        Colors.RgbaType.SRGB,
+                                                        0.1098039f,
+                                                        0.3411764f,
+                                                        0.1529411f,
+                                                        1.0f
+                                                    )
+                                                }
+                                            }
 
+                                            "Sky Blue" -> {
+                                                model.materialInstances.forEach { materialInstance ->
+                                                    materialInstance.setParameter(
+                                                        "baseColorFactor",
+                                                        Colors.RgbaType.SRGB,
+                                                        0.2588235f,
+                                                        0.8313725f,
+                                                        0.9607843f,
+                                                        1.0f
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                ModelNode(
+                                    modelInstance = model,
+
+                                    position = Position(0.0f, -1.0f, 0.0f),
+
+                                    rotation = Rotation(0.0f, 0.0f, 90.0f)
+                                )
+
+                            }
                         }
 
                         rememberModelInstance(modelLoaderDef, "growler_25_components.glb")?.let{ model ->
 
                             ModelNode (
                                 modelInstance = model,
-
-                                //scaleToUnits = 1.0f,
 
                                 position = Position(0.0f, -1.0f, 0.0f),
 
@@ -306,8 +364,6 @@ fun GuitarViewPort(guitarViewModel: GuitarOrder = viewModel())
                         rememberModelInstance(modelLoaderDef, "25_inch_neck_assembly.glb")?.let{ model ->
                             ModelNode (
                                 modelInstance = model,
-
-                                //scaleToUnits = 1.0f,
 
                                 position = Position(0.0f, -1.0f, 0.0f),
 

@@ -34,7 +34,7 @@ fun ColorDropDown(guitarViewModel: GuitarOrder = viewModel())
 
     var dropped by remember {mutableStateOf(false)}
 
-    val guitarColors = listOf("White", "Red", "Sky Blue", "Olive Green")
+    val guitarColors = listOf("White", "Red", "Sky Blue", "Pine Green", "Navy Blue")
 
     Box(modifier = Modifier.width(200.dp).height(80.dp)
         .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
