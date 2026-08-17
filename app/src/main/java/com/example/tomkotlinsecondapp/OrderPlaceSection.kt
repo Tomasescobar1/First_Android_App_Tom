@@ -61,6 +61,7 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
 {
 
     data class LocalStateClass (
+        val nameIsEmpty: Boolean = true,
         val loadingTrigger: Boolean = false,
         val orderLoadSuccess: Boolean = false,
         val orderRemove: Boolean = false,
@@ -168,6 +169,15 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
         localStateManager = localStateManager.copy(orderListFinal = false)
     }
 
+    if(customerInputLocal != "")
+    {
+        localStateManager = localStateManager.copy(nameIsEmpty = false)
+    }
+    else
+    {
+        localStateManager = localStateManager.copy(nameIsEmpty = true)
+    }
+
     if(orderState.orderPlaceG)
     {
         AlertDialog(
@@ -220,9 +230,10 @@ fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
                                 modifier = Modifier.background(
                                     Color.White,
                                     RoundedCornerShape(12.dp)
-                                )
-                                    .width(150.dp)
-                            ) {
+                                ).width(150.dp),
+                                enabled = !localStateManager.nameIsEmpty
+                            )
+                            {
                                 Text(
                                     text = "Place Order",
                                     color = Color.Black,

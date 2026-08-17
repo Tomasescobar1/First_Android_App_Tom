@@ -12,6 +12,7 @@ android {
     defaultConfig {
         applicationId = "com.example.tomkotlinsecondapp"
         minSdk = 28
+        //noinspection OldTargetApi
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -58,6 +59,9 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.scene.view.lib)
     implementation(libs.firebase.firestore)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
     testImplementation(libs.junit)

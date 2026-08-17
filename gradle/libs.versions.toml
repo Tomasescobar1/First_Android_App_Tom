@@ -15,6 +15,8 @@ googleGmsGoogleServices = "4.5.0"
 firebaseFirestore = "26.5.0"
 firebaseBom = "34.17.0"
 androidx-navigation = "2.9.8"
+credentials = "1.6.0"
+googleid = "1.2.0"
 
 [libraries]
 
@@ -37,6 +39,9 @@ androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-te
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-compose-material-icons-core = { group = "androidx.compose.material", name = "material-icons-core" }
 androidx-compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
+androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
+androidx-credentials-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentials" }
+googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
 scene-view-lib = { name = "sceneview", group = "io.github.sceneview", version.ref = "sceneview"}
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }

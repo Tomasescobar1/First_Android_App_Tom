@@ -7,6 +7,14 @@ import androidx.lifecycle.AndroidViewModel
 import android.app.Application
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.AuthResult
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import androidx.credentials.CredentialManager
+import androidx.credentials.CustomCredential
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.GetCredentialException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,6 +26,23 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
+import android.util.Log
+import com.google.firebase.auth.GoogleAuthProvider
+import com.google.rpc.context.AttributeContext
+
+class AuthRepository(private val auth: FirebaseAuth = FirebaseAuth.getInstance())
+{
+    suspend fun signIn(email: String, pass: String): AuthResult{
+        return auth.signInWithEmailAndPassword(email, pass).await()
+    }
+}
+
+sealed interface AuthUiState {
+    object Idle: AuthUiState
+    object Loading: AuthUiState
+    object Success: AuthUiState
+    data class Error(val message: String): AuthUiState
+}
 
 data class Guitar (
     var customer: String = "Tom",
@@ -44,7 +69,8 @@ data class OrderUIState (
     var orderDeleteFail: Boolean = false,
     var instanceInd: Int = 0,
     var maintenanceSuccess: Boolean = false,
-    var maintenanceFail: Boolean = false
+    var maintenanceFail: Boolean = false,
+    var credentialToggleInput: Boolean = false
 )
 
 data class OrderDataState (
@@ -63,6 +89,21 @@ data class FloatingActionState(
 
 class GuitarOrder(application: Application) : AndroidViewModel(application)
 {
+
+    private val credentialManager = CredentialManager.create(application)
+
+    private val firebaseAuth = FirebaseAuth.getInstance()
+
+    private val currentUser = FirebaseAuth.getInstance().currentUser
+
+    private val uid = currentUser?.uid
+
+    private val webClientID = "443758218420-roslrqrib5t3g8uq15c8p1a9gkdblld7.apps.googleusercontent.com"
+
+    private val _authenticationUiState = MutableStateFlow<AuthUiState>(AuthUiState.Idle)
+
+    val authenticationUiState: StateFlow<AuthUiState> = _authenticationUiState.asStateFlow()
+
     private val _dataState = MutableStateFlow(OrderDataState())
 
     val dataState: StateFlow<OrderDataState> = _dataState.asStateFlow()
@@ -165,6 +206,77 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
         super.onCleared()
 
         connectivityManager.unregisterNetworkCallback(networkCallback)
+    }
+
+    private suspend fun firebaseAuthWithGoogle(idToken: String)
+    {
+        try {
+            val credential = GoogleAuthProvider.getCredential(idToken, null)
+
+            val authResult = firebaseAuth.signInWithCredential(credential).await()
+
+            val firebaseUser = authResult.user
+
+            println("firebaseAuthWithGoogle method success, Firebase sign in success!")
+        }
+        catch(e: Exception)
+        {
+            println("firebaseAuthWithGoogle method, failed to authenticate, crap")
+        }
+    }
+
+    fun signInWithGoogle(activityContext: Context)
+    {
+        viewModelScope.launch{
+            val googleIdOption = GetGoogleIdOption.Builder()
+                .setFilterByAuthorizedAccounts(false)
+                .setServerClientId(webClientID)
+                .setAutoSelectEnabled(true)
+                .build()
+
+            val request = GetCredentialRequest.Builder()
+                .addCredentialOption(googleIdOption)
+                .build()
+
+            try {
+                val result = credentialManager.getCredential(
+                    request = request,
+                    context = activityContext
+                )
+
+                when (val credential = result.credential)
+                {
+                    is CustomCredential -> {
+                        if (credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL)
+                        {
+                            val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
+
+                            val idToken = googleIdTokenCredential.idToken
+
+                            firebaseAuthWithGoogle(idToken)
+
+                            println("The sign in with Google method worked!!!!, ID token: $idToken")
+
+                            _orderState.update {currentAuthState -> currentAuthState.copy(credentialToggleInput = true)}
+                        }
+                    }
+                    else -> println("Unexpected credential type, crap")
+                }
+            }
+            catch(e: GetCredentialException)
+            {
+                println("signInWithGoogle method sign in failed, exception caught.")
+
+                println("Credential error type: ${e.type}")
+
+                println("Credential error message: ${e.message}")
+            }
+        }
+    }
+
+    fun resetState()
+    {
+        _authenticationUiState.value= AuthUiState.Idle
     }
 
     fun updateDataState(input1: Int, input2: String, input3: Double, input4: Boolean = false)
@@ -304,44 +416,48 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
     fun addDataToFirestore(inputOrderData: MutableMap<String, Any> = mutableMapOf(), inputMaintenanceData: MutableMap<String, Any> = mutableMapOf(), serviceOption: Boolean = false)
     {
         viewModelScope.launch {
-            try
-            {
-                if (!serviceOption)
-                {
-                    _isLoading.value = true
+                try {
+                    if(currentUser != null && uid != null)
+                    {
+                        if (!serviceOption)
+                        {
+                            _isLoading.value = true
 
-                    dbOrders.add(inputOrderData).await()
+                            dbOrders.document(uid).set(inputOrderData).await()
 
-                    increment.intValue++
+                            increment.intValue++
 
-                    _orderState.update { currentState -> currentState.copy(instanceInd = increment.intValue) }
+                            _orderState.update { currentState -> currentState.copy(instanceInd = increment.intValue) }
 
-                    _orderState.update { currentState -> currentState.copy(orderSuccess = true) }
+                            _orderState.update { currentState -> currentState.copy(orderSuccess = true) }
 
-                    println("Added order to Firestore, yaaaay!")
+                            println("Added order to Firestore, yaaaay!")
+                        }
+                        else
+                        {
+                            _maintenanceLoading.value = true
+
+                            dbMaintenance.add(inputMaintenanceData).await()
+
+                            _orderState.update { currentState ->
+                                currentState.copy(
+                                    maintenanceSuccess = true
+                                )
+                            }
+
+                            println("Added maintenance to Firestore, yaaaay!")
+                        }
+                    }
+                } catch (e: Exception) {
+                    if (serviceOption) {
+                        _orderState.update { currentState -> currentState.copy(maintenanceFail = true) }
+
+                        println("Upload error message: ${e.message}")
+                    } else {
+                        _orderState.update { currentState -> currentState.copy(orderFail = true) }
+                    }
+                    println("Failed to add data, crap!")
                 }
-                else
-                {
-                    _maintenanceLoading.value = true
-
-                    dbMaintenance.add(inputMaintenanceData).await()
-
-                    _orderState.update { currentState -> currentState.copy(maintenanceSuccess = true) }
-
-                    println("Added maintenance to Firestore, yaaaay!")
-                }
-            }
-            catch (e: Exception)
-            {
-                if (serviceOption)
-                {
-                    _orderState.update { currentState -> currentState.copy(maintenanceFail = true) }
-                } else
-                {
-                    _orderState.update { currentState -> currentState.copy(orderFail = true) }
-                }
-                println("Failed to add data, crap!")
-            }
         }
     }
 

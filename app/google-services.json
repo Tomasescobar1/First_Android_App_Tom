@@ -12,7 +12,20 @@
           "package_name": "com.example.tomkotlinsecondapp"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "443758218420-u37u1plvqcc7sqvtr99l9lfiinqlp2al.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.tomkotlinsecondapp",
+            "certificate_hash": "c9ef715321aa074e94b8042b80699b657ef715f6"
+          }
+        },
+        {
+          "client_id": "443758218420-roslrqrib5t3g8uq15c8p1a9gkdblld7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyD_lU_Led3dMGqqJ0khimuQIps5ok5BZIg"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "443758218420-roslrqrib5t3g8uq15c8p1a9gkdblld7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

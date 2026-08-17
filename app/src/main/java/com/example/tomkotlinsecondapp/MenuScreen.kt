@@ -57,6 +57,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontFamily
@@ -76,10 +77,12 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-fun formatDayMonthYear(timeStampMillis: Long): String{
+fun formatDayMonthYear(timeStampMillis: Long): String {
+
     val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy").withZone(ZoneId.systemDefault())
 
     return formatter.format(Instant.ofEpochMilli(timeStampMillis))
+
 }
 
 @Composable fun MenuScreen(onNavigateToMain: () -> Unit, guitarViewModel: GuitarOrder = viewModel())
@@ -93,6 +96,7 @@ fun formatDayMonthYear(timeStampMillis: Long): String{
         var maintenanceSuccessLocal: Boolean = false,
         var checkListToggle: Boolean = false,
         var nameInputToggle: Boolean = false,
+        var nameIsEmpty: Boolean = true,
     )
 
     data class TrackedValue(
@@ -104,6 +108,8 @@ fun formatDayMonthYear(timeStampMillis: Long): String{
     val keyboardController = LocalSoftwareKeyboardController.current
 
     val focusManager = LocalFocusManager.current
+
+    val context = LocalContext.current
 
     val orderState by guitarViewModel.orderState.collectAsStateWithLifecycle()
 
@@ -134,7 +140,14 @@ fun formatDayMonthYear(timeStampMillis: Long): String{
         offlineSignToggle = 100.0
     }
 
-    //colorOffset = Color(66, 203, 240)
+    if(nameStorage != "")
+    {
+        localStateManager = localStateManager.copy(nameIsEmpty = false)
+    }
+    else
+    {
+        localStateManager = localStateManager.copy(nameIsEmpty = true)
+    }
 
     class MaintenanceData(val id: Int, val title: String, val initialChecked: Boolean = false)
     {
@@ -346,7 +359,7 @@ fun formatDayMonthYear(timeStampMillis: Long): String{
                         )
                         {
                             TextButton(
-                                onClick = { localStateManager = localStateManager.copy(maintenanceToggle = !localStateManager.maintenanceToggle) },
+                                onClick = { guitarViewModel.signInWithGoogle(context) },
                                 enabled = !offlineState,
                                 modifier = Modifier.background(
                                     Color.White,
@@ -364,7 +377,7 @@ fun formatDayMonthYear(timeStampMillis: Long): String{
                         }
 
                         AnimatedVisibility(
-                            visible = localStateManager.maintenanceToggle,
+                            visible = orderState.credentialToggleInput,
                             enter = slideInVertically(animationSpec = tween(200)){fullHeight -> -fullHeight},
                             exit = slideOutVertically(animationSpec = tween(200){fullHeight -> fullHeight})
                         )
@@ -590,8 +603,8 @@ fun formatDayMonthYear(timeStampMillis: Long): String{
                                     modifier = Modifier.background(
                                         Color.White,
                                         RoundedCornerShape(12.dp)
-                                    )
-                                        .width(150.dp)
+                                    ).width(150.dp),
+                                    enabled = !localStateManager.nameIsEmpty
                                 ) {
                                     Text(
                                         text = "Request maintenance",

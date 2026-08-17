@@ -161,6 +161,8 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
             localStates = localStates.copy(orderDeleteConfirm = false)
 
             localStates = localStates.copy(findTextBoxInd = false)
+
+            localStates = localStates.copy(orderFoundInd = false)
         }
     }
 

@@ -48,7 +48,7 @@ fun ColorDropDown(guitarViewModel: GuitarOrder = viewModel())
         DropdownMenu(
             expanded = dropped,
             onDismissRequest = {dropped = false},
-            modifier = Modifier.border(4.dp, Color.Black, RoundedCornerShape(16.dp))
+            modifier = Modifier.border(4.dp, Color.Black, RoundedCornerShape(4.dp))
                 .background(Color.White)
         ) {
             guitarColors.forEach { guitarColor ->
