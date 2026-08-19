@@ -85,7 +85,7 @@ fun formatDayMonthYear(timeStampMillis: Long): String {
 
 }
 
-@Composable fun MenuScreen(onNavigateToMain: () -> Unit, guitarViewModel: GuitarOrder = viewModel())
+@Composable fun MenuScreen(onNavigateToMain: () -> Unit, guitarViewModel: GuitarOrder)
 {
 
     data class LocalStateClass(
@@ -114,6 +114,8 @@ fun formatDayMonthYear(timeStampMillis: Long): String {
     val orderState by guitarViewModel.orderState.collectAsStateWithLifecycle()
 
     val maintenanceLoading by guitarViewModel.maintenanceLoading.collectAsStateWithLifecycle()
+
+    val authLoadingState by guitarViewModel.authLoadingState.collectAsStateWithLifecycle()
 
     val offlineState by guitarViewModel.isOffline.collectAsStateWithLifecycle()
 
@@ -214,6 +216,8 @@ fun formatDayMonthYear(timeStampMillis: Long): String {
 
         guitarViewModel.updateOrderState(11, true)
 
+        nameStorage = ""
+
         localStateManager = localStateManager.copy(maintenanceSuccessLocal = false)
 
         if(input)
@@ -222,6 +226,18 @@ fun formatDayMonthYear(timeStampMillis: Long): String {
         }
     }
 
+    fun emptyListCheck()
+    {
+        for(i in 0 until maintenanceItems.size)
+        {
+            if(maintenanceItems[i].isChecked)
+            {
+                localStateManager = localStateManager.copy(nameInputToggle = true)
+
+                break
+            }
+        }
+    }
 
     LaunchedEffect(maintenanceLoading)
     {
@@ -237,14 +253,12 @@ fun formatDayMonthYear(timeStampMillis: Long): String {
 
             delay(2000L.milliseconds)
 
+            localStateManager = localStateManager.copy(maintenanceLoadingTrigger = false)
+
             if(orderState.maintenanceSuccess)
             {
                 localStateManager = localStateManager.copy(maintenanceSuccessLocal = true)
             }
-
-            guitarViewModel.updateOrderState(12, false)
-
-            localStateManager = localStateManager.copy(maintenanceLoadingTrigger = false)
         }
     }
 
@@ -358,21 +372,35 @@ fun formatDayMonthYear(timeStampMillis: Long): String {
                             contentAlignment = Alignment.Center
                         )
                         {
-                            TextButton(
-                                onClick = { guitarViewModel.signInWithGoogle(context) },
-                                enabled = !offlineState,
-                                modifier = Modifier.background(
-                                    Color.White,
-                                    RoundedCornerShape(12.dp)
-                                )
-                                    .width(150.dp)
-                            ) {
-                                Text(
-                                    text = "Log In For Maintenance.",
-                                    color = Color.Black,
-                                    fontFamily = FontFamily.Monospace,
-                                    fontWeight = FontWeight.Bold
-                                )
+                            if(authLoadingState)
+                            {
+                                Box(modifier = Modifier.height(50.dp).width(150.dp).background(Color.White, RoundedCornerShape(12.dp)),
+                                    contentAlignment = Alignment.Center)
+                                {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(40.dp),
+                                        strokeWidth = 4.dp, color = Color.White,
+                                        trackColor = colorOffset
+                                    )
+                                }
+                            }
+                            else
+                            {
+                                TextButton(
+                                    onClick = { guitarViewModel.signInWithGoogle(context) },
+                                    enabled = !offlineState,
+                                    modifier = Modifier.background(
+                                        Color.White,
+                                        RoundedCornerShape(12.dp)
+                                    ).height(60.dp).width(150.dp)
+                                ) {
+                                    Text(
+                                        text = "Log In For Maintenance.",
+                                        color = Color.Black,
+                                        fontFamily = FontFamily.Monospace,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
                             }
                         }
 
@@ -515,7 +543,7 @@ fun formatDayMonthYear(timeStampMillis: Long): String {
                         )
                         {
                             TextButton(
-                                onClick = { localStateManager = localStateManager.copy(nameInputToggle = true) },
+                                onClick = { emptyListCheck() },
                                 modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
                                     .width(200.dp).height(50.dp)
                             )

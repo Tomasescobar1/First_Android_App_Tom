@@ -104,6 +104,10 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
     val authenticationUiState: StateFlow<AuthUiState> = _authenticationUiState.asStateFlow()
 
+    private val _authLoadingState = MutableStateFlow(false)
+
+    val authLoadingState = _authLoadingState.asStateFlow()
+
     private val _dataState = MutableStateFlow(OrderDataState())
 
     val dataState: StateFlow<OrderDataState> = _dataState.asStateFlow()
@@ -239,6 +243,9 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                 .build()
 
             try {
+
+                _authLoadingState.value = true
+
                 val result = credentialManager.getCredential(
                     request = request,
                     context = activityContext
@@ -257,14 +264,22 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
                             println("The sign in with Google method worked!!!!, ID token: $idToken")
 
+                            _authLoadingState.value = false
+
                             _orderState.update {currentAuthState -> currentAuthState.copy(credentialToggleInput = true)}
                         }
                     }
-                    else -> println("Unexpected credential type, crap")
+                    else -> {
+                        _authLoadingState.value = false
+
+                        println("Unexpected credential type, crap")
+                    }
                 }
             }
             catch(e: GetCredentialException)
             {
+                _authLoadingState.value = false
+
                 println("signInWithGoogle method sign in failed, exception caught.")
 
                 println("Credential error type: ${e.type}")
@@ -437,7 +452,7 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                         {
                             _maintenanceLoading.value = true
 
-                            dbMaintenance.add(inputMaintenanceData).await()
+                            dbMaintenance.document(uid).set(inputMaintenanceData).await()
 
                             _orderState.update { currentState ->
                                 currentState.copy(

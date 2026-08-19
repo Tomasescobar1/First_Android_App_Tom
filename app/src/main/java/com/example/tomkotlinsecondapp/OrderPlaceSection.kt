@@ -57,7 +57,7 @@ import com.google.firebase.firestore.firestore
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
-fun ConfirmSection(guitarViewModel: GuitarOrder = viewModel())
+fun ConfirmSection(guitarViewModel: GuitarOrder)
 {
 
     data class LocalStateClass (

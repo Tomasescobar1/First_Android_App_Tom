@@ -84,7 +84,7 @@ import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
-fun GuitarViewPort(guitarViewModel: GuitarOrder = viewModel())
+fun GuitarViewPort(guitarViewModel: GuitarOrder)
 {
 
     val cDataState by guitarViewModel.dataState.collectAsStateWithLifecycle()
@@ -386,9 +386,9 @@ fun GuitarViewPort(guitarViewModel: GuitarOrder = viewModel())
         Column(modifier = Modifier.width(400.dp).height(900.dp).zIndex(3f), verticalArrangement = Arrangement.Bottom,
             horizontalAlignment = Alignment.Start)
         {
-            FABComponent()
+            FABComponent(guitarViewModel = guitarViewModel)
 
-            ConfirmSection()
+            ConfirmSection(guitarViewModel = guitarViewModel)
         }
     }
 

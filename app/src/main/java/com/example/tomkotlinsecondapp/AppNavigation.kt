@@ -34,7 +34,7 @@ object MenuRoute
 @Serializable
 object DetailsRoute
 
-@Composable fun AppNavigation()
+@Composable fun AppNavigation(guitarViewModel: GuitarOrder)
 {
      val navigationController = rememberNavController()
 
@@ -70,12 +70,12 @@ object DetailsRoute
 
         composable<MenuRoute>
         {
-            MenuScreen(onNavigateToMain = { navigationController.navigate(MainRoute) })
+            MenuScreen(onNavigateToMain = { navigationController.navigate(MainRoute) }, guitarViewModel = guitarViewModel)
         }
 
         composable<MainRoute>
         {
-            MainScreen()
+            MainScreen(guitarViewModel = guitarViewModel)
         }
 
     }

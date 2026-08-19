@@ -54,7 +54,7 @@ import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
-fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
+fun DropDownSection(guitarViewModel: GuitarOrder)
 {
 
     data class LocalStates(
@@ -301,7 +301,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder = viewModel())
     {
         TextButton(
             onClick = { localStates = localStates.copy(findTextBoxInd = true) },
-            enabled = !offlineState,
+            enabled = !offlineState && orderState.credentialToggleInput,
             modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp))
                 .width(150.dp)
         ) {

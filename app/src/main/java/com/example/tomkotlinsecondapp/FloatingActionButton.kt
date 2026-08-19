@@ -50,7 +50,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlin.math.roundToInt
 
 @Composable
-fun FABComponent(guitarViewModel: GuitarOrder = viewModel()) {
+fun FABComponent(guitarViewModel: GuitarOrder) {
 
     val isDeployed by guitarViewModel.deployedState.collectAsStateWithLifecycle()
 
@@ -103,7 +103,7 @@ fun FABComponent(guitarViewModel: GuitarOrder = viewModel()) {
             {
                 ColorDropDown()
 
-                DropDownSection()
+                DropDownSection(guitarViewModel = guitarViewModel)
 
                 Box(
                     modifier = Modifier.width(200.dp).height(80.dp)

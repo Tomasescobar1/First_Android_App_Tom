@@ -72,6 +72,7 @@ import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.zIndex
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.tomkotlinsecondapp.MainScreen
 import com.example.tomkotlinsecondapp.ui.theme.TomKotlinSecondAppTheme
 import com.google.firebase.Firebase
@@ -83,9 +84,12 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+
+            val globalViewModel: GuitarOrder = viewModel()
+
             TomKotlinSecondAppTheme {
 
-                AppNavigation()
+                AppNavigation(guitarViewModel = globalViewModel)
 
             }
         }
