@@ -428,7 +428,7 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
         println("Added ${orderList.last().color}")
     }
 
-    fun addDataToFirestore(inputOrderData: MutableMap<String, Any> = mutableMapOf(), inputMaintenanceData: MutableMap<String, Any> = mutableMapOf(), serviceOption: Boolean = false)
+    fun addDataToFirestore(inputOrderData: MutableMap<String, Any> = mutableMapOf(), inputMaintenanceData: MutableMap<String, Any> = mutableMapOf(), serviceOption: Boolean = false, serviceDate: String = "")
     {
         viewModelScope.launch {
                 try {
@@ -452,7 +452,7 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                         {
                             _maintenanceLoading.value = true
 
-                            dbMaintenance.document(uid).set(inputMaintenanceData).await()
+                            dbMaintenance.document(uid).collection(serviceDate).document().set(inputMaintenanceData).await()
 
                             _orderState.update { currentState ->
                                 currentState.copy(

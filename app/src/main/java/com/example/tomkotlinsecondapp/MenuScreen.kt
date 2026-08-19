@@ -121,6 +121,8 @@ fun formatDayMonthYear(timeStampMillis: Long): String {
 
     val dateStorage by remember {mutableStateOf(TrackedValue())}
 
+    var convertedDate by remember {mutableStateOf("")}
+
     var nameStorage by remember { mutableStateOf("") }
 
     val maintenanceMapList = remember { mutableStateMapOf<String, Any>() }
@@ -203,6 +205,13 @@ fun formatDayMonthYear(timeStampMillis: Long): String {
         }
     }
 
+    fun maintenanceDateConversion(inputDate: String) :String
+    {
+        val sanitizedDate = inputDate.replace("/", "-")
+
+        return sanitizedDate
+    }
+
     fun dialogDismiss(input: Boolean = false)
     {
         for(i in 0 until maintenanceItems.size)
@@ -249,11 +258,13 @@ fun formatDayMonthYear(timeStampMillis: Long): String {
 
             localStateManager = localStateManager.copy(maintenanceLoadingTrigger = true)
 
-            guitarViewModel.addDataToFirestore(inputMaintenanceData = maintenanceMapList, serviceOption = true)
+            guitarViewModel.addDataToFirestore(inputMaintenanceData = maintenanceMapList, serviceOption = true, serviceDate = maintenanceDateConversion(maintenanceMapList["Date of creation"].toString()))
 
             delay(2000L.milliseconds)
 
             localStateManager = localStateManager.copy(maintenanceLoadingTrigger = false)
+
+            guitarViewModel.updateOrderState(12, false)
 
             if(orderState.maintenanceSuccess)
             {
@@ -632,7 +643,7 @@ fun formatDayMonthYear(timeStampMillis: Long): String {
                                         Color.White,
                                         RoundedCornerShape(12.dp)
                                     ).width(150.dp),
-                                    enabled = !localStateManager.nameIsEmpty
+                                    //enabled = !localStateManager.nameIsEmpty
                                 ) {
                                     Text(
                                         text = "Request maintenance",
