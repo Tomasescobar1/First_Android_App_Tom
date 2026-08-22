@@ -54,6 +54,8 @@ fun FABComponent(guitarViewModel: GuitarOrder) {
 
     val isDeployed by guitarViewModel.deployedState.collectAsStateWithLifecycle()
 
+    val offlineState by guitarViewModel.isOffline.collectAsStateWithLifecycle()
+
     val context = LocalContext.current
 
     //var exitToggle by remember {mutableStateOf(false)}
@@ -62,14 +64,24 @@ fun FABComponent(guitarViewModel: GuitarOrder) {
 
     var colorOffset by remember {mutableStateOf(Color(66, 203, 240))}
 
+    var sizeOffset by remember {mutableIntStateOf(480)}
+
     colorOffset = if(isDeployed.deployedState)
     {
         Color.Transparent
     }
-
     else
     {
         Color(66, 203, 240)
+    }
+
+    if(offlineState)
+    {
+        sizeOffset = 540
+    }
+    else
+    {
+        sizeOffset = 480
     }
 
     FloatingActionButton (
@@ -96,11 +108,36 @@ fun FABComponent(guitarViewModel: GuitarOrder) {
         AnimatedVisibility(visible = isDeployed.deployedState)
         {
             Column(
-                modifier = Modifier.zIndex(2f).width(200.dp).height(480.dp),
+                modifier = Modifier.zIndex(2f).width(200.dp).height(sizeOffset.dp),
                 verticalArrangement = Arrangement.Bottom,
                 horizontalAlignment = Alignment.Start
             )
             {
+                if(offlineState)
+                {
+                    Box(
+                        modifier = Modifier.width(200.dp).height(70.dp)
+                            .background(Color(245, 66, 87), RoundedCornerShape(16.dp))
+                            .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
+                        contentAlignment = Alignment.Center
+                    )
+                    {
+                        Box(
+                            modifier = Modifier.width(150.dp).height(40.dp)
+                                .background(Color.White, RoundedCornerShape(12.dp)),
+                            contentAlignment = Alignment.Center
+                        )
+                        {
+                            Text(
+                                text = "Offline",
+                                color = Color.Black,
+                                fontFamily = FontFamily.Monospace,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+
                 ColorDropDown()
 
                 DropDownSection(guitarViewModel = guitarViewModel)

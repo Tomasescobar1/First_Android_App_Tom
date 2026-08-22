@@ -54,12 +54,17 @@ import com.google.firebase.Firebase
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import kotlin.time.Duration.Companion.milliseconds
-
 @Composable
 fun ConfirmSection(guitarViewModel: GuitarOrder)
 {
 
+    data class TrackedValue(
+        val createdAt: Long = System.currentTimeMillis()
+    )
     data class LocalStateClass (
         val nameIsEmpty: Boolean = true,
         val loadingTrigger: Boolean = false,
@@ -82,6 +87,8 @@ fun ConfirmSection(guitarViewModel: GuitarOrder)
 
     var customerInputLocal by remember {mutableStateOf("")}
 
+    var dateStorage by remember {mutableStateOf(TrackedValue())}
+
     var localStateManager by remember {mutableStateOf(LocalStateClass())}
 
     fun confirmData()
@@ -92,7 +99,8 @@ fun ConfirmSection(guitarViewModel: GuitarOrder)
                 customerInputLocal,
                 cDataState.modelIndVal,
                 cDataState.colorInput,
-                cDataState.scaleLengthInd
+                cDataState.scaleLengthInd,
+                guitarViewModel.formatDayMonthYear(dateStorage.createdAt)
             )
             for (i in 0 until guitarViewModel.orderList.size) {
                 println(guitarViewModel.orderList[i].customer)
@@ -137,6 +145,13 @@ fun ConfirmSection(guitarViewModel: GuitarOrder)
         localStateManager = localStateManager.copy(orderRemove = true)
     }
 
+    fun orderDateConversion(inputDate: String) :String
+    {
+        val sanitizedDate = inputDate.replace("/", "-")
+
+        return sanitizedDate
+    }
+
     LaunchedEffect(loadingState)
     {
         if(loadingState)
@@ -145,7 +160,7 @@ fun ConfirmSection(guitarViewModel: GuitarOrder)
 
             localStateManager = localStateManager.copy(loadingTrigger = true)
 
-            guitarViewModel.addDataToFirestore(inputOrderData = guitarViewModel.dbOrderList)
+            guitarViewModel.addDataToFirestore(inputOrderData = guitarViewModel.dbOrderList, serviceDate = orderDateConversion(guitarViewModel.dbOrderList["Date Of Creation"].toString()))
 
             delay(2000L.milliseconds)
 

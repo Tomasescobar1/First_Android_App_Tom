@@ -86,6 +86,8 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
 
     val focusManager = LocalFocusManager.current
 
+    val context = LocalContext.current
+
     val keyboardController = LocalSoftwareKeyboardController.current
 
     var customerInputLocal by remember {mutableStateOf("")}
@@ -306,7 +308,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                 .width(150.dp)
         ) {
             Text(
-                text = "Find your order",
+                text = "Find your orders",
                 color = Color.Black,
                 fontFamily = FontFamily.Monospace,
                 fontWeight = FontWeight.Bold
@@ -657,7 +659,16 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
             )
             {
                 TextButton(
-                    onClick = { guitarViewModel.updateOrderState(2, true) },
+                    onClick = {
+                        if(orderState.credentialToggleInput)
+                        {
+                            guitarViewModel.updateOrderState(2, true)
+                        }
+                        else
+                        {
+                            guitarViewModel.signInWithGoogle(context)
+                        }
+                              },
                     enabled = !offlineState,
                     modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp))
                         .width(150.dp)

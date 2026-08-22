@@ -29,6 +29,9 @@ import android.net.NetworkRequest
 import android.util.Log
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.rpc.context.AttributeContext
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 class AuthRepository(private val auth: FirebaseAuth = FirebaseAuth.getInstance())
 {
@@ -48,7 +51,8 @@ data class Guitar (
     var customer: String = "Tom",
     var model: String = " Telecaster",
     var color: String = "White",
-    var scaleLength: Double = 25.5
+    var scaleLength: Double = 25.5,
+    var dateOfCreation: String =""
 )
 
 data class OrderUIState (
@@ -125,7 +129,8 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
         "Customer" to " ",
         "Model" to " ",
         "Color" to " ",
-        "Scale Length" to 0.0
+        "Scale Length" to 0.0,
+        "Date Of Creation" to " "
     )
 
     var increment = mutableIntStateOf(0)
@@ -212,6 +217,13 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
         connectivityManager.unregisterNetworkCallback(networkCallback)
     }
 
+    fun formatDayMonthYear(timeStampMillis: Long): String
+    {
+        val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy").withZone(ZoneId.systemDefault())
+
+        return formatter.format(Instant.ofEpochMilli(timeStampMillis))
+    }
+
     private suspend fun firebaseAuthWithGoogle(idToken: String)
     {
         try {
@@ -243,7 +255,6 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                 .build()
 
             try {
-
                 _authLoadingState.value = true
 
                 val result = credentialManager.getCredential(
@@ -411,9 +422,9 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
     }
 
 
-    fun addListElement(customer: String = "Tom", model: String = "Telecaster", color: String = "White", scaleLength: Double = 25.5)
+    fun addListElement(customer: String = "Tom", model: String = "Telecaster", color: String = "White", scaleLength: Double = 25.5, dateOfCreation: String = "")
     {
-        val newGuitar = Guitar(customer, model, color, scaleLength)
+        val newGuitar = Guitar(customer, model, color, scaleLength, dateOfCreation)
 
         orderList.add(newGuitar)
 
@@ -424,6 +435,8 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
         dbOrderList.replace("Color", orderList.last().color)
 
         dbOrderList.replace("Scale Length", orderList.last().scaleLength)
+
+        dbOrderList.replace("Date Of Creation", orderList.last().dateOfCreation)
 
         println("Added ${orderList.last().color}")
     }
@@ -438,7 +451,7 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                         {
                             _isLoading.value = true
 
-                            dbOrders.document(uid).set(inputOrderData).await()
+                            dbOrders.document(uid).collection(serviceDate).document().set(inputOrderData).await()
 
                             increment.intValue++
 
@@ -485,7 +498,7 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
             viewModelScope.launch {
                 try
                 {
-                    val snapshot = dbOrders.whereEqualTo("Customer", input.lowercase()).get().await()
+                    val snapshot = dbOrders.document(uid.toString()).collection("").whereEqualTo("Customer", input.lowercase()).get().await()
 
                     for(document in snapshot.documents)
                     {

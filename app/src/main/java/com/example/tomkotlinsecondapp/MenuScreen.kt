@@ -77,13 +77,13 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-fun formatDayMonthYear(timeStampMillis: Long): String {
+/*fun formatDayMonthYear(timeStampMillis: Long): String {
 
     val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy").withZone(ZoneId.systemDefault())
 
     return formatter.format(Instant.ofEpochMilli(timeStampMillis))
 
-}
+}*/
 
 @Composable fun MenuScreen(onNavigateToMain: () -> Unit, guitarViewModel: GuitarOrder)
 {
@@ -193,7 +193,7 @@ fun formatDayMonthYear(timeStampMillis: Long): String {
         {
             if(i == 1)
             {
-                maintenanceMapList.put("Date of creation", formatDayMonthYear(dateStorage.createdAt))
+                maintenanceMapList.put("Date of creation", guitarViewModel.formatDayMonthYear(dateStorage.createdAt))
             }
 
             if(maintenanceItems[i].isChecked)
@@ -218,6 +218,8 @@ fun formatDayMonthYear(timeStampMillis: Long): String {
         {
             maintenanceItems[i].isChecked = false
         }
+
+        maintenanceArray.clear()
 
         localStateManager = localStateManager.copy(checkListToggle = false)
 
@@ -399,18 +401,30 @@ fun formatDayMonthYear(timeStampMillis: Long): String {
                             {
                                 TextButton(
                                     onClick = { guitarViewModel.signInWithGoogle(context) },
-                                    enabled = !offlineState,
+                                    enabled = !offlineState && !orderState.credentialToggleInput,
                                     modifier = Modifier.background(
                                         Color.White,
                                         RoundedCornerShape(12.dp)
                                     ).height(60.dp).width(150.dp)
                                 ) {
-                                    Text(
-                                        text = "Log In For Maintenance.",
-                                        color = Color.Black,
-                                        fontFamily = FontFamily.Monospace,
-                                        fontWeight = FontWeight.Bold
-                                    )
+                                    if(!orderState.credentialToggleInput)
+                                    {
+                                        Text(
+                                            text = "Log In For Maintenance.",
+                                            color = Color.Black,
+                                            fontFamily = FontFamily.Monospace,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                    else
+                                    {
+                                        Text(
+                                            text = "You are logged in.",
+                                            color = Color.Black,
+                                            fontFamily = FontFamily.Monospace,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
                                 }
                             }
                         }
