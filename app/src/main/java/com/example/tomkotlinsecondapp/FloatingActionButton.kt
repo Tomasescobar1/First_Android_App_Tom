@@ -75,13 +75,9 @@ fun FABComponent(guitarViewModel: GuitarOrder) {
         Color(66, 203, 240)
     }
 
-    if(offlineState)
-    {
-        sizeOffset = 540
-    }
-    else
-    {
-        sizeOffset = 480
+    sizeOffset = when {
+        offlineState -> 540
+        else -> 480
     }
 
     FloatingActionButton (
@@ -108,7 +104,7 @@ fun FABComponent(guitarViewModel: GuitarOrder) {
         AnimatedVisibility(visible = isDeployed.deployedState)
         {
             Column(
-                modifier = Modifier.zIndex(2f).width(200.dp).height(sizeOffset.dp),
+                modifier = Modifier.zIndex(2f).width(200.dp).height(sizeOffset.dp).clickable(interactionSource = null, indication = null){},
                 verticalArrangement = Arrangement.Bottom,
                 horizontalAlignment = Alignment.Start
             )

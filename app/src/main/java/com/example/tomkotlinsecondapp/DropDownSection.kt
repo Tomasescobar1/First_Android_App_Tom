@@ -66,7 +66,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
         val loadingUpdateTrigger: Boolean = false,
         val loadingLogInTrigger: Boolean = false,
         val loadingLogIn: Boolean = false,
-        val loginSuccess: Boolean = false,
+        val loginFail: Boolean = false,
         val orderFoundInd: Boolean = false,
         val orderFindFail: Boolean = false,
         val orderFindFailInd: Boolean = false,
@@ -798,15 +798,15 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
             confirmButton = {})
     }
 
-    if(localStates.loginSuccess)
+    if(localStates.loginFail)
     {
         AlertDialog(
             onDismissRequest = {},
-            title = {Text("Logged in successfully!", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
+            title = {Text("Failed to log in!", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
             text = {Column(verticalArrangement = Arrangement.Top)
             {
                 Text(
-                    text = "You can now place your order.", overflow = TextOverflow.Clip,
+                    text = "Crap.", overflow = TextOverflow.Clip,
                     lineHeight = 30.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
             }
             },
