@@ -41,6 +41,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -63,6 +64,9 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
         val scaleLengthDropped: Boolean = false,
         val searchLoadTrigger: Boolean = false,
         val loadingUpdateTrigger: Boolean = false,
+        val loadingLogInTrigger: Boolean = false,
+        val loadingLogIn: Boolean = false,
+        val loginSuccess: Boolean = false,
         val orderFoundInd: Boolean = false,
         val orderFindFail: Boolean = false,
         val orderFindFailInd: Boolean = false,
@@ -70,6 +74,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
         val orderUpdateFail: Boolean = false,
         val orderModInd: Boolean = false,
         val orderDeleteConfirm: Boolean = false,
+        val logInToPlaceOrder: Boolean = false
     )
 
     var localStates by remember {mutableStateOf(LocalStates())}
@@ -188,6 +193,22 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
             {
                 localStates = localStates.copy(orderFindFailInd = true)
             }
+        }
+    }
+
+    LaunchedEffect(localStates.loadingLogIn)
+    {
+        if(localStates.loadingLogIn)
+        {
+            localStates = localStates.copy(loadingLogIn = true)
+
+            guitarViewModel.signInWithGoogle(context)
+
+            delay(3000L.milliseconds)
+
+            localStates = localStates.copy(loadingLogIn = false)
+
+            localStates = localStates.copy(logInToPlaceOrder = false)
         }
     }
 
@@ -666,7 +687,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                         }
                         else
                         {
-                            guitarViewModel.signInWithGoogle(context)
+                            localStates = localStates.copy(logInToPlaceOrder = true)
                         }
                               },
                     enabled = !offlineState,
@@ -728,6 +749,68 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                 )
             }
         }
+    }
+
+    if(localStates.logInToPlaceOrder)
+    {
+        AlertDialog(
+            onDismissRequest = { localStates = localStates.copy(logInToPlaceOrder = false) },
+            title = {Text("You need to log in to place an order...", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
+            text = {Column(horizontalAlignment = Alignment.CenterHorizontally)
+            {
+                Box(
+                    modifier = Modifier.width(200.dp).height(80.dp)
+                        .background(Color(66, 203,  245), RoundedCornerShape(16.dp))
+                        .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
+                    contentAlignment = Alignment.Center
+                )
+                {
+                    if(localStates.loadingLogIn)
+                    {
+                        Box(modifier = Modifier.height(50.dp).width(150.dp).background(Color.White, RoundedCornerShape(12.dp)),
+                            contentAlignment = Alignment.Center)
+                        {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(40.dp),
+                                strokeWidth = 4.dp, color = Color.White,
+                                trackColor = Color(66, 203,245)
+                            )
+                        }
+                    }
+                    else
+                    {
+                        TextButton(
+                            onClick = { localStates = localStates.copy(loadingLogIn = true) },
+                            modifier = Modifier.background(Color.White,RoundedCornerShape(12.dp)).width(150.dp)
+                        )
+                        {
+                            Text(
+                                text = "Log in",
+                                color = Color.Black,
+                                fontFamily = FontFamily.Monospace,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+            }
+            },
+            confirmButton = {})
+    }
+
+    if(localStates.loginSuccess)
+    {
+        AlertDialog(
+            onDismissRequest = {},
+            title = {Text("Logged in successfully!", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
+            text = {Column(verticalArrangement = Arrangement.Top)
+            {
+                Text(
+                    text = "You can now place your order.", overflow = TextOverflow.Clip,
+                    lineHeight = 30.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+            }
+            },
+            confirmButton = {})
     }
 
 }
