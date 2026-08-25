@@ -40,13 +40,6 @@ class AuthRepository(private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     }
 }
 
-sealed interface AuthUiState {
-    object Idle: AuthUiState
-    object Loading: AuthUiState
-    object Success: AuthUiState
-    data class Error(val message: String): AuthUiState
-}
-
 data class Guitar (
     var customer: String = "Tom",
     var model: String = " Telecaster",
@@ -73,8 +66,7 @@ data class OrderUIState (
     var orderDeleteFail: Boolean = false,
     var instanceInd: Int = 0,
     var maintenanceSuccess: Boolean = false,
-    var maintenanceFail: Boolean = false,
-    var credentialToggleInput: Boolean = false
+    var maintenanceFail: Boolean = false
 )
 
 data class OrderDataState (
@@ -104,13 +96,13 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
     private val webClientID = "443758218420-roslrqrib5t3g8uq15c8p1a9gkdblld7.apps.googleusercontent.com"
 
-    private val _authenticationUiState = MutableStateFlow<AuthUiState>(AuthUiState.Idle)
-
-    val authenticationUiState: StateFlow<AuthUiState> = _authenticationUiState.asStateFlow()
-
     private val _authLoadingState = MutableStateFlow(false)
 
     val authLoadingState = _authLoadingState.asStateFlow()
+
+    private val _authState = MutableStateFlow(false)
+
+    val authState = _authState.asStateFlow()
 
     private val _dataState = MutableStateFlow(OrderDataState())
 
@@ -277,7 +269,7 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
                             _authLoadingState.value = false
 
-                            _orderState.update {currentAuthState -> currentAuthState.copy(credentialToggleInput = true)}
+                            _authState.value = true
                         }
                     }
                     else -> {
@@ -298,11 +290,6 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                 println("Credential error message: ${e.message}")
             }
         }
-    }
-
-    fun resetState()
-    {
-        _authenticationUiState.value= AuthUiState.Idle
     }
 
     fun updateDataState(input1: Int, input2: String, input3: Double, input4: Boolean = false)

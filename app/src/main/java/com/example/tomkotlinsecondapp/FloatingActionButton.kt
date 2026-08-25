@@ -56,6 +56,8 @@ fun FABComponent(guitarViewModel: GuitarOrder) {
 
     val offlineState by guitarViewModel.isOffline.collectAsStateWithLifecycle()
 
+    val authState by guitarViewModel.authState.collectAsStateWithLifecycle()
+
     val context = LocalContext.current
 
     //var exitToggle by remember {mutableStateOf(false)}
@@ -77,6 +79,7 @@ fun FABComponent(guitarViewModel: GuitarOrder) {
 
     sizeOffset = when {
         offlineState -> 540
+        authState -> 540
         else -> 480
     }
 
@@ -126,6 +129,31 @@ fun FABComponent(guitarViewModel: GuitarOrder) {
                         {
                             Text(
                                 text = "Offline",
+                                color = Color.Black,
+                                fontFamily = FontFamily.Monospace,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+
+                if(authState)
+                {
+                    Box(
+                        modifier = Modifier.width(200.dp).height(70.dp)
+                            .background(Color(67, 181, 96), RoundedCornerShape(16.dp))
+                            .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
+                        contentAlignment = Alignment.Center
+                    )
+                    {
+                        Box(
+                            modifier = Modifier.width(150.dp).height(40.dp)
+                                .background(Color.White, RoundedCornerShape(12.dp)),
+                            contentAlignment = Alignment.Center
+                        )
+                        {
+                            Text(
+                                text = "Logged in.",
                                 color = Color.Black,
                                 fontFamily = FontFamily.Monospace,
                                 fontWeight = FontWeight.Bold

@@ -117,6 +117,8 @@ import java.time.format.DateTimeFormatter
 
     val authLoadingState by guitarViewModel.authLoadingState.collectAsStateWithLifecycle()
 
+    val authState by guitarViewModel.authState.collectAsStateWithLifecycle()
+
     val offlineState by guitarViewModel.isOffline.collectAsStateWithLifecycle()
 
     val dateStorage by remember {mutableStateOf(TrackedValue())}
@@ -135,13 +137,9 @@ import java.time.format.DateTimeFormatter
 
     var offlineSignToggle by remember { mutableDoubleStateOf(100.0) }
 
-    if(offlineState)
-    {
-        offlineSignToggle = 0.0
-    }
-    else
-    {
-        offlineSignToggle = 100.0
+    offlineSignToggle = when {
+        offlineState -> 0.0
+        else -> 100.0
     }
 
     if(nameStorage != "")
@@ -170,7 +168,6 @@ import java.time.format.DateTimeFormatter
     @Composable
     fun MaintenanceCheckList()
     {
-
         LazyColumn {
             items(maintenanceItems, key = { it.id }) {item ->
                 Row(modifier = Modifier.fillMaxWidth().clickable{item.isChecked = !item.isChecked},
@@ -180,7 +177,6 @@ import java.time.format.DateTimeFormatter
                 }
             }
         }
-
     }
 
     fun maintenanceTypeConversion()
@@ -401,13 +397,13 @@ import java.time.format.DateTimeFormatter
                             {
                                 TextButton(
                                     onClick = { guitarViewModel.signInWithGoogle(context) },
-                                    enabled = !offlineState && !orderState.credentialToggleInput,
+                                    enabled = !offlineState && !authState,
                                     modifier = Modifier.background(
                                         Color.White,
                                         RoundedCornerShape(12.dp)
                                     ).height(60.dp).width(150.dp)
                                 ) {
-                                    if(!orderState.credentialToggleInput)
+                                    if(!authState)
                                     {
                                         Text(
                                             text = "Log In For Maintenance.",
@@ -430,7 +426,7 @@ import java.time.format.DateTimeFormatter
                         }
 
                         AnimatedVisibility(
-                            visible = orderState.credentialToggleInput,
+                            visible = authState,
                             enter = slideInVertically(animationSpec = tween(200)){fullHeight -> -fullHeight},
                             exit = slideOutVertically(animationSpec = tween(200){fullHeight -> fullHeight})
                         )
