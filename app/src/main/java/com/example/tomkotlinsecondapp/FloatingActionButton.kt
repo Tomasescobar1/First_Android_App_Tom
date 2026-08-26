@@ -79,7 +79,7 @@ fun FABComponent(guitarViewModel: GuitarOrder) {
 
     sizeOffset = when {
         offlineState -> 540
-        authState -> 540
+        //authState -> 540
         else -> 480
     }
 
@@ -137,11 +137,11 @@ fun FABComponent(guitarViewModel: GuitarOrder) {
                     }
                 }
 
-                if(authState)
+                /*if(authState)
                 {
                     Box(
                         modifier = Modifier.width(200.dp).height(70.dp)
-                            .background(Color(67, 181, 96), RoundedCornerShape(16.dp))
+                            .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
                             .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
                         contentAlignment = Alignment.Center
                     )
@@ -160,7 +160,7 @@ fun FABComponent(guitarViewModel: GuitarOrder) {
                             )
                         }
                     }
-                }
+                }*/
 
                 ColorDropDown()
 

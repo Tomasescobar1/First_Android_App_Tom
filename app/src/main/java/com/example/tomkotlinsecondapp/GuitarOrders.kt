@@ -29,6 +29,7 @@ import android.net.NetworkRequest
 import android.util.Log
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.rpc.context.AttributeContext
+import kotlinx.coroutines.async
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -438,9 +439,21 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                         {
                             _isLoading.value = true
 
-                            dbOrders.document(uid).collection(serviceDate).document().set(inputOrderData).await()
-
                             increment.intValue++
+
+                            dbOrders.document(uid).collection(serviceDate).document("${serviceDate}_${increment.intValue}").set(inputOrderData).await()
+
+                            /*val orderDataSet = async {
+                                dbOrders.document(uid).collection(serviceDate).document().set(inputOrderData).await()
+                            }
+
+                            val order*/
+
+                            //dbOrders.document(uid).collection("Dates of creation").document(serviceDate).set({}).await()
+
+                            //increment.intValue++
+
+                            //dbOrders.document(uid).collection("Dates of creation").document(serviceDate).set("").await()
 
                             _orderState.update { currentState -> currentState.copy(instanceInd = increment.intValue) }
 
@@ -485,26 +498,7 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
             viewModelScope.launch {
                 try
                 {
-                    val snapshot = dbOrders.document(uid.toString()).collection("").whereEqualTo("Customer", input.lowercase()).get().await()
-
-                    for(document in snapshot.documents)
-                    {
-                        if(document.data?.get("Customer") == input.lowercase()) {
-
-                            foundDocumentId = document.id
-
-                            val foundOrder: MutableMap<String, Any>? = document.data
-
-                            if(foundOrder != null)
-                            {
-                                _foundOrderString.value = foundOrder.entries.joinToString(separator = "\n") { entry -> "${entry.key}: ${entry.value}" }
-                            }
-
-                            _orderState.update {currentState -> currentState.copy(orderFoundInd = true)}
-
-                            break
-                        }
-                    }
+                    val snapshot = dbOrders.document(uid.toString()).get().await()
 
                     if(!orderState.value.orderFoundInd)
                     {

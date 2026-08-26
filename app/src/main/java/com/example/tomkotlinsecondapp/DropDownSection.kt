@@ -331,7 +331,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                 .width(150.dp)
         ) {
             Text(
-                text = "Find your orders",
+                text = "Visualize orders",
                 color = Color.Black,
                 fontFamily = FontFamily.Monospace,
                 fontWeight = FontWeight.Bold
@@ -681,6 +681,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                 contentAlignment = Alignment.Center
             )
             {
+
                 TextButton(
                     onClick = {
                         if(authState)
