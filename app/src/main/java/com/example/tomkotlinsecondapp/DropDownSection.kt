@@ -91,6 +91,8 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
 
     val authState by guitarViewModel.authState.collectAsStateWithLifecycle()
 
+    val authLoadingState by guitarViewModel.authLoadingState.collectAsStateWithLifecycle()
+
     val focusManager = LocalFocusManager.current
 
     val context = LocalContext.current
@@ -195,22 +197,6 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
             {
                 localStates = localStates.copy(orderFindFailInd = true)
             }
-        }
-    }
-
-    LaunchedEffect(localStates.loadingLogIn)
-    {
-        if(localStates.loadingLogIn)
-        {
-            localStates = localStates.copy(loadingLogIn = true)
-
-            guitarViewModel.signInWithGoogle(context)
-
-            delay(3000L.milliseconds)
-
-            localStates = localStates.copy(loadingLogIn = false)
-
-            localStates = localStates.copy(logInToPlaceOrder = false)
         }
     }
 
@@ -682,27 +668,39 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
             )
             {
 
-                TextButton(
-                    onClick = {
-                        if(authState)
-                        {
-                            guitarViewModel.updateOrderState(2, true)
-                        }
-                        else
-                        {
-                            localStates = localStates.copy(logInToPlaceOrder = true)
-                        }
-                              },
-                    enabled = !offlineState,
-                    modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp))
-                        .width(150.dp)
-                ) {
-                    Text(
-                        text = "Place Order",
-                        color = Color.Black,
-                        fontFamily = FontFamily.Monospace,
-                        fontWeight = FontWeight.Bold
-                    )
+                if(!authLoadingState)
+                {
+                    TextButton(
+                        onClick = {
+                            if (authState) {
+                                guitarViewModel.updateOrderState(2, true)
+                            } else {
+                                localStates = localStates.copy(logInToPlaceOrder = true)
+                            }
+                        },
+                        enabled = !offlineState,
+                        modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp))
+                            .width(150.dp)
+                    ) {
+                        Text(
+                            text = "Place Order",
+                            color = Color.Black,
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+                else
+                {
+                    Box(modifier = Modifier.height(50.dp).width(150.dp).background(Color.White, RoundedCornerShape(12.dp)),
+                        contentAlignment = Alignment.Center)
+                    {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(40.dp),
+                            strokeWidth = 4.dp, color = Color.White,
+                            trackColor = Color(66, 203,245)
+                        )
+                    }
                 }
             }
         }
@@ -768,32 +766,19 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                     contentAlignment = Alignment.Center
                 )
                 {
-                    if(localStates.loadingLogIn)
+                    TextButton(
+                        onClick = {
+                            guitarViewModel.signInWithGoogle(context)
+                            localStates = localStates.copy(logInToPlaceOrder = false) },
+                        modifier = Modifier.background(Color.White,RoundedCornerShape(12.dp)).width(150.dp)
+                    )
                     {
-                        Box(modifier = Modifier.height(50.dp).width(150.dp).background(Color.White, RoundedCornerShape(12.dp)),
-                            contentAlignment = Alignment.Center)
-                        {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(40.dp),
-                                strokeWidth = 4.dp, color = Color.White,
-                                trackColor = Color(66, 203,245)
-                            )
-                        }
-                    }
-                    else
-                    {
-                        TextButton(
-                            onClick = { localStates = localStates.copy(loadingLogIn = true) },
-                            modifier = Modifier.background(Color.White,RoundedCornerShape(12.dp)).width(150.dp)
+                        Text(
+                            text = "Log in",
+                            color = Color.Black,
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold
                         )
-                        {
-                            Text(
-                                text = "Log in",
-                                color = Color.Black,
-                                fontFamily = FontFamily.Monospace,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
                     }
                 }
             }
