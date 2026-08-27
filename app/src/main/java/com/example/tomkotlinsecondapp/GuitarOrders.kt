@@ -470,11 +470,13 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                             {
                                 dbOrders.document(uid).collection(serviceDate).document("${serviceDate}_${snapshotLong}").set(inputOrderData).await()
 
-                                _orderState.update { currentState -> currentState.copy(orderSuccess = true) }
+                                //_orderState.update { currentState -> currentState.copy(orderSuccess = true) }
 
-                                dbOrders.document(uid).collection("User preferences").document("Date quantity").set(dateSetter(snapshotLong)).await()
+                                dbOrders.document("hi").collection("User preferences").document("Date quantity").set(dateSetter(snapshotLong)).await()
 
                                 _orderState.update { currentState -> currentState.copy(instanceInd = snapshotLong) }
+
+                                _orderState.update { currentState -> currentState.copy(orderSuccess = true) }
                             }
 
                             println("Added order to Firestore, yaaaay!")

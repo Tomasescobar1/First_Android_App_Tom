@@ -291,10 +291,10 @@ fun ConfirmSection(guitarViewModel: GuitarOrder)
                             "\n Scale length: ${guitarViewModel.orderList.last().scaleLength} in ", overflow = TextOverflow.Clip,
                         lineHeight = 30.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
 
-                        for (i in 0 until guitarViewModel.orderList.size) {
+                        /*for (i in 0 until guitarViewModel.orderList.size) {
                             Text(text = "\nCustomer ${i+1}: ${guitarViewModel.orderList[i].customer}",
                                 lineHeight = 25.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-                        }
+                        }*/
 
                         Text("\nAvailable order slots: ${5 - orderState.instanceInd}", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
 
