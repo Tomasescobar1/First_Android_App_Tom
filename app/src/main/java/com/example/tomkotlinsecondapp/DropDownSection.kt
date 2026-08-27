@@ -7,6 +7,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -757,7 +758,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
         AlertDialog(
             onDismissRequest = { localStates = localStates.copy(logInToPlaceOrder = false) },
             title = {Text("You need to log in to place an order...", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
-            text = {Column(horizontalAlignment = Alignment.CenterHorizontally)
+            text = {Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally)
             {
                 Box(
                     modifier = Modifier.width(200.dp).height(80.dp)

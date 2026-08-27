@@ -126,6 +126,8 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
         "Date Of Creation" to " "
     )
 
+    var  dbDateRegistry: MutableMap<String, Any> = mutableMapOf("OrderNumber" to 1)
+
     var increment = mutableIntStateOf(0)
 
     private val _isLoading = MutableStateFlow(false)
@@ -157,6 +159,12 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
     private val _isOffline = MutableStateFlow(!isCurrentlyOnline())
 
     val isOffline = _isOffline.asStateFlow()
+
+    fun dateSetter(input: Int? = 1) : MutableMap<String, Int?>
+    {
+        val outputMap = mutableMapOf("OrderNumber" to input)
+        return outputMap
+    }
 
     private fun isCurrentlyOnline() : Boolean
     {
@@ -439,25 +447,35 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                         {
                             _isLoading.value = true
 
-                            increment.intValue++
-
-                            dbOrders.document(uid).collection(serviceDate).document("${serviceDate}_${increment.intValue}").set(inputOrderData).await()
-
-                            /*val orderDataSet = async {
-                                dbOrders.document(uid).collection(serviceDate).document().set(inputOrderData).await()
-                            }
-
-                            val order*/
-
-                            //dbOrders.document(uid).collection("Dates of creation").document(serviceDate).set({}).await()
-
                             //increment.intValue++
 
-                            //dbOrders.document(uid).collection("Dates of creation").document(serviceDate).set("").await()
+                            val snapshot = dbOrders.document(uid).collection("User preferences").document("Date quantity").get().await()
 
-                            _orderState.update { currentState -> currentState.copy(instanceInd = increment.intValue) }
+                            var snapshotLong: Int? = snapshot.getLong("OrderNumber")?.toInt()
 
-                            _orderState.update { currentState -> currentState.copy(orderSuccess = true) }
+                            if(snapshot.exists())
+                            {
+                                snapshotLong = snapshotLong!! + 1
+
+                                //println("OrderNumber: ${snapshot.getLong("OrderNumber").toString()}")
+                            }
+                            else
+                            {
+                                println("Snapshot does not exist!")
+
+                                snapshotLong = 1
+                            }
+
+                            if(snapshotLong <= 5)
+                            {
+                                dbOrders.document(uid).collection(serviceDate).document("${serviceDate}_${snapshotLong}").set(inputOrderData).await()
+
+                                _orderState.update { currentState -> currentState.copy(orderSuccess = true) }
+
+                                dbOrders.document(uid).collection("User preferences").document("Date quantity").set(dateSetter(snapshotLong)).await()
+
+                                _orderState.update { currentState -> currentState.copy(instanceInd = snapshotLong) }
+                            }
 
                             println("Added order to Firestore, yaaaay!")
                         }

@@ -60,8 +60,6 @@ fun FABComponent(guitarViewModel: GuitarOrder) {
 
     val context = LocalContext.current
 
-    //var exitToggle by remember {mutableStateOf(false)}
-
     var fabOffset by remember {mutableStateOf(Offset(0f, 0f))}
 
     var colorOffset by remember {mutableStateOf(Color(66, 203, 240))}
@@ -136,31 +134,6 @@ fun FABComponent(guitarViewModel: GuitarOrder) {
                         }
                     }
                 }
-
-                /*if(authState)
-                {
-                    Box(
-                        modifier = Modifier.width(200.dp).height(70.dp)
-                            .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
-                            .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
-                        contentAlignment = Alignment.Center
-                    )
-                    {
-                        Box(
-                            modifier = Modifier.width(150.dp).height(40.dp)
-                                .background(Color.White, RoundedCornerShape(12.dp)),
-                            contentAlignment = Alignment.Center
-                        )
-                        {
-                            Text(
-                                text = "Logged in.",
-                                color = Color.Black,
-                                fontFamily = FontFamily.Monospace,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                    }
-                }*/
 
                 ColorDropDown()
 
