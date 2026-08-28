@@ -114,6 +114,8 @@ fun ConfirmSection(guitarViewModel: GuitarOrder)
         {
             guitarViewModel.updateOrderState(2, false)
 
+            guitarViewModel.updateOrderState(4, false)
+
             localStateManager = localStateManager.copy(orderLoadSuccess = false)
 
             customerInputLocal = ""
@@ -150,29 +152,6 @@ fun ConfirmSection(guitarViewModel: GuitarOrder)
         val sanitizedDate = inputDate.replace("/", "-")
 
         return sanitizedDate
-    }
-
-    LaunchedEffect(loadingState)
-    {
-        if(loadingState)
-        {
-            confirmData()
-
-            localStateManager = localStateManager.copy(loadingTrigger = true)
-
-            guitarViewModel.addDataToFirestore(inputOrderData = guitarViewModel.dbOrderList, serviceDate = orderDateConversion(guitarViewModel.dbOrderList["Date Of Creation"].toString()))
-
-            delay(2000L.milliseconds)
-
-            if(orderState.orderSuccess)
-            {
-                localStateManager = localStateManager.copy(orderLoadSuccess = true)
-            }
-
-            guitarViewModel.updateOrderState(4, false)
-
-            localStateManager = localStateManager.copy(loadingTrigger = false)
-        }
     }
 
     LaunchedEffect(localStateManager.orderRemove)
@@ -238,10 +217,14 @@ fun ConfirmSection(guitarViewModel: GuitarOrder)
                         contentAlignment = Alignment.Center
                     )
                     {
-                        if(!localStateManager.loadingTrigger)
+                        if(!loadingState)
                         {
                             TextButton(
-                                onClick = { guitarViewModel.updateOrderState(4, true) },
+                                onClick = {
+                                    confirmData()
+                                    guitarViewModel.addDataToFirestore(inputOrderData = guitarViewModel.dbOrderList,
+                                    serviceDate = orderDateConversion(guitarViewModel.dbOrderList["Date Of Creation"].toString())) },
+
                                 modifier = Modifier.background(
                                     Color.White,
                                     RoundedCornerShape(12.dp)
@@ -277,7 +260,7 @@ fun ConfirmSection(guitarViewModel: GuitarOrder)
         )
     }
 
-    if(localStateManager.orderLoadSuccess)
+    if(orderState.orderSuccess)
     {
         AlertDialog(
             onDismissRequest = {dialogDismiss(input2 = true)},
@@ -353,7 +336,7 @@ fun ConfirmSection(guitarViewModel: GuitarOrder)
     {
         AlertDialog(
             onDismissRequest = {guitarViewModel.updateOrderState(1,false)},
-            title = {Text("Order slots full!" + "\nCustomer list: ", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
+            title = {Text("Order slots full!" + "\nLast session customer list: ", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, fontSize = 20.sp)},
             text = {Column(verticalArrangement = Arrangement.Top)
             {
 

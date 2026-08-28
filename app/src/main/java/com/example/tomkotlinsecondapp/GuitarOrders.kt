@@ -360,6 +360,11 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
             4 -> {
                 _isLoading.value = input2
+
+                if(!input2)
+                {
+                    _orderState.update {currentState -> currentState.copy(orderSuccess = false)}
+                }
             }
 
             5 -> {
@@ -447,8 +452,6 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                         {
                             _isLoading.value = true
 
-                            //increment.intValue++
-
                             val snapshot = dbOrders.document(uid).collection("User preferences").document("Date quantity").get().await()
 
                             var snapshotLong: Int? = snapshot.getLong("OrderNumber")?.toInt()
@@ -456,8 +459,6 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                             if(snapshot.exists())
                             {
                                 snapshotLong = snapshotLong!! + 1
-
-                                //println("OrderNumber: ${snapshot.getLong("OrderNumber").toString()}")
                             }
                             else
                             {
@@ -470,16 +471,24 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                             {
                                 dbOrders.document(uid).collection(serviceDate).document("${serviceDate}_${snapshotLong}").set(inputOrderData).await()
 
-                                //_orderState.update { currentState -> currentState.copy(orderSuccess = true) }
-
-                                dbOrders.document("hi").collection("User preferences").document("Date quantity").set(dateSetter(snapshotLong)).await()
+                                dbOrders.document(uid).collection("User preferences").document("Date quantity").set(dateSetter(snapshotLong)).await()
 
                                 _orderState.update { currentState -> currentState.copy(instanceInd = snapshotLong) }
 
+                                //_isLoading.value = false
+
                                 _orderState.update { currentState -> currentState.copy(orderSuccess = true) }
+
+                                println("Added order to Firestore, yaaaay!")
+                            }
+                            else
+                            {
+                                println("Order slots full, crap!")
                             }
 
-                            println("Added order to Firestore, yaaaay!")
+                            _isLoading.value = false
+
+                            //
                         }
                         else
                         {
