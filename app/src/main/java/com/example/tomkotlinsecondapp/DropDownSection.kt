@@ -76,7 +76,9 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
         val orderModInd: Boolean = false,
         val orderDeleteConfirm: Boolean = false,
         val ordersFull: Boolean = false,
-        val logInToPlaceOrder: Boolean = false
+        val logInToPlaceOrder: Boolean = false,
+        val orderSlotCheck: Boolean = false,
+        val slotCheckLoading: Boolean = false
     )
 
     var localStates by remember {mutableStateOf(LocalStates())}
@@ -223,6 +225,18 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
             customerInputLocal = ""
         }
     }
+
+    LaunchedEffect(localStates.orderSlotCheck)
+    {
+        localStates = localStates.copy(slotCheckLoading = true)
+
+        guitarViewModel.checkSlotAvailability()
+
+        delay(1000L.milliseconds)
+
+        localStates = localStates.copy(slotCheckLoading = false)
+    }
+
 
     Box(
         modifier = Modifier.width(200.dp).height(80.dp)
@@ -672,7 +686,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
             )
             {
 
-                if(!authLoadingState)
+                if(!authLoadingState || localStates.slotCheckLoading)
                 {
                     TextButton(
                         onClick = {
@@ -680,7 +694,9 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
 
                             if (authState)
                             {
-                                guitarViewModel.checkSlotAvailability()
+                                //guitarViewModel.checkSlotAvailability()
+
+                                localStates = localStates.copy(orderSlotCheck = true)
 
                                 if(!orderState.orderListFull && orderSlotState)
                                 {
