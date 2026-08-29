@@ -75,6 +75,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
         val orderUpdateFail: Boolean = false,
         val orderModInd: Boolean = false,
         val orderDeleteConfirm: Boolean = false,
+        val ordersFull: Boolean = false,
         val logInToPlaceOrder: Boolean = false
     )
 
@@ -93,6 +94,8 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
     val authState by guitarViewModel.authState.collectAsStateWithLifecycle()
 
     val authLoadingState by guitarViewModel.authLoadingState.collectAsStateWithLifecycle()
+
+    val orderSlotState by guitarViewModel.orderSlotState.collectAsStateWithLifecycle()
 
     val focusManager = LocalFocusManager.current
 
@@ -313,7 +316,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
     {
         TextButton(
             onClick = { localStates = localStates.copy(findTextBoxInd = true) },
-            enabled = !offlineState && authState,
+            enabled = false,  //!offlineState && authState,
             modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp))
                 .width(150.dp)
         ) {
@@ -657,10 +660,10 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
     }
 
 
-    if(orderState.instanceInd < 5)
+    /*if(orderState.instanceInd < 5)
     {
         if(orderState.orderUpdate)
-        {
+        {*/
             Box(
                 modifier = Modifier.width(200.dp).height(80.dp)
                     .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
@@ -673,9 +676,23 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                 {
                     TextButton(
                         onClick = {
-                            if (authState) {
-                                guitarViewModel.updateOrderState(2, true)
-                            } else {
+                            println(orderState.orderListFull.toString())
+
+                            if (authState)
+                            {
+                                guitarViewModel.checkSlotAvailability()
+
+                                if(!orderState.orderListFull && orderSlotState)
+                                {
+                                    guitarViewModel.updateOrderState(2, true)
+                                }
+                                else
+                                {
+                                    localStates = localStates.copy(ordersFull = true)
+                                }
+                            }
+                            else
+                            {
                                 localStates = localStates.copy(logInToPlaceOrder = true)
                             }
                         },
@@ -704,7 +721,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                     }
                 }
             }
-        }
+        /*}
         else
         {
             Box(
@@ -751,7 +768,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                 )
             }
         }
-    }
+    }*/
 
     if(localStates.logInToPlaceOrder)
     {
@@ -797,6 +814,51 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                 Text(
                     text = "Crap.", overflow = TextOverflow.Clip,
                     lineHeight = 30.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+            }
+            },
+            confirmButton = {})
+    }
+
+    if(localStates.ordersFull)
+    {
+        AlertDialog(
+            onDismissRequest = { localStates = localStates.copy(ordersFull = false) },
+            title = {Text("Order slots full!", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, fontSize = 20.sp)},
+            text = {Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally)
+            {
+                if(guitarViewModel.orderList.size > 0)
+                {
+                    Text(
+                        text = "Last session customer list: ",
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    for (i in 0 until guitarViewModel.orderList.size) {
+                        Text(
+                            text = "\nCustomer ${i + 1}: ${guitarViewModel.orderList[i].customer}",
+                            lineHeight = 25.sp,
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
+                Box(
+                    Modifier.background(Color(66, 203, 245), RoundedCornerShape(10.dp)).height(55.dp).width(120.dp)
+                        .border(3.dp, Color.Black, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center)
+                {
+                    TextButton(
+                        onClick = { localStates = localStates.copy(ordersFull = false) },
+                        modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
+                            .height(35.dp).width(90.dp)
+                    )
+                    {
+                        Text("Confirm",
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black)
+                    }
+                }
             }
             },
             confirmButton = {})

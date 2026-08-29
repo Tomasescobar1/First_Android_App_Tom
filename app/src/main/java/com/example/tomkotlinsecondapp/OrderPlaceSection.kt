@@ -154,6 +154,13 @@ fun ConfirmSection(guitarViewModel: GuitarOrder)
         return sanitizedDate
     }
 
+    fun orderPlace()
+    {
+        confirmData()
+
+        guitarViewModel.addDataToFirestore(inputOrderData = guitarViewModel.dbOrderList, serviceDate = orderDateConversion(guitarViewModel.dbOrderList["Date Of Creation"].toString()))
+    }
+
     LaunchedEffect(localStateManager.orderRemove)
     {
         delay(3000L.milliseconds)
@@ -220,10 +227,7 @@ fun ConfirmSection(guitarViewModel: GuitarOrder)
                         if(!loadingState)
                         {
                             TextButton(
-                                onClick = {
-                                    confirmData()
-                                    guitarViewModel.addDataToFirestore(inputOrderData = guitarViewModel.dbOrderList,
-                                    serviceDate = orderDateConversion(guitarViewModel.dbOrderList["Date Of Creation"].toString())) },
+                                onClick = { orderPlace() },
 
                                 modifier = Modifier.background(
                                     Color.White,
@@ -332,10 +336,10 @@ fun ConfirmSection(guitarViewModel: GuitarOrder)
             })
     }
 
-    if(orderState.orderListFull)
+    if(localStateManager.orderListFinal)
     {
         AlertDialog(
-            onDismissRequest = {guitarViewModel.updateOrderState(1,false)},
+            onDismissRequest = {  },
             title = {Text("Order slots full!" + "\nLast session customer list: ", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, fontSize = 20.sp)},
             text = {Column(verticalArrangement = Arrangement.Top)
             {
@@ -355,7 +359,7 @@ fun ConfirmSection(guitarViewModel: GuitarOrder)
                 .border(3.dp, Color.Black, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center)
                 {
                 TextButton(
-                    onClick = { localStateManager = localStateManager.copy(orderListFinal = true) },
+                    onClick = {  },
                     modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
                                         .height(35.dp).width(90.dp)
                     )
@@ -368,7 +372,7 @@ fun ConfirmSection(guitarViewModel: GuitarOrder)
             })
     }
 
-    if(localStateManager.orderListFinal)
+    /*if(localStateManager.orderListFinal)
     {
         AlertDialog(
             onDismissRequest = {dialogDismiss(false, false)},
@@ -425,7 +429,7 @@ fun ConfirmSection(guitarViewModel: GuitarOrder)
                     }
                 }
             })
-    }
+    }*/
 
     if(localStateManager.orderRemove)
     {

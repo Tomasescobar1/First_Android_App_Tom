@@ -246,7 +246,14 @@ import java.time.format.DateTimeFormatter
         }
     }
 
-    LaunchedEffect(maintenanceLoading)
+    fun maintenanceOrder()
+    {
+        maintenanceTypeConversion()
+
+        guitarViewModel.addDataToFirestore(inputMaintenanceData = maintenanceMapList, serviceOption = true, serviceDate = maintenanceDateConversion(maintenanceMapList["Date of creation"].toString()))
+    }
+
+    /*LaunchedEffect(maintenanceLoading)
     {
         if(maintenanceLoading)
         {
@@ -269,7 +276,7 @@ import java.time.format.DateTimeFormatter
                 localStateManager = localStateManager.copy(maintenanceSuccessLocal = true)
             }
         }
-    }
+    }*/
 
     Column(modifier = Modifier.fillMaxSize().background(Color.White).padding(top = (100 + offlineSignToggle).dp), verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally)
@@ -645,10 +652,10 @@ import java.time.format.DateTimeFormatter
                             contentAlignment = Alignment.Center
                         )
                         {
-                            if(!localStateManager.maintenanceLoadingTrigger)
+                            if(!maintenanceLoading)
                             {
                                 TextButton(
-                                    onClick = { guitarViewModel.updateOrderState(12, true) },
+                                    onClick = { maintenanceOrder() },
                                     modifier = Modifier.background(
                                         Color.White,
                                         RoundedCornerShape(12.dp)
@@ -683,7 +690,7 @@ import java.time.format.DateTimeFormatter
             )
         }
 
-        if(localStateManager.maintenanceSuccessLocal)
+        if(orderState.maintenanceSuccess)
         {
             AlertDialog(
                 onDismissRequest = { dialogDismiss() },

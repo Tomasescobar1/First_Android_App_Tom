@@ -105,6 +105,10 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
     val authState = _authState.asStateFlow()
 
+    private val _orderSlotState = MutableStateFlow(false)
+
+    val orderSlotState = _orderSlotState.asStateFlow()
+
     private val _dataState = MutableStateFlow(OrderDataState())
 
     val dataState: StateFlow<OrderDataState> = _dataState.asStateFlow()
@@ -442,6 +446,56 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
         println("Added ${orderList.last().color}")
     }
 
+    fun checkSlotAvailability() //: Boolean
+    {
+
+        viewModelScope.launch {
+
+            try
+            {
+                if(currentUser != null && uid != null)
+                {
+                    _authLoadingState.value = true
+
+                    val snapshot = dbOrders.document(uid).collection("User preferences").document("Date quantity").get().await()
+
+                    val snapshotLong: Int? = snapshot.getLong("OrderNumber")?.toInt()
+
+                    if(snapshot.exists())
+                    {
+                        if (snapshotLong != null)
+                        {
+                            if(snapshotLong == 5)
+                            {
+                                _orderSlotState.value = false
+
+                                println("Available order slots null")
+                            }
+                            else
+                            {
+                                _orderSlotState.value = true
+
+                                println("There are available order slots!")
+                            }
+                        }
+                    }
+                    else
+                    {
+                        _orderSlotState.value = true
+
+                        println("The snapshot doesn't exist yet.")
+                    }
+                }
+            }
+            catch (e: Exception)
+            {
+                println("Couldn't check the availability of the order slots")
+            }
+        }
+
+        _authLoadingState.value = false
+    }
+
     fun addDataToFirestore(inputOrderData: MutableMap<String, Any> = mutableMapOf(), inputMaintenanceData: MutableMap<String, Any> = mutableMapOf(), serviceOption: Boolean = false, serviceDate: String = "")
     {
         viewModelScope.launch {
@@ -458,7 +512,13 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
                             if(snapshot.exists())
                             {
-                                snapshotLong = snapshotLong!! + 1
+                                if (snapshotLong != null)
+                                {
+                                    if(snapshotLong <= 5)
+                                    {
+                                        snapshotLong = snapshotLong!! + 1
+                                    }
+                                }
                             }
                             else
                             {
@@ -467,34 +527,41 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                                 snapshotLong = 1
                             }
 
-                            if(snapshotLong <= 5)
+                            if (snapshotLong != null)
                             {
-                                dbOrders.document(uid).collection(serviceDate).document("${serviceDate}_${snapshotLong}").set(inputOrderData).await()
+                                if(snapshotLong <= 5)
+                                {
+                                    dbOrders.document(uid).collection(serviceDate).document("${serviceDate}_${snapshotLong}").set(inputOrderData).await()
 
-                                dbOrders.document(uid).collection("User preferences").document("Date quantity").set(dateSetter(snapshotLong)).await()
+                                    dbOrders.document(uid).collection("User preferences").document("Date quantity").set(dateSetter(snapshotLong)).await()
 
-                                _orderState.update { currentState -> currentState.copy(instanceInd = snapshotLong) }
+                                    _orderState.update { currentState -> currentState.copy(instanceInd = snapshotLong) }
 
-                                //_isLoading.value = false
+                                    _orderState.update { currentState -> currentState.copy(orderSuccess = true) }
 
-                                _orderState.update { currentState -> currentState.copy(orderSuccess = true) }
+                                    if(snapshotLong == 5)
+                                    {
+                                        _orderState.update { currentState -> currentState.copy(orderListFull = true) }
+                                    }
 
-                                println("Added order to Firestore, yaaaay!")
-                            }
-                            else
-                            {
-                                println("Order slots full, crap!")
+                                    println("Added order to Firestore, yaaaay!")
+                                }
+                                else
+                                {
+                                    println("Order slots full, crap!")
+                                }
                             }
 
                             _isLoading.value = false
 
-                            //
                         }
                         else
                         {
                             _maintenanceLoading.value = true
 
                             dbMaintenance.document(uid).collection(serviceDate).document().set(inputMaintenanceData).await()
+
+                            _maintenanceLoading.value = false
 
                             _orderState.update { currentState ->
                                 currentState.copy(
@@ -510,8 +577,13 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                         _orderState.update { currentState -> currentState.copy(maintenanceFail = true) }
 
                         println("Upload error message: ${e.message}")
-                    } else {
+
+                        _maintenanceLoading.value = false
+                    }
+                    else {
                         _orderState.update { currentState -> currentState.copy(orderFail = true) }
+
+                        _isLoading.value = false
                     }
                     println("Failed to add data, crap!")
                 }
