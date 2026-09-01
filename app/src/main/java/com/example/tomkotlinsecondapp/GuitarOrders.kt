@@ -170,6 +170,12 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
         return outputMap
     }
 
+    fun dateList(input1: Int?, input2: String): MutableMap<String, String>
+    {
+        val outputMap = mutableMapOf("Date ${input1.toString()}" to input2)
+        return outputMap
+    }
+
     private fun isCurrentlyOnline() : Boolean
     {
         val activeNetwork = connectivityManager.activeNetwork ?: return false
@@ -534,6 +540,8 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                                     dbOrders.document(uid).collection(serviceDate).document("${serviceDate}_${snapshotLong}").set(inputOrderData).await()
 
                                     dbOrders.document(uid).collection("User preferences").document("Date quantity").set(dateSetter(snapshotLong)).await()
+
+                                    dbOrders.document(uid).collection("User preferences").document("Dates placed").set(dateList(snapshotLong, serviceDate)).await()
 
                                     _orderState.update { currentState -> currentState.copy(instanceInd = snapshotLong) }
 

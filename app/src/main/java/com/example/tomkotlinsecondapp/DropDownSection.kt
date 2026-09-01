@@ -694,8 +694,6 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
 
                             if (authState)
                             {
-                                //guitarViewModel.checkSlotAvailability()
-
                                 localStates = localStates.copy(orderSlotCheck = true)
 
                                 if(!orderState.orderListFull && orderSlotState)
