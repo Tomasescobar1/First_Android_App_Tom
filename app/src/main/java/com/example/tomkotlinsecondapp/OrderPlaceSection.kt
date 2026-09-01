@@ -70,7 +70,6 @@ fun ConfirmSection(guitarViewModel: GuitarOrder)
         val loadingTrigger: Boolean = false,
         val orderLoadSuccess: Boolean = false,
         val orderRemove: Boolean = false,
-        val orderListFinal: Boolean = false
     )
 
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -131,8 +130,6 @@ fun ConfirmSection(guitarViewModel: GuitarOrder)
         else
         {
             guitarViewModel.updateOrderState(1, false)
-
-            localStateManager = localStateManager.copy(orderListFinal = false)
         }
     }
 
@@ -166,8 +163,6 @@ fun ConfirmSection(guitarViewModel: GuitarOrder)
         delay(3000L.milliseconds)
 
         localStateManager = localStateManager.copy(orderRemove = false)
-
-        localStateManager = localStateManager.copy(orderListFinal = false)
     }
 
     if(customerInputLocal != "")
@@ -278,11 +273,6 @@ fun ConfirmSection(guitarViewModel: GuitarOrder)
                             "\n Scale length: ${guitarViewModel.orderList.last().scaleLength} in ", overflow = TextOverflow.Clip,
                         lineHeight = 30.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
 
-                        /*for (i in 0 until guitarViewModel.orderList.size) {
-                            Text(text = "\nCustomer ${i+1}: ${guitarViewModel.orderList[i].customer}",
-                                lineHeight = 25.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-                        }*/
-
                         Text("\nAvailable order slots: ${5 - orderState.instanceInd}", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
 
                     }
@@ -336,7 +326,7 @@ fun ConfirmSection(guitarViewModel: GuitarOrder)
             })
     }
 
-    if(localStateManager.orderListFinal)
+    /*if(localStateManager.orderListFinal)
     {
         AlertDialog(
             onDismissRequest = {  },
@@ -372,7 +362,7 @@ fun ConfirmSection(guitarViewModel: GuitarOrder)
             })
     }
 
-    /*if(localStateManager.orderListFinal)
+    if(localStateManager.orderListFinal)
     {
         AlertDialog(
             onDismissRequest = {dialogDismiss(false, false)},
