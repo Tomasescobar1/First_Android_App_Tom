@@ -484,6 +484,12 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                                 println("There are available order slots!")
                             }
                         }
+                        else
+                        {
+                            _orderSlotState.value = true
+
+                            println("The snapshotLong variable is null... But can Still be written on.")
+                        }
                     }
                     else
                     {
