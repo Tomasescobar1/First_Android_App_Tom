@@ -7,6 +7,7 @@ import androidx.lifecycle.AndroidViewModel
 import android.app.Application
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.AuthResult
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
@@ -522,6 +523,8 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
                             var snapshotLong: Int? = snapshot.getLong("OrderNumber")?.toInt()
 
+                            val placedSnapshot = dbOrders.document(uid).collection("User preferences").document("Dates placed").get().await()
+
                             if(snapshot.exists())
                             {
                                 if (snapshotLong != null)
@@ -531,23 +534,31 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                                         snapshotLong = snapshotLong!! + 1
                                     }
                                 }
+                                else
+                                {
+                                    println("Snapshot does not exist!")
+
+                                    snapshotLong = 1
+                                }
                             }
                             else
                             {
-                                println("Snapshot does not exist!")
-
                                 snapshotLong = 1
+
+                                dbOrders.document(uid).collection("User preferences").document("Date quantity").set(dateSetter(snapshotLong)).await()
+
+                                dbOrders.document(uid).collection("User preferences").document("Dates placed").set(dateList(1, "Dates")).await()
                             }
 
-                            if (snapshotLong != null)
-                            {
+                            //if (snapshotLong != null)
+                            //{
                                 if(snapshotLong <= 5)
                                 {
                                     dbOrders.document(uid).collection(serviceDate).document("${serviceDate}_${snapshotLong}").set(inputOrderData).await()
 
                                     dbOrders.document(uid).collection("User preferences").document("Date quantity").set(dateSetter(snapshotLong)).await()
 
-                                    dbOrders.document(uid).collection("User preferences").document("Dates placed").set(dateList(snapshotLong, serviceDate)).await()
+                                    dbOrders.document(uid).collection("User preferences").document("Dates placed").update("Date Items", FieldValue.arrayUnion(serviceDate)).await()
 
                                     _orderState.update { currentState -> currentState.copy(instanceInd = snapshotLong) }
 
@@ -564,7 +575,7 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                                 {
                                     println("Order slots full, crap!")
                                 }
-                            }
+                            //}
 
                             _isLoading.value = false
 
