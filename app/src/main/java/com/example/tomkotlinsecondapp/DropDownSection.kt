@@ -226,18 +226,6 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
         }
     }
 
-    LaunchedEffect(localStates.orderSlotCheck)
-    {
-        localStates = localStates.copy(slotCheckLoading = true)
-
-        guitarViewModel.checkSlotAvailability()
-
-        delay(1000L.milliseconds)
-
-        localStates = localStates.copy(slotCheckLoading = false)
-    }
-
-
     Box(
         modifier = Modifier.width(200.dp).height(80.dp)
             .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
@@ -673,11 +661,6 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
             confirmButton = {})
     }
 
-
-    /*if(orderState.instanceInd < 5)
-    {
-        if(orderState.orderUpdate)
-        {*/
             Box(
                 modifier = Modifier.width(200.dp).height(80.dp)
                     .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
@@ -735,54 +718,6 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                     }
                 }
             }
-        /*}
-        else
-        {
-            Box(
-                modifier = Modifier.width(200.dp).height(80.dp)
-                    .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
-                    .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
-                contentAlignment = Alignment.Center
-            )
-            {
-                TextButton(
-                    onClick = { localStates = localStates.copy(orderModInd = true) },
-                    modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp))
-                        .width(150.dp)
-                ) {
-                    Text(
-                        text = "Update Order",
-                        color = Color.Black,
-                        fontFamily = FontFamily.Monospace,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-        }
-    }
-    else
-    {
-        Box(
-            modifier = Modifier.width(200.dp).height(80.dp)
-                .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
-                .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
-            contentAlignment = Alignment.Center
-        )
-        {
-            TextButton(
-                onClick = { guitarViewModel.updateOrderState(1,true) },
-                modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp))
-                    .width(150.dp)
-            ) {
-                Text(
-                    text = "View Order List",
-                    color = Color.Black,
-                    fontFamily = FontFamily.Monospace,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
-    }*/
 
     if(localStates.logInToPlaceOrder)
     {

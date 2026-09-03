@@ -285,6 +285,8 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
                             firebaseAuthWithGoogle(idToken)
 
+                            checkSlotAvailability()
+
                             println("The sign in with Google method worked!!!!, ID token: $idToken")
 
                             _authLoadingState.value = false
@@ -453,7 +455,7 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
         println("Added ${orderList.last().color}")
     }
 
-    fun checkSlotAvailability() //: Boolean
+    fun checkSlotAvailability()
     {
 
         viewModelScope.launch {
@@ -462,7 +464,7 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
             {
                 if(currentUser != null && uid != null)
                 {
-                    _authLoadingState.value = true
+                    //_authLoadingState.value = true
 
                     val snapshot = dbOrders.document(uid).collection("User preferences").document("Date quantity").get().await()
 
@@ -506,7 +508,7 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
             }
         }
 
-        _authLoadingState.value = false
+        //_authLoadingState.value = false
     }
 
     fun addDataToFirestore(inputOrderData: MutableMap<String, Any> = mutableMapOf(), inputMaintenanceData: MutableMap<String, Any> = mutableMapOf(), serviceOption: Boolean = false, serviceDate: String = "")
@@ -522,8 +524,6 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                             val snapshot = dbOrders.document(uid).collection("User preferences").document("Date quantity").get().await()
 
                             var snapshotLong: Int? = snapshot.getLong("OrderNumber")?.toInt()
-
-                            val placedSnapshot = dbOrders.document(uid).collection("User preferences").document("Dates placed").get().await()
 
                             if(snapshot.exists())
                             {
@@ -547,11 +547,10 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
                                 dbOrders.document(uid).collection("User preferences").document("Date quantity").set(dateSetter(snapshotLong)).await()
 
-                                dbOrders.document(uid).collection("User preferences").document("Dates placed").set(dateList(1, "Dates")).await()
+                                dbOrders.document(uid).collection("User preferences").document("Dates placed").set(hashMapOf<String, Any>()).await()
                             }
 
-                            //if (snapshotLong != null)
-                            //{
+
                                 if(snapshotLong <= 5)
                                 {
                                     dbOrders.document(uid).collection(serviceDate).document("${serviceDate}_${snapshotLong}").set(inputOrderData).await()
@@ -575,7 +574,6 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                                 {
                                     println("Order slots full, crap!")
                                 }
-                            //}
 
                             _isLoading.value = false
 
