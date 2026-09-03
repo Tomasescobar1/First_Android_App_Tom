@@ -58,6 +58,8 @@ fun FABComponent(guitarViewModel: GuitarOrder) {
 
     val authState by guitarViewModel.authState.collectAsStateWithLifecycle()
 
+    val userOrderView by guitarViewModel.userOrderView.collectAsStateWithLifecycle()
+
     val context = LocalContext.current
 
     var fabOffset by remember {mutableStateOf(Offset(0f, 0f))}
@@ -76,9 +78,9 @@ fun FABComponent(guitarViewModel: GuitarOrder) {
     }
 
     sizeOffset = when {
-        offlineState -> 540
+        userOrderView -> 480
         //authState -> 540
-        else -> 480
+        else -> 400
     }
 
     FloatingActionButton (

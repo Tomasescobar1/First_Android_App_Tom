@@ -110,6 +110,10 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
     val orderSlotState = _orderSlotState.asStateFlow()
 
+    private val _userOrderView = MutableStateFlow(false)
+
+    val userOrderView = _userOrderView.asStateFlow()
+
     private val _dataState = MutableStateFlow(OrderDataState())
 
     val dataState: StateFlow<OrderDataState> = _dataState.asStateFlow()
@@ -131,7 +135,7 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
         "Date Of Creation" to " "
     )
 
-    var  dbDateRegistry: MutableMap<String, Any> = mutableMapOf("OrderNumber" to 1)
+    var orderDateList: List<String>? = listOf<String>()
 
     var increment = mutableIntStateOf(0)
 
@@ -286,6 +290,8 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                             firebaseAuthWithGoogle(idToken)
 
                             checkSlotAvailability()
+
+                            checkSavedDates()
 
                             println("The sign in with Google method worked!!!!, ID token: $idToken")
 
@@ -464,8 +470,6 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
             {
                 if(currentUser != null && uid != null)
                 {
-                    //_authLoadingState.value = true
-
                     val snapshot = dbOrders.document(uid).collection("User preferences").document("Date quantity").get().await()
 
                     val snapshotLong: Int? = snapshot.getLong("OrderNumber")?.toInt()
@@ -507,8 +511,41 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                 println("Couldn't check the availability of the order slots")
             }
         }
+    }
 
-        //_authLoadingState.value = false
+    fun checkSavedDates()
+    {
+        viewModelScope.launch{
+
+            try {
+
+                if(currentUser != null && uid != null)
+                {
+                    val ordersRef = dbOrders.document(uid).collection("User preferences").document("Dates placed").get().await()
+
+                    if(ordersRef.exists())
+                    {
+                        orderDateList = ordersRef.get("Date Items") as? List<String>
+
+                        for(i in 0 until (orderDateList?.size ?: 5))
+                        {
+                            println("Date number $i: ${orderDateList?.get(i)}")
+                        }
+
+                        _userOrderView.value = true
+                    }
+                }
+                else
+                {
+                    println("No dates have been uploaded yet.")
+                }
+
+            }
+            catch(e: Exception)
+            {
+                println("Unable to fetch placed dates.")
+            }
+        }
     }
 
     fun addDataToFirestore(inputOrderData: MutableMap<String, Any> = mutableMapOf(), inputMaintenanceData: MutableMap<String, Any> = mutableMapOf(), serviceOption: Boolean = false, serviceDate: String = "")
@@ -595,7 +632,8 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                             println("Added maintenance to Firestore, yaaaay!")
                         }
                     }
-                } catch (e: Exception) {
+                }
+                catch (e: Exception) {
                     if (serviceOption) {
                         _orderState.update { currentState -> currentState.copy(maintenanceFail = true) }
 

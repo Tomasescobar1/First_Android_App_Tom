@@ -61,7 +61,6 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
 
     data class LocalStates(
         val dropped: Boolean = false,
-        val findTextBoxInd: Boolean = false,
         val scaleLengthDropped: Boolean = false,
         val searchLoadTrigger: Boolean = false,
         val loadingUpdateTrigger: Boolean = false,
@@ -78,7 +77,8 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
         val ordersFull: Boolean = false,
         val logInToPlaceOrder: Boolean = false,
         val orderSlotCheck: Boolean = false,
-        val slotCheckLoading: Boolean = false
+        val slotCheckLoading: Boolean = false,
+        val orderListInd: Boolean = false,
     )
 
     var localStates by remember {mutableStateOf(LocalStates())}
@@ -99,6 +99,8 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
 
     val orderSlotState by guitarViewModel.orderSlotState.collectAsStateWithLifecycle()
 
+    val userOrderView by guitarViewModel.userOrderView.collectAsStateWithLifecycle()
+
     val focusManager = LocalFocusManager.current
 
     val context = LocalContext.current
@@ -113,8 +115,6 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
 
     fun dialogDismiss(input:Boolean = false)
     {
-        localStates = localStates.copy(findTextBoxInd = false)
-
         customerInputLocal = ""
 
         localStates = localStates.copy(orderFoundInd = false)
@@ -177,8 +177,6 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
 
             localStates = localStates.copy(orderDeleteConfirm = false)
 
-            localStates = localStates.copy(findTextBoxInd = false)
-
             localStates = localStates.copy(orderFoundInd = false)
         }
     }
@@ -219,8 +217,6 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
             localStates = localStates.copy(orderFindFail = false)
 
             localStates= localStates.copy(orderFindFailInd = false)
-
-            localStates = localStates.copy(findTextBoxInd = false)
 
             customerInputLocal = ""
         }
@@ -309,32 +305,35 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
         }
     }
 
-    Box(
-        modifier = Modifier.width(200.dp).height(80.dp)
-            .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
-            .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
-        contentAlignment = Alignment.Center
-    )
+    if(userOrderView)
     {
-        TextButton(
-            onClick = { localStates = localStates.copy(findTextBoxInd = true) },
-            enabled = false,  //!offlineState && authState,
-            modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp))
-                .width(150.dp)
-        ) {
-            Text(
-                text = "Visualize orders",
-                color = Color.Black,
-                fontFamily = FontFamily.Monospace,
-                fontWeight = FontWeight.Bold
-            )
+        Box(
+            modifier = Modifier.width(200.dp).height(80.dp)
+                .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
+                .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
+            contentAlignment = Alignment.Center
+        )
+        {
+            TextButton(
+                onClick = { localStates = localStates.copy(orderListInd = true) },
+                enabled = false,
+                modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp))
+                    .width(150.dp)
+            ) {
+                Text(
+                    text = "Visualize orders",
+                    color = Color.Black,
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
     }
 
-    if(localStates.findTextBoxInd)
+    if(localStates.orderListInd)
     {
         AlertDialog(
-            onDismissRequest = {  },
+            onDismissRequest = { localStates = localStates.copy(orderListInd = false) },
             title = {},
             text = {
                 Column(
@@ -343,31 +342,17 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Please type in your name to find your order.",
+                        text = "Placed orders history.",
                         fontFamily = FontFamily.Monospace,
                         fontWeight = FontWeight.Bold
                     )
-                    OutlinedTextField(
 
-                        value = customerInputLocal,
-                        onValueChange = { customerInputLocal = it },
-                        label = {
-                            Text(
-                                text = "Your name here.",
-                                fontFamily = FontFamily.Monospace
-                            )
-                        },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                        keyboardActions = KeyboardActions (
-                            onDone = {
-                                keyboardController?.hide()
-                                focusManager.clearFocus()
-                            }
-                        )
-                    )
+                    Column(){
+                        /*for(i in 0 until guitarViewModel.orderDateList.size())
+                        {
 
-                    Box(modifier = Modifier.height(30.dp).width(80.dp))
+                        }*/
+                    }
 
                     Box(
                         modifier = Modifier.width(200.dp).height(80.dp)
