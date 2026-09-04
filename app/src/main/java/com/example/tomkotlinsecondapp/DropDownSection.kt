@@ -316,7 +316,6 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
         {
             TextButton(
                 onClick = { localStates = localStates.copy(orderListInd = true) },
-                enabled = false,
                 modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp))
                     .width(150.dp)
             ) {
@@ -338,8 +337,8 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
             text = {
                 Column(
                     modifier = Modifier.height(400.dp).width(400.dp),
-                    verticalArrangement = Arrangement.Top,
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    verticalArrangement = Arrangement.SpaceBetween,
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(
                         text = "Placed orders history.",
@@ -347,11 +346,22 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                         fontWeight = FontWeight.Bold
                     )
 
-                    Column(){
-                        /*for(i in 0 until guitarViewModel.orderDateList.size())
+                    Box(modifier = Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.TopCenter)
+                    {
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        )
                         {
-
-                        }*/
+                            for (i in 0 until (guitarViewModel.orderDateList?.size ?: 5)) {
+                                Text(
+                                    text = "Order ${i + 1}: ${guitarViewModel.orderDateList?.get(i)}",
+                                    lineHeight = 25.sp,
+                                    fontFamily = FontFamily.Monospace,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
                     }
 
                     Box(
@@ -361,22 +371,8 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                         contentAlignment = Alignment.Center
                     )
                     {
-                        if(localStates.searchLoadTrigger)
-                        {
-                            Box(modifier = Modifier.height(50.dp).width(150.dp).background(Color.White, RoundedCornerShape(12.dp)),
-                                contentAlignment = Alignment.Center)
-                            {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(40.dp),
-                                    strokeWidth = 4.dp, color = Color.White,
-                                    trackColor = Color(66, 203,245)
-                                )
-                            }
-                        }
-                        else
-                        {
                             TextButton(
-                                onClick = { guitarViewModel.orderFind(customerInputLocal) },
+                                onClick = { localStates = localStates.copy(orderListInd = false) },
                                 modifier = Modifier.background(
                                     Color.White,
                                     RoundedCornerShape(12.dp)
@@ -384,13 +380,13 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                                     .width(150.dp)
                             ) {
                                 Text(
-                                    text = "Find Order",
+                                    text = "Confirm",
                                     color = Color.Black,
                                     fontFamily = FontFamily.Monospace,
                                     fontWeight = FontWeight.Bold
                                 )
                             }
-                        }
+
                     }
                 }
 
