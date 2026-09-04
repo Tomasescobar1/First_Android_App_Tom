@@ -204,6 +204,14 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
         }
     }
 
+    LaunchedEffect(localStates.orderListInd)
+    {
+        if(localStates.orderListInd)
+        {
+            guitarViewModel.checkSavedDates()
+        }
+    }
+
     LaunchedEffect(localStates.orderFindFailInd)
     {
         if(orderState.orderFoundFail && localStates.orderFindFailInd)
@@ -336,17 +344,18 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
             title = {},
             text = {
                 Column(
-                    modifier = Modifier.height(400.dp).width(400.dp),
+                    modifier = Modifier.height(600.dp).width(400.dp),
                     verticalArrangement = Arrangement.SpaceBetween,
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(
-                        text = "Placed orders history.",
+                        text = "Placed orders history. \nOrders placed on:",
+                        lineHeight = 30.sp,
                         fontFamily = FontFamily.Monospace,
                         fontWeight = FontWeight.Bold
                     )
 
-                    Box(modifier = Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.TopCenter)
+                    Box(modifier = Modifier.fillMaxWidth().height(350.dp), contentAlignment = Alignment.TopCenter)
                     {
                         Column(
                             modifier = Modifier.fillMaxWidth(),
@@ -354,12 +363,25 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                         )
                         {
                             for (i in 0 until (guitarViewModel.orderDateList?.size ?: 5)) {
-                                Text(
-                                    text = "Order ${i + 1}: ${guitarViewModel.orderDateList?.get(i)}",
-                                    lineHeight = 25.sp,
-                                    fontFamily = FontFamily.Monospace,
-                                    fontWeight = FontWeight.Bold
-                                )
+                                Box(
+                                    modifier = Modifier.width(200.dp).height(80.dp)
+                                        .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
+                                        .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    TextButton(
+                                        onClick = {},
+                                        modifier = Modifier.width(150.dp).height(40.dp).background(Color.White, RoundedCornerShape(10.dp)),
+                                    )
+                                    {
+                                        Text(
+                                            text = "${guitarViewModel.orderDateList?.get(i)}",
+                                            lineHeight = 25.sp,
+                                            fontFamily = FontFamily.Monospace,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
