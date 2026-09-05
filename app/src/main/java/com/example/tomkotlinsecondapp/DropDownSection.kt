@@ -2,6 +2,9 @@ package com.example.tomkotlinsecondapp
 
 import android.text.style.LineHeightSpan
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -313,7 +316,11 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
         }
     }
 
-    if(userOrderView)
+    AnimatedVisibility(
+        visible = userOrderView,
+        enter = slideInVertically(animationSpec = tween(200){fullHeight -> -fullHeight}),
+        exit = slideOutVertically(animationSpec = tween(200){fullHeight -> fullHeight})
+    )
     {
         Box(
             modifier = Modifier.width(200.dp).height(80.dp)
@@ -370,7 +377,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                                     contentAlignment = Alignment.Center
                                 ) {
                                     TextButton(
-                                        onClick = {},
+                                        onClick = { guitarViewModel.readOrderFromFirebase(guitarViewModel.orderDateList?.get(i)) },
                                         modifier = Modifier.width(150.dp).height(40.dp).background(Color.White, RoundedCornerShape(10.dp)),
                                     )
                                     {
@@ -378,6 +385,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                                             text = "${guitarViewModel.orderDateList?.get(i)}",
                                             lineHeight = 25.sp,
                                             fontFamily = FontFamily.Monospace,
+                                            color = Color.Black,
                                             fontWeight = FontWeight.Bold
                                         )
                                     }

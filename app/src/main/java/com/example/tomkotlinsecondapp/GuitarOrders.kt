@@ -114,6 +114,10 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
     val userOrderView = _userOrderView.asStateFlow()
 
+    private val _orderFetchLoading = MutableStateFlow(false)
+
+    val orderFetchLoading = _orderFetchLoading.asStateFlow()
+
     private val _dataState = MutableStateFlow(OrderDataState())
 
     val dataState: StateFlow<OrderDataState> = _dataState.asStateFlow()
@@ -136,6 +140,8 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
     )
 
     var orderDateList: List<String>? = listOf<String>()
+
+    var fetchedOrderList: List<String> = listOf<String>()
 
     var increment = mutableIntStateOf(0)
 
@@ -651,28 +657,30 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun orderFind(input: String = "", orderType: Boolean = false)
+    fun readOrderFromFirebase(input: String?)
     {
-        if(input != "" && !orderType)
-        {
-            _orderState.update{currentState -> currentState.copy(orderSearchLoad = true)}
-
-            viewModelScope.launch {
-                try
+        viewModelScope.launch{
+            try
+            {
+                if(currentUser != null && uid != null)
                 {
-                    val snapshot = dbOrders.document(uid.toString()).get().await()
+                    _orderFetchLoading.value = true
 
-                    if(!orderState.value.orderFoundInd)
+                    val dateSnapshot = dbOrders.document(uid).collection(input.toString()).get().await()
+
+                    fetchedOrderList = dateSnapshot.documents.map {document -> document.id}
+
+                    for(i in 0 until fetchedOrderList.size)
                     {
-                        _orderState.update {currentState -> currentState.copy(orderFoundFail = true)}
+                        println("Date $i: ${fetchedOrderList[i]}")
                     }
-                }
-                catch (e: Exception)
-                {
-                    _orderState.update {currentState -> currentState.copy(orderFoundFailMode = true)}
 
-                    _orderState.update {currentState -> currentState.copy(orderFoundFail = true)}
+                    _orderFetchLoading.value = false
                 }
+            }
+            catch(e: Exception)
+            {
+                println("No fetched dates, crap!")
             }
         }
     }
