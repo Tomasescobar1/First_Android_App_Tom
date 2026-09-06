@@ -664,8 +664,6 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
             {
                 if(currentUser != null && uid != null)
                 {
-                    _orderFetchLoading.value = true
-
                     val dateSnapshot = dbOrders.document(uid).collection(input.toString()).get().await()
 
                     fetchedOrderList = dateSnapshot.documents.map {document -> document.id}
@@ -675,7 +673,7 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                         println("Date $i: ${fetchedOrderList[i]}")
                     }
 
-                    _orderFetchLoading.value = false
+                    _orderFetchLoading.value = true
                 }
             }
             catch(e: Exception)

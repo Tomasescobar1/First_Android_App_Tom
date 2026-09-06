@@ -104,11 +104,15 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
 
     val userOrderView by guitarViewModel.userOrderView.collectAsStateWithLifecycle()
 
+    val orderFetchLoading by guitarViewModel.orderFetchLoading.collectAsStateWithLifecycle()
+
     val focusManager = LocalFocusManager.current
 
     val context = LocalContext.current
 
     val keyboardController = LocalSoftwareKeyboardController.current
+
+    var localDateIndicator: String? by remember {mutableStateOf("")}
 
     var customerInputLocal by remember {mutableStateOf("")}
 
@@ -322,6 +326,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
         exit = slideOutVertically(animationSpec = tween(200){fullHeight -> fullHeight})
     )
     {
+
         Box(
             modifier = Modifier.width(200.dp).height(80.dp)
                 .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
@@ -356,7 +361,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(
-                        text = "Placed orders history. \nOrders placed on:",
+                        text = "Placed orders history:",
                         lineHeight = 30.sp,
                         fontFamily = FontFamily.Monospace,
                         fontWeight = FontWeight.Bold
@@ -377,7 +382,8 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                                     contentAlignment = Alignment.Center
                                 ) {
                                     TextButton(
-                                        onClick = { guitarViewModel.readOrderFromFirebase(guitarViewModel.orderDateList?.get(i)) },
+                                        onClick = { guitarViewModel.readOrderFromFirebase(guitarViewModel.orderDateList?.get(i))
+                                                  localDateIndicator = guitarViewModel.orderDateList?.get(i)},
                                         modifier = Modifier.width(150.dp).height(40.dp).background(Color.White, RoundedCornerShape(10.dp)),
                                     )
                                     {
@@ -423,6 +429,47 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
             },
             confirmButton = {}
         )
+    }
+
+    if(orderFetchLoading)
+    {
+        AlertDialog(
+            onDismissRequest = {},
+            title = {Text("Orders placed on ${localDateIndicator}:", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
+            text = {Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.Top, horizontalAlignment = Alignment.CenterHorizontally)
+            {
+                for(i in 0 until (guitarViewModel.orderDateList?.size ?: 5))
+                {
+                    Text(
+                        text = guitarViewModel.fetchedOrderList[i],
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+                }
+
+                Box(modifier = Modifier.height(30.dp).width(80.dp))
+
+                Box(
+                    Modifier.background(Color(66, 203, 245), RoundedCornerShape(10.dp)).width(120.dp).height(55.dp)
+                        .border(3.dp, Color.Black, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center
+                )
+                {
+                    TextButton(
+                        onClick = {},
+                        modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
+                            .width(90.dp).height(35.dp)
+                    )
+                    {
+                        Text("Confirm",
+                            fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold,
+                            color = Color.Black)
+                    }
+                }
+
+            }
+            },
+            confirmButton = {})
     }
 
     if(localStates.orderFoundInd)
@@ -786,7 +833,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
             title = {Text("Order slots full!", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, fontSize = 20.sp)},
             text = {Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally)
             {
-                if(guitarViewModel.orderList.size > 0)
+                if(guitarViewModel.orderList.isNotEmpty())
                 {
                     Text(
                         text = "Last session customer list: ",
