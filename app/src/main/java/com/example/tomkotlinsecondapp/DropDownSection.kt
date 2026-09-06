@@ -434,11 +434,11 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
     if(orderFetchLoading)
     {
         AlertDialog(
-            onDismissRequest = {},
+            onDismissRequest = { guitarViewModel.updateOrderState(13, false) },
             title = {Text("Orders placed on ${localDateIndicator}:", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
             text = {Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.Top, horizontalAlignment = Alignment.CenterHorizontally)
             {
-                for(i in 0 until (guitarViewModel.orderDateList?.size ?: 5))
+                for(i in 0 until guitarViewModel.fetchedOrderList.size)
                 {
                     Text(
                         text = guitarViewModel.fetchedOrderList[i],
@@ -456,7 +456,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                 )
                 {
                     TextButton(
-                        onClick = {},
+                        onClick = { guitarViewModel.updateOrderState(13, false) },
                         modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
                             .width(90.dp).height(35.dp)
                     )

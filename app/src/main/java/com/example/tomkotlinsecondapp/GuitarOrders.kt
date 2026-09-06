@@ -444,6 +444,10 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
             12 -> {
                 _maintenanceLoading.value = input2
             }
+
+            13 -> {
+                _orderFetchLoading.value = false
+            }
         }
     }
 
