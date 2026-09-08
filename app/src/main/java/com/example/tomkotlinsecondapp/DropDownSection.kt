@@ -106,6 +106,8 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
 
     val orderFetchLoading by guitarViewModel.orderFetchLoading.collectAsStateWithLifecycle()
 
+    val fetchedOrder by guitarViewModel.orderSpecs.collectAsStateWithLifecycle()
+
     val focusManager = LocalFocusManager.current
 
     val context = LocalContext.current
@@ -440,12 +442,25 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
             {
                 for(i in 0 until guitarViewModel.fetchedOrderList.size)
                 {
-                    Text(
-                        text = guitarViewModel.fetchedOrderList[i],
-                        fontFamily = FontFamily.Monospace,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black
+                    Box(
+                        Modifier.background(Color(66, 203, 245), RoundedCornerShape(10.dp)).width(170.dp).height(55.dp)
+                            .border(3.dp, Color.Black, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center
                     )
+                    {
+                        TextButton(
+                            onClick = { guitarViewModel.readOrderFromFirebase("", true, guitarViewModel.fetchedOrderList[i]) },
+                            modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
+                                .width(140.dp).height(35.dp)
+                        )
+                        {
+                            Text(
+                                text = guitarViewModel.fetchedOrderList[i],
+                                fontFamily = FontFamily.Monospace,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Black
+                            )
+                        }
+                    }
                 }
 
                 Box(modifier = Modifier.height(30.dp).width(80.dp))

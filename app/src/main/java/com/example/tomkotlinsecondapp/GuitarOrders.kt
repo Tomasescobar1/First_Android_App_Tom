@@ -79,6 +79,13 @@ data class OrderDataState (
     var cameraInd: Int = 0
 )
 
+data class FetchedOrderData (
+    var color: String = "",
+    var modelInd: String = "",
+    var customerOrdering: String = "",
+    var scaleLength: Double = 0.0,
+)
+
 data class FloatingActionState(
     var deployedState: Boolean = false,
     var invBackground: Boolean = false,
@@ -174,6 +181,10 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
     private val _isOffline = MutableStateFlow(!isCurrentlyOnline())
 
     val isOffline = _isOffline.asStateFlow()
+
+    private val _orderSpecs = MutableStateFlow(FetchedOrderData())
+
+    val orderSpecs = _orderSpecs.asStateFlow()
 
     fun dateSetter(input: Int? = 1) : MutableMap<String, Int?>
     {
@@ -661,23 +672,38 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun readOrderFromFirebase(input: String?)
+    fun readOrderFromFirebase(input: String?, input2: Boolean = false, specificOrderParam: String = "")
     {
         viewModelScope.launch{
             try
             {
                 if(currentUser != null && uid != null)
                 {
-                    val dateSnapshot = dbOrders.document(uid).collection(input.toString()).get().await()
-
-                    fetchedOrderList = dateSnapshot.documents.map {document -> document.id}
-
-                    for(i in 0 until fetchedOrderList.size)
+                    if(!input2)
                     {
-                        println("Date $i: ${fetchedOrderList[i]}")
-                    }
+                        val dateSnapshot = dbOrders.document(uid).collection(input.toString()).get().await()
 
-                    _orderFetchLoading.value = true
+                        fetchedOrderList = dateSnapshot.documents.map { document -> document.id }
+
+                        for (i in 0 until fetchedOrderList.size)
+                        {
+                            println("Date $i: ${fetchedOrderList[i]}")
+                        }
+
+                        _orderFetchLoading.value = true
+                    }
+                    else
+                    {
+                        if(specificOrderParam  != "")
+                        {
+                            val orderSnapshot = dbOrders.document(uid).collection(input.toString()).document(specificOrderParam).get().await()
+
+                            if(orderSnapshot.exists())
+                            {
+                                _orderSpecs.update { orderSnapshot.toObject(FetchedOrderData::class.java)!! }
+                            }
+                        }
+                    }
                 }
             }
             catch(e: Exception)
