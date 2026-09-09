@@ -155,7 +155,7 @@ fun ConfirmSection(guitarViewModel: GuitarOrder)
     {
         confirmData()
 
-        guitarViewModel.addDataToFirestore(inputOrderData = guitarViewModel.dbOrderList, serviceDate = orderDateConversion(guitarViewModel.dbOrderList["Date Of Creation"].toString()))
+        guitarViewModel.addDataToFirestore(inputOrderData = guitarViewModel.dbOrderList, serviceDate = orderDateConversion(guitarViewModel.dbOrderList["dateOfCreation"].toString()))
     }
 
     LaunchedEffect(localStateManager.orderRemove)

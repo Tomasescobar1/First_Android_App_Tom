@@ -84,6 +84,7 @@ data class FetchedOrderData (
     var modelInd: String = "",
     var customerOrdering: String = "",
     var scaleLength: Double = 0.0,
+    var dateOfCreation: String = ""
 )
 
 data class FloatingActionState(
@@ -121,9 +122,9 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
     val userOrderView = _userOrderView.asStateFlow()
 
-    private val _orderFetchLoading = MutableStateFlow(false)
+    private val _orderFetchLoad = MutableStateFlow(false)
 
-    val orderFetchLoading = _orderFetchLoading.asStateFlow()
+    val orderFetchLoad = _orderFetchLoad.asStateFlow()
 
     private val _dataState = MutableStateFlow(OrderDataState())
 
@@ -139,11 +140,11 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
     var orderList = mutableListOf<Guitar>()
 
     var dbOrderList: MutableMap<String, Any> = mutableMapOf(
-        "Customer" to " ",
-        "Model" to " ",
-        "Color" to " ",
-        "Scale Length" to 0.0,
-        "Date Of Creation" to " "
+        "customerOrdering" to " ",
+        "modelInd" to " ",
+        "color" to " ",
+        "scaleLength" to 0.0,
+        "dateOfCreation" to " "
     )
 
     var orderDateList: List<String>? = listOf<String>()
@@ -185,6 +186,10 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
     private val _orderSpecs = MutableStateFlow(FetchedOrderData())
 
     val orderSpecs = _orderSpecs.asStateFlow()
+
+    private val _specificFetchedOrder = MutableStateFlow(false)
+
+    val specificFetchedOrder = _specificFetchedOrder.asStateFlow()
 
     fun dateSetter(input: Int? = 1) : MutableMap<String, Int?>
     {
@@ -457,7 +462,7 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
             }
 
             13 -> {
-                _orderFetchLoading.value = false
+                _orderFetchLoad.value = false
             }
         }
     }
@@ -469,15 +474,15 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
         orderList.add(newGuitar)
 
-        dbOrderList.replace("Customer", orderList.last().customer.lowercase())
+        dbOrderList.replace("customerOrdering", orderList.last().customer.lowercase())
 
-        dbOrderList.replace("Model", orderList.last().model)
+        dbOrderList.replace("modelInd", orderList.last().model)
 
-        dbOrderList.replace("Color", orderList.last().color)
+        dbOrderList.replace("color", orderList.last().color)
 
-        dbOrderList.replace("Scale Length", orderList.last().scaleLength)
+        dbOrderList.replace("scaleLength", orderList.last().scaleLength)
 
-        dbOrderList.replace("Date Of Creation", orderList.last().dateOfCreation)
+        dbOrderList.replace("dateOfCreation", orderList.last().dateOfCreation)
 
         println("Added ${orderList.last().color}")
     }
@@ -589,7 +594,7 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                                 {
                                     if(snapshotLong <= 5)
                                     {
-                                        snapshotLong = snapshotLong!! + 1
+                                        snapshotLong += 1
                                     }
                                 }
                                 else
@@ -690,7 +695,7 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                             println("Date $i: ${fetchedOrderList[i]}")
                         }
 
-                        _orderFetchLoading.value = true
+                        _orderFetchLoad.value = true
                     }
                     else
                     {
@@ -701,6 +706,10 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                             if(orderSnapshot.exists())
                             {
                                 _orderSpecs.update { orderSnapshot.toObject(FetchedOrderData::class.java)!! }
+
+                                _specificFetchedOrder.value = true
+
+                                println(orderSpecs.value)
                             }
                         }
                     }

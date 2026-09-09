@@ -29,6 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -104,9 +105,11 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
 
     val userOrderView by guitarViewModel.userOrderView.collectAsStateWithLifecycle()
 
-    val orderFetchLoading by guitarViewModel.orderFetchLoading.collectAsStateWithLifecycle()
+    val orderFetchLoad by guitarViewModel.orderFetchLoad.collectAsStateWithLifecycle()
 
     val fetchedOrder by guitarViewModel.orderSpecs.collectAsStateWithLifecycle()
+
+    val specificFetchedOrder by guitarViewModel.specificFetchedOrder.collectAsStateWithLifecycle()
 
     val focusManager = LocalFocusManager.current
 
@@ -433,7 +436,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
         )
     }
 
-    if(orderFetchLoading)
+    if(orderFetchLoad)
     {
         AlertDialog(
             onDismissRequest = { guitarViewModel.updateOrderState(13, false) },
@@ -448,7 +451,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                     )
                     {
                         TextButton(
-                            onClick = { guitarViewModel.readOrderFromFirebase("", true, guitarViewModel.fetchedOrderList[i]) },
+                            onClick = { guitarViewModel.readOrderFromFirebase(localDateIndicator, true, guitarViewModel.fetchedOrderList[i]) },
                             modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
                                 .width(140.dp).height(35.dp)
                         )
@@ -487,11 +490,11 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
             confirmButton = {})
     }
 
-    if(localStates.orderFoundInd)
+    if(specificFetchedOrder)
     {
         AlertDialog(
             onDismissRequest = {},
-            title = {Text("Order found!" + "\nSpecifications: ", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
+            title = {Text("Order specifications: ", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
             text = {Column(verticalArrangement = Arrangement.Top)
             {
                 Text(
