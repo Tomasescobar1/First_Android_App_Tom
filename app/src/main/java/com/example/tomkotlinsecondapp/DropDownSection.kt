@@ -493,13 +493,19 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
     if(specificFetchedOrder)
     {
         AlertDialog(
-            onDismissRequest = {},
+            onDismissRequest = {guitarViewModel.updateOrderState(14, false)},
             title = {Text("Order specifications: ", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
-            text = {Column(verticalArrangement = Arrangement.Top)
+            text = {Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.Top, horizontalAlignment = Alignment.CenterHorizontally)
             {
                 Text(
-                    text = foundOrderString, overflow = TextOverflow.Clip,
+                    text = "Customer: ${fetchedOrder.customerOrdering}\n" +
+                            "Model: ${fetchedOrder.modelInd}\n" +
+                            "Color: ${fetchedOrder.color}\n" +
+                            "Scale Length: ${fetchedOrder.scaleLength}",
+                    overflow = TextOverflow.Clip,
                     lineHeight = 30.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+
+                Box(modifier = Modifier.fillMaxWidth().height(10.dp))
 
                 Box(
                     Modifier.background(Color(66, 203, 245), RoundedCornerShape(10.dp)).width(170.dp).height(55.dp)
@@ -508,6 +514,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                 {
                     TextButton(
                         onClick = {dialogDismiss(true)},
+                        enabled = false,
                         modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
                             .width(150.dp).height(35.dp)
                     )
@@ -518,7 +525,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                     }
                 }
 
-                Box(modifier = Modifier.height(30.dp).width(80.dp))
+                Box(modifier = Modifier.height(20.dp).width(80.dp))
 
                 Box(
                     Modifier.background(Color(245, 66, 87), RoundedCornerShape(10.dp)).width(170.dp).height(55.dp)
@@ -527,6 +534,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                 {
                     TextButton(
                         onClick = { localStates = localStates.copy(orderDeleteConfirm = true) },
+                        enabled = false,
                         modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
                             .width(150.dp).height(35.dp)
                     )
@@ -546,7 +554,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                 )
                 {
                     TextButton(
-                        onClick = {dialogDismiss()},
+                        onClick = {guitarViewModel.updateOrderState(14, false)},
                         modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
                             .width(90.dp).height(35.dp)
                     )

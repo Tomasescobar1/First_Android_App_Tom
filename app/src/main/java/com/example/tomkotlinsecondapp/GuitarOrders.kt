@@ -464,6 +464,10 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
             13 -> {
                 _orderFetchLoad.value = false
             }
+
+            14 -> {
+                _specificFetchedOrder.value = false
+            }
         }
     }
 
