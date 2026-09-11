@@ -27,6 +27,7 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
+import android.nfc.Tag
 import android.util.Log
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.rpc.context.AttributeContext
@@ -478,7 +479,10 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
         orderList.add(newGuitar)
 
-        dbOrderList.replace("customerOrdering", orderList.last().customer.lowercase())
+        if(customer != "")
+        {
+            dbOrderList.replace("customerOrdering", orderList.last().customer.lowercase())
+        }
 
         dbOrderList.replace("modelInd", orderList.last().model)
 
@@ -713,7 +717,7 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
                                 _specificFetchedOrder.value = true
 
-                                println(orderSpecs.value)
+                                Log.d("readOrderFromFirebase", "${orderSpecs.value}")
                             }
                         }
                     }
@@ -726,23 +730,25 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun orderUpdate(customer: String = "", model: String = "Telecaster", color: String = "White", scaleLength: Double = 25.5)
+    fun orderUpdate(model: String = "Telecaster", color: String = "White", scaleLength: Double = 25.5, serviceDate: String, specificOrderParam: String)
     {
-        val documentRef = dbOrders.document(foundDocumentId)
+        //val documentRef = dbOrders.document(uid).collection(serviceDate).document(specificOrderParam).get().await()
 
-        if(customer != "")
+        if(currentUser != null && uid != null)
         {
-            addListElement(
-                customer,
-                model,
-                color,
-                scaleLength
-            )
-
             viewModelScope.launch {
                 try
                 {
-                    documentRef.update(dbOrderList).await()
+                    val documentRef = dbOrders.document(uid).collection(serviceDate).document(specificOrderParam).get().await()
+
+                    addListElement(
+                        "",
+                        model,
+                        color,
+                        scaleLength
+                    )
+
+                    //documentRef.update().await()
 
                     _updatedOrderString.value = dbOrderList.entries.joinToString(separator = "\n") { entry -> "${entry.key}: ${entry.value}" }
 

@@ -1,6 +1,7 @@
 package com.example.tomkotlinsecondapp
 
 import android.text.style.LineHeightSpan
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
@@ -119,6 +120,8 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
 
     var localDateIndicator: String? by remember {mutableStateOf("")}
 
+    var specificOrderDocName by remember {mutableStateOf("")}
+
     var customerInputLocal by remember {mutableStateOf("")}
 
     val guitarNames = listOf("Telecaster", "Growler")
@@ -145,7 +148,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
     {
         if(localStates.loadingUpdateTrigger)
         {
-            guitarViewModel.orderUpdate(customerInputLocal, cDataState.modelIndVal,
+            guitarViewModel.orderUpdate(cDataState.modelIndVal,
                 cDataState.colorInput, cDataState.scaleLengthInd)
 
             customerInputLocal = ""
@@ -340,16 +343,37 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
         )
         {
             TextButton(
-                onClick = { localStates = localStates.copy(orderListInd = true) },
+                onClick = {
+                    if(!localStates.orderModInd)
+                    {
+                        localStates = localStates.copy(orderListInd = true)
+                    }
+                    else
+                    {
+                        Log.d("DropDownSection 351", "Update conditional working!")
+                    }
+                          },
                 modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp))
                     .width(150.dp)
             ) {
-                Text(
-                    text = "Visualize orders",
-                    color = Color.Black,
-                    fontFamily = FontFamily.Monospace,
-                    fontWeight = FontWeight.Bold
-                )
+                if(!localStates.orderModInd)
+                {
+                    Text(
+                        text = "Visualize orders",
+                        color = Color.Black,
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                else
+                {
+                    Text(
+                        text = "Update order",
+                        color = Color.Black,
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
     }
@@ -361,7 +385,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
             title = {},
             text = {
                 Column(
-                    modifier = Modifier.height(600.dp).width(400.dp),
+                    modifier = Modifier.height(600.dp).width(450.dp),
                     verticalArrangement = Arrangement.SpaceBetween,
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
@@ -372,7 +396,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                         fontWeight = FontWeight.Bold
                     )
 
-                    Box(modifier = Modifier.fillMaxWidth().height(350.dp), contentAlignment = Alignment.TopCenter)
+                    Box(modifier = Modifier.fillMaxWidth().height(420.dp), contentAlignment = Alignment.TopCenter)
                     {
                         Column(
                             modifier = Modifier.fillMaxWidth(),
@@ -388,7 +412,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                                 ) {
                                     TextButton(
                                         onClick = { guitarViewModel.readOrderFromFirebase(guitarViewModel.orderDateList?.get(i))
-                                                  localDateIndicator = guitarViewModel.orderDateList?.get(i)},
+                                                  localDateIndicator = guitarViewModel.orderDateList?.get(i) },
                                         modifier = Modifier.width(150.dp).height(40.dp).background(Color.White, RoundedCornerShape(10.dp)),
                                     )
                                     {
@@ -451,7 +475,10 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                     )
                     {
                         TextButton(
-                            onClick = { guitarViewModel.readOrderFromFirebase(localDateIndicator, true, guitarViewModel.fetchedOrderList[i]) },
+                            onClick = {
+                                guitarViewModel.readOrderFromFirebase(localDateIndicator, true, guitarViewModel.fetchedOrderList[i])
+                                specificOrderDocName = guitarViewModel.fetchedOrderList[i]
+                                      },
                             modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
                                 .width(140.dp).height(35.dp)
                         )
@@ -513,8 +540,12 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                 )
                 {
                     TextButton(
-                        onClick = {dialogDismiss(true)},
-                        enabled = false,
+                        onClick = {
+                            guitarViewModel.updateOrderState(13, false)
+                            guitarViewModel.updateOrderState(14, false)
+                            localStates = localStates.copy(orderListInd = false)
+                            localStates = localStates.copy(orderModInd = true)
+                        },
                         modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
                             .width(150.dp).height(35.dp)
                     )
@@ -567,7 +598,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
             })
     }
 
-    if(localStates.orderModInd)
+    /*if(localStates.orderModInd)
     {
         AlertDialog(
             onDismissRequest = {},
@@ -649,7 +680,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
             },
             confirmButton = {}
         )
-    }
+    }*/
 
     if(localStates.orderDeleteConfirm)
     {
