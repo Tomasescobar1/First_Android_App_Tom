@@ -149,7 +149,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
         if(localStates.loadingUpdateTrigger)
         {
             guitarViewModel.orderUpdate(cDataState.modelIndVal,
-                cDataState.colorInput, cDataState.scaleLengthInd)
+                cDataState.colorInput,cDataState.scaleLengthInd)
 
             customerInputLocal = ""
 
@@ -352,7 +352,9 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                     {
                         Log.d("DropDownSection 351", "Update conditional working!")
 
+                        guitarViewModel.addListElement(fetchedOrder.customerOrdering, cDataState.modelIndVal, cDataState.colorInput, cDataState.scaleLengthInd)
 
+                        guitarViewModel.addDataToFirestore(inputOrderData = guitarViewModel.dbOrderList, serviceDate = localDateIndicator.toString(), update = true, dateUpdate = specificOrderDocName)
                     }
                           },
                 modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp))

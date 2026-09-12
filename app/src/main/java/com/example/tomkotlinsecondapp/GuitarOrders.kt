@@ -645,6 +645,10 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                                     else
                                     {
                                         dbOrders.document(uid).collection(serviceDate).document(dateUpdate).set(inputOrderData).await()
+
+                                        _orderState.update {currentState -> currentState.copy(updateSuccess = true)}
+
+                                        println("Updated Firestore order, yaaaaay!")
                                     }
                                 }
                                 else
@@ -736,7 +740,7 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun orderUpdate(model: String = "Telecaster", color: String = "White", scaleLength: Double = 25.5, serviceDate: String, specificOrderParam: String)
+    fun orderUpdate(model: String = "Telecaster", color: String = "White", scaleLength: Double = 25.5)
     {
         //val documentRef = dbOrders.document(uid).collection(serviceDate).document(specificOrderParam).get().await()
 
@@ -745,7 +749,7 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
             viewModelScope.launch {
                 try
                 {
-                    val documentRef = dbOrders.document(uid).collection(serviceDate).document(specificOrderParam).get().await()
+                    //val documentRef = dbOrders.document(uid).collection(serviceDate).document(specificOrderParam).get().await()
 
                     addListElement(
                         "",
