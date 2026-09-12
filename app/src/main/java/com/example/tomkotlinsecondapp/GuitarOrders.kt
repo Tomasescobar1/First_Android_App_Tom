@@ -582,7 +582,7 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun addDataToFirestore(inputOrderData: MutableMap<String, Any> = mutableMapOf(), inputMaintenanceData: MutableMap<String, Any> = mutableMapOf(), serviceOption: Boolean = false, serviceDate: String = "")
+    fun addDataToFirestore(inputOrderData: MutableMap<String, Any> = mutableMapOf(), inputMaintenanceData: MutableMap<String, Any> = mutableMapOf(), serviceOption: Boolean = false, serviceDate: String = "", update: Boolean = false, dateUpdate: String = "")
     {
         viewModelScope.launch {
                 try {
@@ -600,7 +600,7 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                             {
                                 if (snapshotLong != null)
                                 {
-                                    if(snapshotLong <= 5)
+                                    if(snapshotLong <= 5 && !update)
                                     {
                                         snapshotLong += 1
                                     }
@@ -621,25 +621,31 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                                 dbOrders.document(uid).collection("User preferences").document("Dates placed").set(hashMapOf<String, Any>()).await()
                             }
 
-
                                 if(snapshotLong <= 5)
                                 {
-                                    dbOrders.document(uid).collection(serviceDate).document("${serviceDate}_${snapshotLong}").set(inputOrderData).await()
-
-                                    dbOrders.document(uid).collection("User preferences").document("Date quantity").set(dateSetter(snapshotLong)).await()
-
-                                    dbOrders.document(uid).collection("User preferences").document("Dates placed").update("Date Items", FieldValue.arrayUnion(serviceDate)).await()
-
-                                    _orderState.update { currentState -> currentState.copy(instanceInd = snapshotLong) }
-
-                                    _orderState.update { currentState -> currentState.copy(orderSuccess = true) }
-
-                                    if(snapshotLong == 5)
+                                    if(!update)
                                     {
-                                        _orderState.update { currentState -> currentState.copy(orderListFull = true) }
-                                    }
+                                        dbOrders.document(uid).collection(serviceDate).document("${serviceDate}_${snapshotLong}").set(inputOrderData).await()
 
-                                    println("Added order to Firestore, yaaaay!")
+                                        dbOrders.document(uid).collection("User preferences").document("Date quantity").set(dateSetter(snapshotLong)).await()
+
+                                        dbOrders.document(uid).collection("User preferences").document("Dates placed").update("Date Items", FieldValue.arrayUnion(serviceDate)).await()
+
+                                        _orderState.update { currentState -> currentState.copy(instanceInd = snapshotLong) }
+
+                                        _orderState.update { currentState -> currentState.copy(orderSuccess = true) }
+
+                                        if (snapshotLong == 5)
+                                        {
+                                            _orderState.update { currentState -> currentState.copy(orderListFull = true) }
+                                        }
+
+                                        println("Added order to Firestore, yaaaay!")
+                                    }
+                                    else
+                                    {
+                                        dbOrders.document(uid).collection(serviceDate).document(dateUpdate).set(inputOrderData).await()
+                                    }
                                 }
                                 else
                                 {

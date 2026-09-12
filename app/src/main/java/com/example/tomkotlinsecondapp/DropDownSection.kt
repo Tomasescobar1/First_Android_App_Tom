@@ -351,6 +351,8 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                     else
                     {
                         Log.d("DropDownSection 351", "Update conditional working!")
+
+
                     }
                           },
                 modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp))
