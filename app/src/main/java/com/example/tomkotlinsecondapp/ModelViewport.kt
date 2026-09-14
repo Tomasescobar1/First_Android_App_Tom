@@ -146,7 +146,7 @@ fun GuitarViewPort(guitarViewModel: GuitarOrder)
             {}
         }
 
-        key(cDataState.colorInput, cDataState.modelIndVal, cDataState.cameraInd)
+        key(cDataState.colorInput, cDataState.modelIndVal)
         {
             SceneView(
                 modifier = Modifier.fillMaxSize().border(6.dp, Color.White)

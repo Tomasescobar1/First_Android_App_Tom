@@ -144,28 +144,6 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
         guitarViewModel.updateOrderState(4, false)
     }
 
-    LaunchedEffect(localStates.loadingUpdateTrigger)
-    {
-        if(localStates.loadingUpdateTrigger)
-        {
-            guitarViewModel.orderUpdate(cDataState.modelIndVal,
-                cDataState.colorInput,cDataState.scaleLengthInd)
-
-            customerInputLocal = ""
-
-            delay(1500L.milliseconds)
-
-            if(orderState.updateSuccess)
-            {
-                localStates = localStates.copy(loadingUpdateTrigger = false)
-
-                guitarViewModel.updateOrderState(8, false)
-
-                localStates = localStates.copy(orderUpdateInd = true)
-            }
-        }
-    }
-
     LaunchedEffect(localStates.orderUpdateInd)
     {
         if(localStates.orderUpdateInd)
@@ -193,29 +171,6 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
             localStates = localStates.copy(orderDeleteConfirm = false)
 
             localStates = localStates.copy(orderFoundInd = false)
-        }
-    }
-
-    LaunchedEffect(orderState.orderSearchLoad)
-    {
-        if(orderState.orderSearchLoad)
-        {
-            localStates = localStates.copy(searchLoadTrigger = true)
-
-            delay(3000L.milliseconds)
-
-            localStates = localStates.copy(searchLoadTrigger = false)
-
-            guitarViewModel.updateOrderState(10, false)
-
-            if(orderState.orderFoundInd)
-            {
-                localStates = localStates.copy(orderFoundInd = true)
-            }
-            else if(orderState.orderFoundFail)
-            {
-                localStates = localStates.copy(orderFindFailInd = true)
-            }
         }
     }
 
@@ -344,7 +299,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
         {
             TextButton(
                 onClick = {
-                    if(!localStates.orderModInd)
+                    if(!orderState.orderModInd)
                     {
                         localStates = localStates.copy(orderListInd = true)
                     }
@@ -352,7 +307,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                     {
                         Log.d("DropDownSection 351", "Update conditional working!")
 
-                        guitarViewModel.addListElement(fetchedOrder.customerOrdering, cDataState.modelIndVal, cDataState.colorInput, cDataState.scaleLengthInd)
+                        guitarViewModel.addListElement(fetchedOrder.customerOrdering, cDataState.modelIndVal, cDataState.colorInput, cDataState.scaleLengthInd, localDateIndicator.toString())
 
                         guitarViewModel.addDataToFirestore(inputOrderData = guitarViewModel.dbOrderList, serviceDate = localDateIndicator.toString(), update = true, dateUpdate = specificOrderDocName)
                     }
@@ -360,7 +315,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                 modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp))
                     .width(150.dp)
             ) {
-                if(!localStates.orderModInd)
+                if(!orderState.orderModInd)
                 {
                     Text(
                         text = "Visualize orders",
@@ -546,9 +501,8 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                     TextButton(
                         onClick = {
                             guitarViewModel.updateOrderState(13, false)
-                            guitarViewModel.updateOrderState(14, false)
+                            guitarViewModel.updateOrderState(14, true)
                             localStates = localStates.copy(orderListInd = false)
-                            localStates = localStates.copy(orderModInd = true)
                         },
                         modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
                             .width(150.dp).height(35.dp)
@@ -601,90 +555,6 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                 }
             })
     }
-
-    /*if(localStates.orderModInd)
-    {
-        AlertDialog(
-            onDismissRequest = {},
-            title = {},
-            text = {
-                Column(
-                    modifier = Modifier.height(400.dp).width(400.dp),
-                    verticalArrangement = Arrangement.Top,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "Please type in your name to modify the order.",
-                        fontFamily = FontFamily.Monospace,
-                        fontWeight = FontWeight.Bold
-                    )
-                    OutlinedTextField(
-
-                        value = customerInputLocal,
-                        onValueChange = { customerInputLocal = it },
-                        label = {
-                            Text(
-                                text = "Your name here.",
-                                fontFamily = FontFamily.Monospace
-                            )
-                        },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                        keyboardActions = KeyboardActions (
-                            onDone = {
-                                keyboardController?.hide()
-                                focusManager.clearFocus()
-                            }
-                        )
-                    )
-
-                    Box(modifier = Modifier.height(30.dp).width(80.dp))
-
-                    Box(
-                        modifier = Modifier.width(200.dp).height(80.dp)
-                            .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
-                            .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
-                        contentAlignment = Alignment.Center
-                    )
-                    {
-                        if(localStates.loadingUpdateTrigger)
-                        {
-                            Box(modifier = Modifier.height(50.dp).width(150.dp).background(Color.White, RoundedCornerShape(12.dp)),
-                                contentAlignment = Alignment.Center)
-                            {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(40.dp),
-                                    strokeWidth = 4.dp, color = Color.White,
-                                    trackColor = Color(66, 203,245)
-                                )
-                            }
-                        }
-                        else
-                        {
-                            TextButton(
-                                onClick = { localStates = localStates.copy(loadingUpdateTrigger = true) },
-                                modifier = Modifier.background(
-                                    Color.White,
-                                    RoundedCornerShape(12.dp)
-                                )
-                                    .width(150.dp)
-                            ) {
-                                Text(
-                                    text = "Confirm",
-                                    color = Color.Black,
-                                    fontFamily = FontFamily.Monospace,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                        }
-
-                    }
-                }
-
-            },
-            confirmButton = {}
-        )
-    }*/
 
     if(localStates.orderDeleteConfirm)
     {
@@ -746,22 +616,6 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                 Text(
                     text = updatedOrderString, overflow = TextOverflow.Clip,
                     lineHeight = 30.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-            }
-            },
-            confirmButton = {})
-    }
-
-    if(localStates.orderFindFail)
-    {
-        AlertDialog(
-            onDismissRequest = {},
-            title = {Text("Order not found!", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
-            text = {Column(verticalArrangement = Arrangement.Top)
-            {
-                if(orderState.orderFoundFailMode)
-                {
-                    Text(text = "Failed to connect to server.")
-                }
             }
             },
             confirmButton = {})

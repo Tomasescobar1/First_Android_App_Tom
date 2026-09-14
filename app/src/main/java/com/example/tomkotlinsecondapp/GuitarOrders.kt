@@ -60,6 +60,7 @@ data class OrderUIState (
     var updateLoad: Boolean = false,
     var updateSuccess: Boolean = false,
     var updateLoadFail: Boolean = false,
+    var orderModInd: Boolean = false,
     var orderUpdate: Boolean = true,
     var orderUpdateFail: Boolean = false,
     var orderFoundInd: Boolean = false,
@@ -138,6 +139,7 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
     private val _deployedState = MutableStateFlow(FloatingActionState())
 
     val deployedState: StateFlow<FloatingActionState> = _deployedState.asStateFlow()
+
     var orderList = mutableListOf<Guitar>()
 
     var dbOrderList: MutableMap<String, Any> = mutableMapOf(
@@ -468,6 +470,15 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
             14 -> {
                 _specificFetchedOrder.value = false
+
+                if(input2)
+                {
+                    _orderState.update {currentState -> currentState.copy(orderModInd = true)}
+                }
+                else
+                {
+                    _orderState.update {currentState -> currentState.copy(orderModInd = false)}
+                }
             }
         }
     }
@@ -667,11 +678,7 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
                             _maintenanceLoading.value = false
 
-                            _orderState.update { currentState ->
-                                currentState.copy(
-                                    maintenanceSuccess = true
-                                )
-                            }
+                            _orderState.update { currentState -> currentState.copy(maintenanceSuccess = true) }
 
                             println("Added maintenance to Firestore, yaaaay!")
                         }
@@ -690,7 +697,7 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
                         _isLoading.value = false
                     }
-                    println("Failed to add data, crap!")
+                    println("Failed to add data, crap! ${e.message}")
                 }
         }
     }
@@ -737,39 +744,6 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
             {
                 println("No fetched dates, crap!")
             }
-        }
-    }
-
-    fun orderUpdate(model: String = "Telecaster", color: String = "White", scaleLength: Double = 25.5)
-    {
-        //val documentRef = dbOrders.document(uid).collection(serviceDate).document(specificOrderParam).get().await()
-
-        if(currentUser != null && uid != null)
-        {
-            viewModelScope.launch {
-                try
-                {
-                    //val documentRef = dbOrders.document(uid).collection(serviceDate).document(specificOrderParam).get().await()
-
-                    addListElement(
-                        "",
-                        model,
-                        color,
-                        scaleLength
-                    )
-
-                    //documentRef.update().await()
-
-                    _updatedOrderString.value = dbOrderList.entries.joinToString(separator = "\n") { entry -> "${entry.key}: ${entry.value}" }
-
-                    _orderState.update {currentState -> currentState.copy(updateSuccess = true)}
-                }
-                catch (e: Exception)
-                {
-                    _orderState.update {currentState -> currentState.copy(orderUpdateFail = true)}
-                }
-            }
-
         }
     }
 

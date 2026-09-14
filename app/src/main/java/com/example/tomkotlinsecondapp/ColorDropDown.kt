@@ -28,7 +28,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 
 
 @Composable
-fun ColorDropDown(guitarViewModel: GuitarOrder = viewModel())
+fun ColorDropDown(guitarViewModel: GuitarOrder)
 {
     val cDataState by guitarViewModel.dataState.collectAsStateWithLifecycle()
 
