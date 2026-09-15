@@ -112,15 +112,15 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
 
     val specificFetchedOrder by guitarViewModel.specificFetchedOrder.collectAsStateWithLifecycle()
 
+    val localDateIndicator by guitarViewModel.fetchedOrderDate.collectAsStateWithLifecycle()
+
+    val specificOrderDocName by guitarViewModel.specificDocName.collectAsStateWithLifecycle()
+
     val focusManager = LocalFocusManager.current
 
     val context = LocalContext.current
 
     val keyboardController = LocalSoftwareKeyboardController.current
-
-    var localDateIndicator: String? by remember {mutableStateOf("")}
-
-    var specificOrderDocName by remember {mutableStateOf("")}
 
     var customerInputLocal by remember {mutableStateOf("")}
 
@@ -144,17 +144,15 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
         guitarViewModel.updateOrderState(4, false)
     }
 
-    LaunchedEffect(localStates.orderUpdateInd)
+    LaunchedEffect(orderState.updateSuccess)
     {
-        if(localStates.orderUpdateInd)
+        if(orderState.updateSuccess)
         {
             delay(3000L.milliseconds)
 
-            guitarViewModel.updateOrderState(7, true)
+            guitarViewModel.updateOrderState(8, false)
 
-            localStates = localStates.copy(orderUpdateInd = false)
-
-            localStates = localStates.copy(orderModInd = false)
+            guitarViewModel.updateOrderState(14, false)
         }
     }
 
@@ -167,6 +165,8 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
             guitarViewModel.updateOrderState(9, false)
 
             guitarViewModel.updateOrderState(6, false)
+
+            guitarViewModel.updateOrderState(14, false)
 
             localStates = localStates.copy(orderDeleteConfirm = false)
 
@@ -371,7 +371,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                                 ) {
                                     TextButton(
                                         onClick = { guitarViewModel.readOrderFromFirebase(guitarViewModel.orderDateList?.get(i))
-                                                  localDateIndicator = guitarViewModel.orderDateList?.get(i) },
+                                                  guitarViewModel.updateOrderState(15, true, guitarViewModel.orderDateList?.get(i).toString()) },
                                         modifier = Modifier.width(150.dp).height(40.dp).background(Color.White, RoundedCornerShape(10.dp)),
                                     )
                                     {
@@ -436,7 +436,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                         TextButton(
                             onClick = {
                                 guitarViewModel.readOrderFromFirebase(localDateIndicator, true, guitarViewModel.fetchedOrderList[i])
-                                specificOrderDocName = guitarViewModel.fetchedOrderList[i]
+                                guitarViewModel.updateOrderState(15, false, guitarViewModel.fetchedOrderList[i])
                                       },
                             modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
                                 .width(140.dp).height(35.dp)
@@ -523,7 +523,6 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                 {
                     TextButton(
                         onClick = { localStates = localStates.copy(orderDeleteConfirm = true) },
-                        enabled = false,
                         modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
                             .width(150.dp).height(35.dp)
                     )
@@ -559,10 +558,17 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
     if(localStates.orderDeleteConfirm)
     {
         AlertDialog(
-            onDismissRequest = {},
+            onDismissRequest = { localStates = localStates.copy(orderDeleteConfirm = false )},
             title = {Text("Confirm order delete?", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
-            text = {Column(verticalArrangement = Arrangement.Top)
+            text = {Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.SpaceBetween, horizontalAlignment = Alignment.CenterHorizontally)
             {
+
+                Text(
+                    text = "It will be unrecoverable after deletion..."
+                )
+
+                Box(modifier = Modifier.height(20.dp))
+
                 Box(
                     modifier = Modifier.width(200.dp).height(80.dp)
                         .background(Color(245, 66, 87), RoundedCornerShape(16.dp))
@@ -571,7 +577,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                 )
                 {
                     TextButton(
-                        onClick = { guitarViewModel.orderDelete() },
+                        onClick = { guitarViewModel.orderDelete(localDateIndicator.toString(), specificOrderDocName) },
                         modifier = Modifier.background(
                             Color.White,
                             RoundedCornerShape(12.dp)
@@ -595,18 +601,33 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
     {
         AlertDialog(
             onDismissRequest = {},
-            title = {Text("Order deleted successfully!" + "\n Specs:", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
-            text = {Column(verticalArrangement = Arrangement.Top)
+            title = {Text("Order deleted successfully!", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
+            text = {Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.Top)
             {
                 Text(
-                    text = foundOrderString, overflow = TextOverflow.Clip,
+                    text = "Yes!", overflow = TextOverflow.Clip,
                     lineHeight = 30.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
             }
             },
             confirmButton = {})
     }
 
-    if(localStates.orderUpdateInd)
+    if(orderState.updateSuccess)
+    {
+        AlertDialog(
+            onDismissRequest = {},
+            title = {Text("Order updated successfully!", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
+            text = {Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.Top)
+            {
+                Text(
+                    text = "Yes!", overflow = TextOverflow.Clip,
+                    lineHeight = 30.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+            }
+            },
+            confirmButton = {})
+    }
+
+    /*if(localStates.orderUpdateInd)
     {
         AlertDialog(
             onDismissRequest = {},
@@ -619,7 +640,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
             }
             },
             confirmButton = {})
-    }
+    }*/
 
     if(localStates.orderUpdateFail)
     {

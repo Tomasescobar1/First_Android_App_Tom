@@ -194,6 +194,14 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
     val specificFetchedOrder = _specificFetchedOrder.asStateFlow()
 
+    private val _fetchedOrderDate = MutableStateFlow("")
+
+    val fetchedOrderDate = _fetchedOrderDate.asStateFlow()
+
+    private val _specificDocName = MutableStateFlow("")
+
+    val specificDocName = _specificDocName.asStateFlow()
+
     fun dateSetter(input: Int? = 1) : MutableMap<String, Int?>
     {
         val outputMap = mutableMapOf("OrderNumber" to input)
@@ -384,7 +392,7 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun updateOrderState(input1: Int, input2: Boolean)
+    fun updateOrderState(input1: Int, input2: Boolean, input3: String = "")
     {
         when(input1)
         {
@@ -480,6 +488,17 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                     _orderState.update {currentState -> currentState.copy(orderModInd = false)}
                 }
             }
+
+            15 -> {
+                if(input2)
+                {
+                    _fetchedOrderDate.value = input3
+                }
+                else
+                {
+                    _specificDocName.value = input3
+                }
+            }
         }
     }
 
@@ -508,9 +527,7 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
     fun checkSlotAvailability()
     {
-
         viewModelScope.launch {
-
             try
             {
                 if(currentUser != null && uid != null)
@@ -560,19 +577,19 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
     fun checkSavedDates()
     {
-        viewModelScope.launch{
+        viewModelScope.launch {
 
-            try {
-
-                if(currentUser != null && uid != null)
+            if(currentUser != null && uid != null)
+            {
+                try
                 {
                     val ordersRef = dbOrders.document(uid).collection("User preferences").document("Dates placed").get().await()
 
-                    if(ordersRef.exists())
+                    if (ordersRef.exists())
                     {
                         orderDateList = ordersRef.get("Date Items") as? List<String>
 
-                        for(i in 0 until (orderDateList?.size ?: 5))
+                        for (i in 0 until (orderDateList?.size ?: 5))
                         {
                             println("Date number $i: ${orderDateList?.get(i)}")
                         }
@@ -580,15 +597,10 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                         _userOrderView.value = true
                     }
                 }
-                else
+                catch (e: Exception)
                 {
-                    println("No dates have been uploaded yet.")
+                    println("Unable to fetch placed dates.")
                 }
-
-            }
-            catch(e: Exception)
-            {
-                println("Unable to fetch placed dates.")
             }
         }
     }
@@ -596,120 +608,125 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
     fun addDataToFirestore(inputOrderData: MutableMap<String, Any> = mutableMapOf(), inputMaintenanceData: MutableMap<String, Any> = mutableMapOf(), serviceOption: Boolean = false, serviceDate: String = "", update: Boolean = false, dateUpdate: String = "")
     {
         viewModelScope.launch {
-                try {
-                    if(currentUser != null && uid != null)
+
+            if(currentUser != null && uid != null)
+            {
+                try
+                {
+                    if (!serviceOption)
                     {
-                        if (!serviceOption)
+                        _isLoading.value = true
+
+                        val snapshot = dbOrders.document(uid).collection("User preferences").document("Date quantity").get().await()
+
+                        var snapshotLong: Int? = snapshot.getLong("OrderNumber")?.toInt()
+
+                        if (snapshot.exists())
                         {
-                            _isLoading.value = true
-
-                            val snapshot = dbOrders.document(uid).collection("User preferences").document("Date quantity").get().await()
-
-                            var snapshotLong: Int? = snapshot.getLong("OrderNumber")?.toInt()
-
-                            if(snapshot.exists())
+                            if (snapshotLong != null)
                             {
-                                if (snapshotLong != null)
+                                if (snapshotLong <= 5 && !update)
                                 {
-                                    if(snapshotLong <= 5 && !update)
-                                    {
-                                        snapshotLong += 1
-                                    }
-                                }
-                                else
-                                {
-                                    println("Snapshot does not exist!")
-
-                                    snapshotLong = 1
+                                    snapshotLong += 1
                                 }
                             }
                             else
                             {
+                                println("Snapshot does not exist!")
+
                                 snapshotLong = 1
-
-                                dbOrders.document(uid).collection("User preferences").document("Date quantity").set(dateSetter(snapshotLong)).await()
-
-                                dbOrders.document(uid).collection("User preferences").document("Dates placed").set(hashMapOf<String, Any>()).await()
                             }
-
-                                if(snapshotLong <= 5)
-                                {
-                                    if(!update)
-                                    {
-                                        dbOrders.document(uid).collection(serviceDate).document("${serviceDate}_${snapshotLong}").set(inputOrderData).await()
-
-                                        dbOrders.document(uid).collection("User preferences").document("Date quantity").set(dateSetter(snapshotLong)).await()
-
-                                        dbOrders.document(uid).collection("User preferences").document("Dates placed").update("Date Items", FieldValue.arrayUnion(serviceDate)).await()
-
-                                        _orderState.update { currentState -> currentState.copy(instanceInd = snapshotLong) }
-
-                                        _orderState.update { currentState -> currentState.copy(orderSuccess = true) }
-
-                                        if (snapshotLong == 5)
-                                        {
-                                            _orderState.update { currentState -> currentState.copy(orderListFull = true) }
-                                        }
-
-                                        println("Added order to Firestore, yaaaay!")
-                                    }
-                                    else
-                                    {
-                                        dbOrders.document(uid).collection(serviceDate).document(dateUpdate).set(inputOrderData).await()
-
-                                        _orderState.update {currentState -> currentState.copy(updateSuccess = true)}
-
-                                        println("Updated Firestore order, yaaaaay!")
-                                    }
-                                }
-                                else
-                                {
-                                    println("Order slots full, crap!")
-                                }
-
-                            _isLoading.value = false
-
                         }
                         else
                         {
-                            _maintenanceLoading.value = true
+                            snapshotLong = 1
 
-                            dbMaintenance.document(uid).collection(serviceDate).document().set(inputMaintenanceData).await()
+                            dbOrders.document(uid).collection("User preferences").document("Date quantity").set(dateSetter(snapshotLong)).await()
 
-                            _maintenanceLoading.value = false
-
-                            _orderState.update { currentState -> currentState.copy(maintenanceSuccess = true) }
-
-                            println("Added maintenance to Firestore, yaaaay!")
+                            dbOrders.document(uid).collection("User preferences").document("Dates placed").set(hashMapOf<String, Any>()).await()
                         }
+
+                        if (snapshotLong <= 5)
+                        {
+                            if (!update)
+                            {
+                                dbOrders.document(uid).collection(serviceDate).document("${serviceDate}_${snapshotLong}").set(inputOrderData).await()
+
+                                dbOrders.document(uid).collection("User preferences").document("Date quantity").set(dateSetter(snapshotLong)).await()
+
+                                dbOrders.document(uid).collection("User preferences").document("Dates placed").update("Date Items", FieldValue.arrayUnion(serviceDate)).await()
+
+                                _orderState.update { currentState -> currentState.copy(instanceInd = snapshotLong) }
+
+                                _orderState.update { currentState -> currentState.copy(orderSuccess = true) }
+
+                                if (snapshotLong == 5)
+                                {
+                                    _orderState.update { currentState -> currentState.copy(orderListFull = true) }
+                                }
+
+                                println("Added order to Firestore, yaaaay!")
+                            }
+                            else
+                            {
+                                dbOrders.document(uid).collection(serviceDate).document(dateUpdate).set(inputOrderData).await()
+
+                                _orderState.update { currentState -> currentState.copy(updateSuccess = true) }
+
+                                println("Updated Firestore order, yaaaaay!")
+                            }
+                        }
+                        else
+                        {
+                            println("Order slots full, crap!")
+                        }
+
+                        _isLoading.value = false
+
+                    }
+                    else
+                    {
+                        _maintenanceLoading.value = true
+
+                        dbMaintenance.document(uid).collection(serviceDate).document().set(inputMaintenanceData).await()
+
+                        _maintenanceLoading.value = false
+
+                        _orderState.update { currentState -> currentState.copy(maintenanceSuccess = true) }
+
+                        println("Added maintenance to Firestore, yaaaay!")
                     }
                 }
-                catch (e: Exception) {
-                    if (serviceOption) {
+                catch (e: Exception)
+                {
+                    if (serviceOption)
+                    {
                         _orderState.update { currentState -> currentState.copy(maintenanceFail = true) }
 
                         println("Upload error message: ${e.message}")
 
                         _maintenanceLoading.value = false
                     }
-                    else {
+                    else
+                    {
                         _orderState.update { currentState -> currentState.copy(orderFail = true) }
 
                         _isLoading.value = false
                     }
                     println("Failed to add data, crap! ${e.message}")
                 }
+            }
         }
     }
 
     fun readOrderFromFirebase(input: String?, input2: Boolean = false, specificOrderParam: String = "")
     {
-        viewModelScope.launch{
-            try
-            {
-                if(currentUser != null && uid != null)
+        if(currentUser != null && uid != null)
+        {
+            viewModelScope.launch {
+                try
                 {
-                    if(!input2)
+                    if (!input2)
                     {
                         val dateSnapshot = dbOrders.document(uid).collection(input.toString()).get().await()
 
@@ -724,11 +741,12 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                     }
                     else
                     {
-                        if(specificOrderParam  != "")
+                        if (specificOrderParam != "")
                         {
-                            val orderSnapshot = dbOrders.document(uid).collection(input.toString()).document(specificOrderParam).get().await()
+                            val orderSnapshot = dbOrders.document(uid).collection(input.toString())
+                                .document(specificOrderParam).get().await()
 
-                            if(orderSnapshot.exists())
+                            if (orderSnapshot.exists())
                             {
                                 _orderSpecs.update { orderSnapshot.toObject(FetchedOrderData::class.java)!! }
 
@@ -739,29 +757,46 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                         }
                     }
                 }
-            }
-            catch(e: Exception)
-            {
-                println("No fetched dates, crap!")
+                catch (e: Exception)
+                {
+                    println("No fetched dates, crap!")
+                }
             }
         }
     }
 
-    fun orderDelete()
+    fun orderDelete(serviceDate: String, dateToDelete: String)
     {
-        if(foundDocumentId != "")
-        {
-            viewModelScope.launch {
-                try
+        viewModelScope.launch {
+            try
+            {
+                if(currentUser != null && uid != null)
                 {
-                    dbOrders.document(foundDocumentId).delete().await()
+                    val snapShot = dbOrders.document(uid).collection("User preferences").document("Date quantity").get().await()
 
-                    _orderState.update {currentState -> currentState.copy(orderDelete = true)}
+                    var snapShotLong: Int? = snapShot.getLong("OrderNumber")?.toInt()
+
+                    if(snapShot.exists())
+                    {
+                        if(snapShotLong != null)
+                        {
+                            if (snapShotLong > 0)
+                            {
+                                snapShotLong -= 1
+
+                                dbOrders.document(uid).collection("User preferences").document("Date quantity").set(dateSetter(snapShotLong)).await()
+                            }
+                        }
+                    }
+
+                    dbOrders.document(uid).collection(serviceDate).document(dateToDelete).delete().await()
+
+                    _orderState.update { currentState -> currentState.copy(orderDelete = true) }
                 }
-                catch (e: Exception)
-                {
-                    _orderState.update {currentState -> currentState.copy(orderDeleteFail = true)}
-                }
+            }
+            catch (e: Exception)
+            {
+                _orderState.update {currentState -> currentState.copy(orderDeleteFail = true)}
             }
         }
     }
