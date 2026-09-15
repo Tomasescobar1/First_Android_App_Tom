@@ -92,9 +92,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
 
     val cDataState by guitarViewModel.dataState.collectAsStateWithLifecycle()
 
-    val foundOrderString by guitarViewModel.foundOrderString.collectAsStateWithLifecycle()
-
-    val updatedOrderString by guitarViewModel.updatedOrderString.collectAsStateWithLifecycle()
+    val loadingState by guitarViewModel.isLoading.collectAsStateWithLifecycle()
 
     val offlineState by guitarViewModel.isOffline.collectAsStateWithLifecycle()
 
@@ -165,6 +163,8 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
             guitarViewModel.updateOrderState(9, false)
 
             guitarViewModel.updateOrderState(6, false)
+
+            guitarViewModel.updateOrderState(13, false)
 
             guitarViewModel.updateOrderState(14, false)
 
@@ -326,12 +326,23 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                 }
                 else
                 {
-                    Text(
-                        text = "Update order",
-                        color = Color.Black,
-                        fontFamily = FontFamily.Monospace,
-                        fontWeight = FontWeight.Bold
-                    )
+                    if(!loadingState)
+                    {
+                        Text(
+                            text = "Update order",
+                            color = Color.Black,
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    else
+                    {
+                        CircularProgressIndicator (
+                            modifier = Modifier.size(40.dp),
+                            strokeWidth = 4.dp, color = Color.White,
+                            trackColor = Color(66, 203,245)
+                        )
+                    }
                 }
             }
         }
@@ -584,12 +595,23 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                         )
                             .width(150.dp)
                     ) {
-                        Text(
-                            text = "Confirm",
-                            color = Color.Black,
-                            fontFamily = FontFamily.Monospace,
-                            fontWeight = FontWeight.Bold
-                        )
+                        if(!loadingState)
+                        {
+                            Text(
+                                text = "Confirm",
+                                color = Color.Black,
+                                fontFamily = FontFamily.Monospace,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                        else
+                        {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(40.dp),
+                                strokeWidth = 4.dp, color = Color.White,
+                                trackColor = Color(245, 66,87)
+                            )
+                        }
                     }
                 }
             }
@@ -626,21 +648,6 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
             },
             confirmButton = {})
     }
-
-    /*if(localStates.orderUpdateInd)
-    {
-        AlertDialog(
-            onDismissRequest = {},
-            title = {Text("Order updated!" + "\n Specifications:", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
-            text = {Column(verticalArrangement = Arrangement.Top)
-            {
-                Text(
-                    text = updatedOrderString, overflow = TextOverflow.Clip,
-                    lineHeight = 30.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-            }
-            },
-            confirmButton = {})
-    }*/
 
     if(localStates.orderUpdateFail)
     {

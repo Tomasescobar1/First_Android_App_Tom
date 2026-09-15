@@ -30,6 +30,7 @@ import android.net.NetworkRequest
 import android.nfc.Tag
 import android.util.Log
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.firestore.AggregateSource
 import com.google.rpc.context.AttributeContext
 import kotlinx.coroutines.async
 import java.time.Instant
@@ -772,6 +773,14 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
             {
                 if(currentUser != null && uid != null)
                 {
+                    _isLoading.value = true
+
+                    val countSnapshot = dbOrders.document(uid).collection(serviceDate).count().get(AggregateSource.SERVER).await()
+
+                    val dateCount = countSnapshot.count.toInt()
+
+                    Log.d("orderDelete", "${dateCount}")
+
                     val snapShot = dbOrders.document(uid).collection("User preferences").document("Date quantity").get().await()
 
                     var snapShotLong: Int? = snapShot.getLong("OrderNumber")?.toInt()
@@ -784,12 +793,19 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                             {
                                 snapShotLong -= 1
 
+                                if(dateCount == 1)
+                                {
+                                    dbOrders.document(uid).collection("User preferences").document("Dates placed").update("Date Items", FieldValue.arrayRemove(serviceDate)).await()
+                                }
+
                                 dbOrders.document(uid).collection("User preferences").document("Date quantity").set(dateSetter(snapShotLong)).await()
                             }
                         }
                     }
 
                     dbOrders.document(uid).collection(serviceDate).document(dateToDelete).delete().await()
+
+                    _isLoading.value = false
 
                     _orderState.update { currentState -> currentState.copy(orderDelete = true) }
                 }
