@@ -121,6 +121,10 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
     val orderSlotState = _orderSlotState.asStateFlow()
 
+    private val _maintenanceSlotState = MutableStateFlow(false)
+
+    val maintenanceSlotState = _maintenanceSlotState.asStateFlow()
+
     private val _userOrderView = MutableStateFlow(false)
 
     val userOrderView = _userOrderView.asStateFlow()
@@ -322,6 +326,8 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                             val idToken = googleIdTokenCredential.idToken
 
                             firebaseAuthWithGoogle(idToken)
+
+                            checkSlotAvailability(true)
 
                             checkSlotAvailability()
 
@@ -526,57 +532,107 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
         println("Added ${orderList.last().color}")
     }
 
-    fun checkSlotAvailability()
+    fun checkSlotAvailability(maintenanceToggle: Boolean  = false)
     {
-        viewModelScope.launch {
-            try
-            {
-                if(currentUser != null && uid != null)
-                {
-                    val snapshot = dbOrders.document(uid).collection("User preferences").document("Date quantity").get().await()
+        if(!maintenanceToggle)
+        {
+            viewModelScope.launch {
+                try {
+                    if (currentUser != null && uid != null) {
+                        val snapshot = dbOrders.document(uid).collection("User preferences").document("Date quantity").get().await()
 
-                    val snapshotLong: Int? = snapshot.getLong("OrderNumber")?.toInt()
+                        val snapshotLong: Int? = snapshot.getLong("OrderNumber")?.toInt()
 
-                    if(snapshot.exists())
-                    {
-                        if (snapshotLong != null)
+                        if (snapshot.exists())
                         {
-                            if(snapshotLong == 5)
+                            if (snapshotLong != null)
                             {
-                                _orderSlotState.value = false
+                                if (snapshotLong == 5)
+                                {
+                                    _orderSlotState.value = false
 
-                                println("Available order slots null")
+                                    println("Available order slots null")
+                                }
+                                else
+                                {
+                                    _orderSlotState.value = true
+
+                                    println("There are available order slots!")
+                                }
                             }
                             else
                             {
                                 _orderSlotState.value = true
 
-                                println("There are available order slots!")
+                                println("The snapshotLong variable is null... But can Still be written on.")
                             }
                         }
                         else
                         {
                             _orderSlotState.value = true
 
-                            println("The snapshotLong variable is null... But can Still be written on.")
+                            println("The snapshot doesn't exist yet.")
                         }
                     }
-                    else
-                    {
-                        _orderSlotState.value = true
-
-                        println("The snapshot doesn't exist yet.")
-                    }
+                }
+                catch (e: Exception)
+                {
+                    println("Couldn't check the availability of the order slots")
                 }
             }
-            catch (e: Exception)
-            {
-                println("Couldn't check the availability of the order slots")
+        }
+        else
+        {
+            viewModelScope.launch {
+
+                try {
+                    if (currentUser != null && uid != null)
+                    {
+                        val maintenanceSnapshot = dbMaintenance.document(uid).collection("User preferences").document("Date quantity").get().await()
+
+                        val maintenanceSnapshotLong: Int? = maintenanceSnapshot.getLong("OrderNumber")?.toInt()
+
+                        if (maintenanceSnapshot.exists())
+                        {
+                            if (maintenanceSnapshotLong != null)
+                            {
+                                if (maintenanceSnapshotLong == 5)
+                                {
+                                    _maintenanceSlotState.value = false
+
+                                    println("Available order slots null")
+                                }
+                                else
+                                {
+                                    _maintenanceSlotState.value = true
+
+                                    println("There are available order slots!")
+                                }
+                            }
+                            else
+                            {
+                                _maintenanceSlotState.value = true
+
+                                println("The snapshotLong variable is null... But can Still be written on.")
+                            }
+                        }
+                        else
+                        {
+                            _maintenanceSlotState.value = true
+
+                            println("The snapshot doesn't exist yet.")
+                        }
+                    }
+                }
+                catch (e: Exception)
+                {
+                    println("Couldn't check the availability of the order slots")
+                }
             }
         }
     }
 
-    fun checkSavedDates()
+    fun checkSavedDates(input: Boolean = false)
     {
         viewModelScope.launch {
 
@@ -633,7 +689,7 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                             }
                             else
                             {
-                                println("Snapshot does not exist!")
+                                println("SnapshotLong does not exist!")
 
                                 snapshotLong = 1
                             }
@@ -689,7 +745,35 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                     {
                         _maintenanceLoading.value = true
 
-                        dbMaintenance.document(uid).collection(serviceDate).document().set(inputMaintenanceData).await()
+                        val maintenanceSnapshot = dbMaintenance.document(uid).collection("User preferences").document("Date quantity").get().await()
+
+                        var maintenanceSnapshotLong: Int? = maintenanceSnapshot.getLong("OrderNumber")?.toInt()
+
+                        if(maintenanceSnapshot.exists())
+                        {
+                            if(maintenanceSnapshotLong != null)
+                            {
+                                if(maintenanceSnapshotLong <= 5 && !update)
+                                {
+                                    maintenanceSnapshotLong += 1
+                                }
+                                else
+                                {
+                                    Log.d("addDataToFirestore-Maint", "SnapshotLong does not exist!")
+
+                                    maintenanceSnapshotLong = 1
+                                }
+                            }
+
+                            if(!update)
+                            {
+                                dbMaintenance.document(uid).collection(serviceDate).document("${serviceDate}_${maintenanceSnapshotLong}").set(inputMaintenanceData).await()
+
+                                dbMaintenance.document(uid).collection("User preferences").document("Date quantity").set(dateSetter(maintenanceSnapshotLong)).await()
+
+                                dbMaintenance.document(uid).collection("User preferences").document("Dates placed").update("Date Items", FieldValue.arrayUnion(serviceDate)).await()
+                            }
+                        }
 
                         _maintenanceLoading.value = false
 

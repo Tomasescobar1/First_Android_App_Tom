@@ -133,17 +133,6 @@ fun ConfirmSection(guitarViewModel: GuitarOrder)
         }
     }
 
-    fun listReset()
-    {
-        guitarViewModel.updateOrderState(1, false)
-
-        guitarViewModel.orderList.clear()
-
-        guitarViewModel.updateOrderState(3, false)
-
-        localStateManager = localStateManager.copy(orderRemove = true)
-    }
-
     fun orderDateConversion(inputDate: String) :String
     {
         val sanitizedDate = inputDate.replace("/", "-")
