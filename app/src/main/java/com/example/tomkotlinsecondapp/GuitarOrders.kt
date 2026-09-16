@@ -764,6 +764,14 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                                     maintenanceSnapshotLong = 1
                                 }
                             }
+                            else
+                            {
+                                maintenanceSnapshotLong = 1
+
+                                dbMaintenance.document(uid).collection("User preferences").document("Date quantity").set(dateSetter(maintenanceSnapshotLong)).await()
+
+                                dbMaintenance.document(uid).collection("User preferences").document("Dates placed").set(hashMapOf<String, Any>()).await()
+                            }
 
                             if(!update)
                             {
