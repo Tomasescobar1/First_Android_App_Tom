@@ -29,6 +29,7 @@ import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.nfc.Tag
 import android.util.Log
+import androidx.compose.runtime.currentRecomposeScope
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.AggregateSource
 import com.google.rpc.context.AttributeContext
@@ -70,7 +71,9 @@ data class OrderUIState (
     var orderDelete: Boolean = false,
     var orderDeleteFail: Boolean = false,
     var instanceInd: Int = 0,
+    var maintenanceInstance: Int = 0,
     var maintenanceSuccess: Boolean = false,
+    var maintenanceFull: Boolean = false,
     var maintenanceFail: Boolean = false
 )
 
@@ -129,6 +132,10 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
     val userOrderView = _userOrderView.asStateFlow()
 
+    private val _userMaintenanceView = MutableStateFlow(false)
+
+    val userMaintenanceView = _userMaintenanceView.asStateFlow()
+
     private val _orderFetchLoad = MutableStateFlow(false)
 
     val orderFetchLoad = _orderFetchLoad.asStateFlow()
@@ -159,6 +166,9 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
     var fetchedOrderList: List<String> = listOf<String>()
 
+    var maintenanceDateList: List<String>? = listOf<String>()
+
+    var fetchedMaintenanceList: List<String> = listOf<String>()
     var increment = mutableIntStateOf(0)
 
     private val _isLoading = MutableStateFlow(false)
@@ -330,6 +340,8 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                             checkSlotAvailability(true)
 
                             checkSlotAvailability()
+
+                            checkSavedDates(true)
 
                             checkSavedDates()
 
@@ -620,7 +632,7 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                         {
                             _maintenanceSlotState.value = true
 
-                            println("The snapshot doesn't exist yet.")
+                            println("The maintenance snapshot doesn't exist yet.")
                         }
                     }
                 }
@@ -640,18 +652,37 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
             {
                 try
                 {
-                    val ordersRef = dbOrders.document(uid).collection("User preferences").document("Dates placed").get().await()
-
-                    if (ordersRef.exists())
+                    if(!input)
                     {
-                        orderDateList = ordersRef.get("Date Items") as? List<String>
+                        val ordersRef = dbOrders.document(uid).collection("User preferences").document("Dates placed").get().await()
 
-                        for (i in 0 until (orderDateList?.size ?: 5))
+                        if (ordersRef.exists())
                         {
-                            println("Date number $i: ${orderDateList?.get(i)}")
-                        }
+                            orderDateList = ordersRef.get("Date Items") as? List<String>
 
-                        _userOrderView.value = true
+                            for (i in 0 until (orderDateList?.size ?: 5))
+                            {
+                                println("Date number $i: ${orderDateList?.get(i)}")
+                            }
+
+                            _userOrderView.value = true
+                        }
+                    }
+                    else
+                    {
+                        val maintenanceRef = dbMaintenance.document(uid).collection("User preferences").document("Dates placed").get().await()
+
+                        if(maintenanceRef.exists())
+                        {
+                            maintenanceDateList = maintenanceRef.get("Date Items") as? List<String>
+
+                            for (i in 0 until (maintenanceDateList?.size ?: 5))
+                            {
+                                Log.d("checkedSavedDates, Input = true", "Date number $i: ${maintenanceDateList?.get(i)}")
+                            }
+
+                            _userMaintenanceView.value = true
+                        }
                     }
                 }
                 catch (e: Exception)
@@ -749,45 +780,55 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
                         var maintenanceSnapshotLong: Int? = maintenanceSnapshot.getLong("OrderNumber")?.toInt()
 
-                        if(maintenanceSnapshot.exists())
-                        {
-                            if(maintenanceSnapshotLong != null)
+                        if(maintenanceSnapshot.exists()) {
+                            if (maintenanceSnapshotLong != null)
                             {
-                                if(maintenanceSnapshotLong <= 5 && !update)
+                                if (maintenanceSnapshotLong <= 5 && !update)
                                 {
                                     maintenanceSnapshotLong += 1
-                                }
-                                else
-                                {
-                                    Log.d("addDataToFirestore-Maint", "SnapshotLong does not exist!")
-
-                                    maintenanceSnapshotLong = 1
                                 }
                             }
                             else
                             {
+                                Log.d("addDataToFirestore-Maint", "SnapshotLong does not exist!")
+
                                 maintenanceSnapshotLong = 1
-
-                                dbMaintenance.document(uid).collection("User preferences").document("Date quantity").set(dateSetter(maintenanceSnapshotLong)).await()
-
-                                dbMaintenance.document(uid).collection("User preferences").document("Dates placed").set(hashMapOf<String, Any>()).await()
                             }
+                        }
+                        else
+                        {
+                            maintenanceSnapshotLong = 1
 
-                            if(!update)
+                            dbMaintenance.document(uid).collection("User preferences").document("Date quantity").set(dateSetter(maintenanceSnapshotLong)).await()
+
+                            dbMaintenance.document(uid).collection("User preferences").document("Dates placed").set(hashMapOf<String, Any>()).await()
+
+                        }
+                        if(maintenanceSnapshotLong <= 5)
+                        {
+                            if (!update)
                             {
                                 dbMaintenance.document(uid).collection(serviceDate).document("${serviceDate}_${maintenanceSnapshotLong}").set(inputMaintenanceData).await()
 
                                 dbMaintenance.document(uid).collection("User preferences").document("Date quantity").set(dateSetter(maintenanceSnapshotLong)).await()
 
                                 dbMaintenance.document(uid).collection("User preferences").document("Dates placed").update("Date Items", FieldValue.arrayUnion(serviceDate)).await()
+
+                                _orderState.update { currentState -> currentState.copy(maintenanceInstance = maintenanceSnapshotLong) }
+
+                                _orderState.update { currentState -> currentState.copy(maintenanceSuccess = true) }
+
+                                Log.d("addDataToFirestore", "Added maintenance to Firestore, yaaaay!")
+                            }
+
+                            if(maintenanceSnapshotLong == 5)
+                            {
+                                _orderState.update {currentState -> currentState.copy(maintenanceFull = true) }
                             }
                         }
 
                         _maintenanceLoading.value = false
 
-                        _orderState.update { currentState -> currentState.copy(maintenanceSuccess = true) }
-
-                        println("Added maintenance to Firestore, yaaaay!")
                     }
                 }
                 catch (e: Exception)

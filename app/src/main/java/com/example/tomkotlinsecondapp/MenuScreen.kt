@@ -194,7 +194,7 @@ import java.time.format.DateTimeFormatter
 
             if(maintenanceItems[i].isChecked)
             {
-                maintenanceMapList.put(maintenanceItems[i].title, i+1)
+                maintenanceMapList.put((i+1).toString(), maintenanceItems[i].title)
 
                 maintenanceArray.add(maintenanceItems[i].title)
             }
@@ -252,31 +252,6 @@ import java.time.format.DateTimeFormatter
 
         guitarViewModel.addDataToFirestore(inputMaintenanceData = maintenanceMapList, serviceOption = true, serviceDate = maintenanceDateConversion(maintenanceMapList["Date of creation"].toString()))
     }
-
-    /*LaunchedEffect(maintenanceLoading)
-    {
-        if(maintenanceLoading)
-        {
-            maintenanceTypeConversion()
-
-            delay(300L.milliseconds)
-
-            localStateManager = localStateManager.copy(maintenanceLoadingTrigger = true)
-
-            guitarViewModel.addDataToFirestore(inputMaintenanceData = maintenanceMapList, serviceOption = true, serviceDate = maintenanceDateConversion(maintenanceMapList["Date of creation"].toString()))
-
-            delay(2000L.milliseconds)
-
-            localStateManager = localStateManager.copy(maintenanceLoadingTrigger = false)
-
-            guitarViewModel.updateOrderState(12, false)
-
-            if(orderState.maintenanceSuccess)
-            {
-                localStateManager = localStateManager.copy(maintenanceSuccessLocal = true)
-            }
-        }
-    }*/
 
     Column(modifier = Modifier.fillMaxSize().background(Color.White).padding(top = (100 + offlineSignToggle).dp), verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally)
