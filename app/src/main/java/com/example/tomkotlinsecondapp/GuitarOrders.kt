@@ -140,6 +140,10 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
     val orderFetchLoad = _orderFetchLoad.asStateFlow()
 
+    private val _maintenanceFetchLoad = MutableStateFlow(false)
+
+    val maintenanceFetchLoad = _maintenanceFetchLoad.asStateFlow()
+
     private val _dataState = MutableStateFlow(OrderDataState())
 
     val dataState: StateFlow<OrderDataState> = _dataState.asStateFlow()
@@ -216,6 +220,14 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
     private val _specificDocName = MutableStateFlow("")
 
     val specificDocName = _specificDocName.asStateFlow()
+
+    private val _fetchedMaintenanceDate = MutableStateFlow("")
+
+    val fetchedMaintenanceDate = _fetchedMaintenanceDate.asStateFlow()
+
+    private val _specificMaintenanceDoc = MutableStateFlow("")
+
+    val specificMaintenanceDoc = _specificMaintenanceDoc.asStateFlow()
 
     fun dateSetter(input: Int? = 1) : MutableMap<String, Int?>
     {
@@ -516,6 +528,17 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                 else
                 {
                     _specificDocName.value = input3
+                }
+            }
+
+            16 -> {
+                if(input2)
+                {
+                    _fetchedMaintenanceDate.value = input3
+                }
+                else
+                {
+                    _specificMaintenanceDoc.value = input3
                 }
             }
         }
@@ -853,40 +876,76 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun readOrderFromFirebase(input: String?, input2: Boolean = false, specificOrderParam: String = "")
+    fun readOrderFromFirebase(input: String?, input2: Boolean = false, specificOrderParam: String = "", serviceOption: Boolean = false)
     {
         if(currentUser != null && uid != null)
         {
             viewModelScope.launch {
                 try
                 {
-                    if (!input2)
+                    if(!serviceOption)
                     {
-                        val dateSnapshot = dbOrders.document(uid).collection(input.toString()).get().await()
-
-                        fetchedOrderList = dateSnapshot.documents.map { document -> document.id }
-
-                        for (i in 0 until fetchedOrderList.size)
+                        if (!input2)
                         {
-                            println("Date $i: ${fetchedOrderList[i]}")
-                        }
+                            val dateSnapshot = dbOrders.document(uid).collection(input.toString()).get().await()
 
-                        _orderFetchLoad.value = true
+                            fetchedOrderList = dateSnapshot.documents.map { document -> document.id }
+
+                            for (i in 0 until fetchedOrderList.size)
+                            {
+                                println("Date $i: ${fetchedOrderList[i]}")
+                            }
+
+                            _orderFetchLoad.value = true
+                        }
+                        else
+                        {
+                            if (specificOrderParam != "")
+                            {
+                                val orderSnapshot = dbOrders.document(uid).collection(input.toString())
+                                    .document(specificOrderParam).get().await()
+
+                                if (orderSnapshot.exists())
+                                {
+                                    _orderSpecs.update { orderSnapshot.toObject(FetchedOrderData::class.java)!! }
+
+                                    _specificFetchedOrder.value = true
+
+                                    Log.d("readOrderFromFirebase", "${orderSpecs.value}")
+                                }
+                            }
+                        }
                     }
                     else
                     {
-                        if (specificOrderParam != "")
+                        if (!input2)
                         {
-                            val orderSnapshot = dbOrders.document(uid).collection(input.toString())
-                                .document(specificOrderParam).get().await()
+                            val dateSnapshot = dbMaintenance .document(uid).collection(input.toString()).get().await()
 
-                            if (orderSnapshot.exists())
+                            fetchedOrderList = dateSnapshot.documents.map { document -> document.id }
+
+                            for (i in 0 until fetchedOrderList.size)
                             {
-                                _orderSpecs.update { orderSnapshot.toObject(FetchedOrderData::class.java)!! }
+                                println("Date $i: ${fetchedOrderList[i]}")
+                            }
 
-                                _specificFetchedOrder.value = true
+                            _orderFetchLoad.value = true
+                        }
+                        else
+                        {
+                            if (specificOrderParam != "")
+                            {
+                                val orderSnapshot = dbOrders.document(uid).collection(input.toString())
+                                    .document(specificOrderParam).get().await()
 
-                                Log.d("readOrderFromFirebase", "${orderSpecs.value}")
+                                if (orderSnapshot.exists())
+                                {
+                                    _orderSpecs.update { orderSnapshot.toObject(FetchedOrderData::class.java)!! }
+
+                                    _specificFetchedOrder.value = true
+
+                                    Log.d("readOrderFromFirebase", "${orderSpecs.value}")
+                                }
                             }
                         }
                     }

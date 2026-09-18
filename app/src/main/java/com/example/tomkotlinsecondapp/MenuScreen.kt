@@ -63,6 +63,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -94,6 +95,7 @@ import java.time.format.DateTimeFormatter
         var maintenanceToggle: Boolean = false,
         var maintenanceLoadingTrigger: Boolean = false,
         var maintenanceSuccessLocal: Boolean = false,
+        var maintenanceListInd: Boolean = false,
         var checkListToggle: Boolean = false,
         var nameInputToggle: Boolean = false,
         var nameIsEmpty: Boolean = true,
@@ -118,6 +120,10 @@ import java.time.format.DateTimeFormatter
     val authLoadingState by guitarViewModel.authLoadingState.collectAsStateWithLifecycle()
 
     val authState by guitarViewModel.authState.collectAsStateWithLifecycle()
+
+    val maintenancePlaced by guitarViewModel.userMaintenanceView.collectAsStateWithLifecycle()
+
+    val localDateIndicator by guitarViewModel.fetchedMaintenanceDate.collectAsStateWithLifecycle()
 
     val offlineState by guitarViewModel.isOffline.collectAsStateWithLifecycle()
 
@@ -343,6 +349,14 @@ import java.time.format.DateTimeFormatter
                     buttonSizeOffset = 0.0
                 }
 
+                LaunchedEffect(localStateManager.maintenanceListInd)
+                {
+                    if(localStateManager.maintenanceListInd)
+                    {
+                        guitarViewModel.checkSavedDates(true)
+                    }
+                }
+
                 AnimatedVisibility(
                     visible = localStateManager.depSideBar,
                     enter = slideInHorizontally(animationSpec = tween(200)) { fullWidth -> -fullWidth },
@@ -408,6 +422,41 @@ import java.time.format.DateTimeFormatter
                         }
 
                         AnimatedVisibility(
+                            visible = maintenancePlaced,
+                            enter = slideInVertically(animationSpec = tween(200)){fullHeight -> -fullHeight},
+                            exit = slideOutVertically(animationSpec = tween(200){fullHeight -> fullHeight})
+                        )
+                        {
+                            Box(
+                                modifier = Modifier.width(200.dp).height(80.dp).zIndex(1f)
+                                    .background(colorOffset, RoundedCornerShape(16.dp))
+                                    .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
+                                contentAlignment = Alignment.Center
+                            )
+                            {
+                                TextButton(
+                                    onClick = {
+                                        localStateManager = localStateManager.copy(maintenanceListInd = true)
+                                              },
+                                    modifier = Modifier.background(
+                                        Color.White,
+                                        RoundedCornerShape(12.dp)
+                                    )
+                                        .width(150.dp)
+                                ) {
+                                    Text(
+                                        text = "View maintenance orders",
+                                        textAlign = TextAlign.Center,
+                                        color = Color.Black,
+                                        fontFamily = FontFamily.Monospace,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 11.sp
+                                    )
+                                }
+                            }
+                        }
+
+                        AnimatedVisibility(
                             visible = authState,
                             enter = slideInVertically(animationSpec = tween(200)){fullHeight -> -fullHeight},
                             exit = slideOutVertically(animationSpec = tween(200){fullHeight -> fullHeight})
@@ -465,6 +514,145 @@ import java.time.format.DateTimeFormatter
                 }
             }
         }
+
+        if(localStateManager.maintenanceListInd)
+        {
+            AlertDialog(
+                onDismissRequest = { localStateManager = localStateManager.copy(maintenanceListInd = false) },
+                title = {},
+                text = {
+                    Column(
+                        modifier = Modifier.height(600.dp).width(450.dp),
+                        verticalArrangement = Arrangement.SpaceBetween,
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        Text(
+                            text = "Placed orders history:",
+                            lineHeight = 30.sp,
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        Box(modifier = Modifier.fillMaxWidth().height(420.dp), contentAlignment = Alignment.TopCenter)
+                        {
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            )
+                            {
+                                for (i in 0 until (guitarViewModel.maintenanceDateList?.size ?: 5)) {
+                                    Box(
+                                        modifier = Modifier.width(200.dp).height(80.dp)
+                                            .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
+                                            .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        TextButton(
+                                            onClick = { guitarViewModel.readOrderFromFirebase(guitarViewModel.maintenanceDateList?.get(i))
+                                                guitarViewModel.updateOrderState(16, true, guitarViewModel.maintenanceDateList?.get(i).toString()) },
+                                            modifier = Modifier.width(150.dp).height(40.dp).background(Color.White, RoundedCornerShape(10.dp)),
+                                        )
+                                        {
+                                            Text(
+                                                text = "${guitarViewModel.maintenanceDateList?.get(i)}",
+                                                lineHeight = 25.sp,
+                                                fontFamily = FontFamily.Monospace,
+                                                color = Color.Black,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        Box(
+                            modifier = Modifier.width(200.dp).height(80.dp)
+                                .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
+                                .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
+                            contentAlignment = Alignment.Center
+                        )
+                        {
+                            TextButton(
+                                onClick = { localStateManager = localStateManager.copy(maintenanceListInd = false) },
+                                modifier = Modifier.background(
+                                    Color.White,
+                                    RoundedCornerShape(12.dp)
+                                )
+                                    .width(150.dp)
+                            ) {
+                                Text(
+                                    text = "Confirm",
+                                    color = Color.Black,
+                                    fontFamily = FontFamily.Monospace,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+
+                        }
+                    }
+
+                },
+                confirmButton = {}
+            )
+        }
+
+        /*if()
+        {
+            AlertDialog(
+                onDismissRequest = {  },
+                title = {Text("Maintenance placed on ${localDateIndicator}:", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
+                text = {Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.Top, horizontalAlignment = Alignment.CenterHorizontally)
+                {
+                    for(i in 0 until guitarViewModel.fetchedOrderList.size)
+                    {
+                        Box(
+                            Modifier.background(Color(66, 203, 245), RoundedCornerShape(10.dp)).width(170.dp).height(55.dp)
+                                .border(3.dp, Color.Black, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center
+                        )
+                        {
+                            TextButton(
+                                onClick = {
+                                    guitarViewModel.readOrderFromFirebase(localDateIndicator, true, guitarViewModel.fetchedOrderList[i])
+                                    guitarViewModel.updateOrderState(15, false, guitarViewModel.fetchedOrderList[i])
+                                },
+                                modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
+                                    .width(140.dp).height(35.dp)
+                            )
+                            {
+                                Text(
+                                    text = guitarViewModel.fetchedOrderList[i],
+                                    fontFamily = FontFamily.Monospace,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.Black
+                                )
+                            }
+                        }
+                    }
+
+                    Box(modifier = Modifier.height(30.dp).width(80.dp))
+
+                    Box(
+                        Modifier.background(Color(66, 203, 245), RoundedCornerShape(10.dp)).width(120.dp).height(55.dp)
+                            .border(3.dp, Color.Black, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center
+                    )
+                    {
+                        TextButton(
+                            onClick = { guitarViewModel.updateOrderState(13, false) },
+                            modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
+                                .width(90.dp).height(35.dp)
+                        )
+                        {
+                            Text("Confirm",
+                                fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold,
+                                color = Color.Black)
+                        }
+                    }
+
+                }
+                },
+                confirmButton = {})
+        }*/
 
         if(localStateManager.menuLeave)
         {
