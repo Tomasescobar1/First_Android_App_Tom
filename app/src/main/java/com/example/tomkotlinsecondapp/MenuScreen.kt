@@ -127,6 +127,16 @@ import java.time.format.DateTimeFormatter
 
     val offlineState by guitarViewModel.isOffline.collectAsStateWithLifecycle()
 
+    val fetchedMaintenance by guitarViewModel.maintenanceSpecs.collectAsStateWithLifecycle()
+
+    val fetchedMaintenanceDate by guitarViewModel.fetchedMaintenanceDate.collectAsStateWithLifecycle()
+
+    val specificMaintenanceDoc by guitarViewModel.specificMaintenanceDoc.collectAsStateWithLifecycle()
+
+    val maintenanceFetchLoad by guitarViewModel.maintenanceFetchLoad.collectAsStateWithLifecycle()
+
+    val specificFetchedMaintenance by guitarViewModel.specificFetchedMaintenance.collectAsStateWithLifecycle()
+
     val dateStorage by remember {mutableStateOf(TrackedValue())}
 
     var convertedDate by remember {mutableStateOf("")}
@@ -548,7 +558,7 @@ import java.time.format.DateTimeFormatter
                                         contentAlignment = Alignment.Center
                                     ) {
                                         TextButton(
-                                            onClick = { guitarViewModel.readOrderFromFirebase(guitarViewModel.maintenanceDateList?.get(i))
+                                            onClick = { guitarViewModel.readOrderFromFirebase(guitarViewModel.maintenanceDateList?.get(i), serviceOption = true)
                                                 guitarViewModel.updateOrderState(16, true, guitarViewModel.maintenanceDateList?.get(i).toString()) },
                                             modifier = Modifier.width(150.dp).height(40.dp).background(Color.White, RoundedCornerShape(10.dp)),
                                         )
@@ -597,14 +607,14 @@ import java.time.format.DateTimeFormatter
             )
         }
 
-        /*if()
+        if(maintenanceFetchLoad)
         {
             AlertDialog(
                 onDismissRequest = {  },
                 title = {Text("Maintenance placed on ${localDateIndicator}:", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
                 text = {Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.Top, horizontalAlignment = Alignment.CenterHorizontally)
                 {
-                    for(i in 0 until guitarViewModel.fetchedOrderList.size)
+                    for(i in 0 until guitarViewModel.fetchedMaintenanceList.size)
                     {
                         Box(
                             Modifier.background(Color(66, 203, 245), RoundedCornerShape(10.dp)).width(170.dp).height(55.dp)
@@ -613,15 +623,15 @@ import java.time.format.DateTimeFormatter
                         {
                             TextButton(
                                 onClick = {
-                                    guitarViewModel.readOrderFromFirebase(localDateIndicator, true, guitarViewModel.fetchedOrderList[i])
-                                    guitarViewModel.updateOrderState(15, false, guitarViewModel.fetchedOrderList[i])
+                                    guitarViewModel.readOrderFromFirebase(localDateIndicator, true, guitarViewModel.fetchedMaintenanceList[i], true)
+                                    guitarViewModel.updateOrderState(16, false, guitarViewModel.fetchedMaintenanceList[i])
                                 },
                                 modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
                                     .width(140.dp).height(35.dp)
                             )
                             {
                                 Text(
-                                    text = guitarViewModel.fetchedOrderList[i],
+                                    text = guitarViewModel.fetchedMaintenanceList[i],
                                     fontFamily = FontFamily.Monospace,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.Black
@@ -638,7 +648,7 @@ import java.time.format.DateTimeFormatter
                     )
                     {
                         TextButton(
-                            onClick = { guitarViewModel.updateOrderState(13, false) },
+                            onClick = { guitarViewModel.updateOrderState(17, false) },
                             modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
                                 .width(90.dp).height(35.dp)
                         )
@@ -652,7 +662,84 @@ import java.time.format.DateTimeFormatter
                 }
                 },
                 confirmButton = {})
-        }*/
+        }
+
+        if(specificFetchedMaintenance)
+        {
+            AlertDialog(
+                onDismissRequest = {guitarViewModel.updateOrderState(18, false)},
+                title = {Text("Order specifications: ", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
+                text = {Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.Top, horizontalAlignment = Alignment.CenterHorizontally)
+                {
+                    Text(
+                        text = "Customer: ${fetchedMaintenance?.get("Name")}\n" +
+                                "",
+                        overflow = TextOverflow.Clip,
+                        lineHeight = 30.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+
+                    Box(modifier = Modifier.fillMaxWidth().height(10.dp))
+
+                    Box(
+                        Modifier.background(Color(66, 203, 245), RoundedCornerShape(10.dp)).width(170.dp).height(55.dp)
+                            .border(3.dp, Color.Black, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center
+                    )
+                    {
+                        TextButton(
+                            onClick = {
+                                /*guitarViewModel.updateOrderState(13, false)
+                                guitarViewModel.updateOrderState(14, true)
+                                localStateManager = localStateManager.copy(maintenanceListInd = false)*/
+                            },
+                            modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
+                                .width(150.dp).height(35.dp)
+                        )
+                        {
+                            Text("Modify order",
+                                fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold,
+                                color = Color.Black)
+                        }
+                    }
+
+                    Box(modifier = Modifier.height(20.dp).width(80.dp))
+
+                    Box(
+                        Modifier.background(Color(245, 66, 87), RoundedCornerShape(10.dp)).width(170.dp).height(55.dp)
+                            .border(3.dp, Color.Black, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center
+                    )
+                    {
+                        TextButton(
+                            onClick = { /*localStates = localStates.copy(orderDeleteConfirm = true)*/ },
+                            modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
+                                .width(150.dp).height(35.dp)
+                        )
+                        {
+                            Text("Delete order",
+                                fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold,
+                                color = Color.Black)
+                        }
+                    }
+
+                }
+                },
+                confirmButton = {
+                    Box(
+                        Modifier.background(Color(66, 203, 245), RoundedCornerShape(10.dp)).width(120.dp).height(55.dp)
+                            .border(3.dp, Color.Black, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center
+                    )
+                    {
+                        TextButton(
+                            onClick = {guitarViewModel.updateOrderState(14, false)},
+                            modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
+                                .width(90.dp).height(35.dp)
+                        )
+                        {
+                            Text("Confirm",
+                                fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold,
+                                color = Color.Black)
+                        }
+                    }
+                })
+        }
 
         if(localStateManager.menuLeave)
         {

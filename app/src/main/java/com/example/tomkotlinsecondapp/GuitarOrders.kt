@@ -144,13 +144,17 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
     val maintenanceFetchLoad = _maintenanceFetchLoad.asStateFlow()
 
+    private val _specificFetchedMaintenance = MutableStateFlow(false)
+
+    val specificFetchedMaintenance = _specificFetchedMaintenance.asStateFlow()
+
     private val _dataState = MutableStateFlow(OrderDataState())
 
     val dataState: StateFlow<OrderDataState> = _dataState.asStateFlow()
 
     private val _orderState = MutableStateFlow(OrderUIState())
 
-    val orderState: StateFlow<OrderUIState> = _orderState.asStateFlow()
+    val orderState = _orderState.asStateFlow()
 
     private val _deployedState = MutableStateFlow(FloatingActionState())
 
@@ -175,6 +179,8 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
     var fetchedMaintenanceList: List<String> = listOf<String>()
     var increment = mutableIntStateOf(0)
 
+    var maintenanceFetchedMap: MutableMap<String, Any>? = mutableMapOf<String, Any>()
+
     private val _isLoading = MutableStateFlow(false)
 
     val isLoading = _isLoading.asStateFlow()
@@ -189,16 +195,6 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
     val dbMaintenance = db.collection("Maintenance")
 
-    private val _foundOrderString = MutableStateFlow("")
-
-    val foundOrderString = _foundOrderString.asStateFlow()
-
-    var foundDocumentId: String = ""
-
-    private val _updatedOrderString = MutableStateFlow("")
-
-    val updatedOrderString = _updatedOrderString.asStateFlow()
-
     private val connectivityManager = application.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
     private val _isOffline = MutableStateFlow(!isCurrentlyOnline())
@@ -208,6 +204,10 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
     private val _orderSpecs = MutableStateFlow(FetchedOrderData())
 
     val orderSpecs = _orderSpecs.asStateFlow()
+
+    private val _maintenanceSpecs = MutableStateFlow(maintenanceFetchedMap)
+
+    val maintenanceSpecs = _maintenanceSpecs.asStateFlow()
 
     private val _specificFetchedOrder = MutableStateFlow(false)
 
@@ -541,6 +541,14 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                     _specificMaintenanceDoc.value = input3
                 }
             }
+
+            17 -> {
+                _maintenanceFetchLoad.value = false
+            }
+
+            18 -> {
+                _specificFetchedMaintenance.value = input2
+            }
         }
     }
 
@@ -635,13 +643,13 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                                 {
                                     _maintenanceSlotState.value = false
 
-                                    println("Available order slots null")
+                                    println("Available maintenance slots null")
                                 }
                                 else
                                 {
                                     _maintenanceSlotState.value = true
 
-                                    println("There are available order slots!")
+                                    println("There are available maintenance slots!")
                                 }
                             }
                             else
@@ -661,7 +669,7 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                 }
                 catch (e: Exception)
                 {
-                    println("Couldn't check the availability of the order slots")
+                    println("Couldn't check the availability of the maintenance slots")
                 }
             }
         }
@@ -922,29 +930,28 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                         {
                             val dateSnapshot = dbMaintenance .document(uid).collection(input.toString()).get().await()
 
-                            fetchedOrderList = dateSnapshot.documents.map { document -> document.id }
+                            fetchedMaintenanceList = dateSnapshot.documents.map { document -> document.id }
 
-                            for (i in 0 until fetchedOrderList.size)
+                            for (i in 0 until fetchedMaintenanceList.size)
                             {
-                                println("Date $i: ${fetchedOrderList[i]}")
+                                println("Date $i: ${fetchedMaintenanceList[i]}")
                             }
 
-                            _orderFetchLoad.value = true
+                            _maintenanceFetchLoad.value = true
                         }
                         else
                         {
                             if (specificOrderParam != "")
                             {
-                                val orderSnapshot = dbOrders.document(uid).collection(input.toString())
-                                    .document(specificOrderParam).get().await()
+                                val maintenanceSnapshot = dbMaintenance.document(uid).collection(input.toString()).document(specificOrderParam).get().await()
 
-                                if (orderSnapshot.exists())
+                                if (maintenanceSnapshot.exists())
                                 {
-                                    _orderSpecs.update { orderSnapshot.toObject(FetchedOrderData::class.java)!! }
+                                    _maintenanceSpecs.value = maintenanceSnapshot.data
 
-                                    _specificFetchedOrder.value = true
+                                    _specificFetchedMaintenance.value = true
 
-                                    Log.d("readOrderFromFirebase", "${orderSpecs.value}")
+                                    Log.d("readOrderFromFirebase", "${_maintenanceSpecs.value}")
                                 }
                             }
                         }
