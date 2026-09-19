@@ -74,7 +74,8 @@ data class OrderUIState (
     var maintenanceInstance: Int = 0,
     var maintenanceSuccess: Boolean = false,
     var maintenanceFull: Boolean = false,
-    var maintenanceFail: Boolean = false
+    var maintenanceFail: Boolean = false,
+    var maintenanceUpdate: Boolean = false
 )
 
 data class OrderDataState (
@@ -811,7 +812,8 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
                         var maintenanceSnapshotLong: Int? = maintenanceSnapshot.getLong("OrderNumber")?.toInt()
 
-                        if(maintenanceSnapshot.exists()) {
+                        if(maintenanceSnapshot.exists())
+                        {
                             if (maintenanceSnapshotLong != null)
                             {
                                 if (maintenanceSnapshotLong <= 5 && !update)
@@ -850,11 +852,21 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                                 _orderState.update { currentState -> currentState.copy(maintenanceSuccess = true) }
 
                                 Log.d("addDataToFirestore", "Added maintenance to Firestore, yaaaay!")
-                            }
 
-                            if(maintenanceSnapshotLong == 5)
+                                if (maintenanceSnapshotLong == 5)
+                                {
+                                    _orderState.update { currentState -> currentState.copy(maintenanceFull = true) }
+                                }
+                            }
+                            else
                             {
-                                _orderState.update {currentState -> currentState.copy(maintenanceFull = true) }
+                                dbMaintenance.document(uid).collection(serviceDate).document(dateUpdate).delete().await()
+
+                                dbMaintenance.document(uid).collection(serviceDate).document(dateUpdate).set(inputMaintenanceData).await()
+
+                                _orderState.update {currentState -> currentState.copy(maintenanceSuccess = true)}
+
+                                Log.d("addDataToFirestore", "Maintenance updated!")
                             }
                         }
 

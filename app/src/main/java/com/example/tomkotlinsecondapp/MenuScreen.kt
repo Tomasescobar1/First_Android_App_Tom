@@ -96,6 +96,7 @@ import java.time.format.DateTimeFormatter
         var maintenanceLoadingTrigger: Boolean = false,
         var maintenanceSuccessLocal: Boolean = false,
         var maintenanceListInd: Boolean = false,
+        var maintenanceUpdateInd: Boolean = false,
         var checkListToggle: Boolean = false,
         var nameInputToggle: Boolean = false,
         var nameIsEmpty: Boolean = true,
@@ -195,17 +196,40 @@ import java.time.format.DateTimeFormatter
         }
     }
 
+    fun maintenanceDateConversion(inputDate: String) :String
+    {
+        val sanitizedDate = inputDate.replace("/", "-")
+
+        return sanitizedDate
+    }
+
     fun maintenanceTypeConversion()
     {
-        maintenanceMapList.put("Name", nameStorage.lowercase())
+        if(!localStateManager.maintenanceUpdateInd)
+        {
+            maintenanceMapList.put("Name", nameStorage.lowercase())
 
-        maintenanceArray.add(nameStorage)
+            maintenanceArray.add(nameStorage)
+        }
+        else
+        {
+            maintenanceMapList.put("Name", fetchedMaintenance?.get("Name").toString())
+
+            maintenanceArray.add(fetchedMaintenance?.get("Name").toString())
+        }
 
         for(i in 0 until maintenanceItems.size)
         {
             if(i == 1)
             {
-                maintenanceMapList.put("Date of creation", guitarViewModel.formatDayMonthYear(dateStorage.createdAt))
+                if(!localStateManager.maintenanceUpdateInd)
+                {
+                    maintenanceMapList.put("Date of creation", guitarViewModel.formatDayMonthYear(dateStorage.createdAt))
+                }
+                else
+                {
+                    maintenanceMapList.put("Date of creation", maintenanceDateConversion(fetchedMaintenance?.get("Date of creation").toString()))
+                }
             }
 
             if(maintenanceItems[i].isChecked)
@@ -215,13 +239,6 @@ import java.time.format.DateTimeFormatter
                 maintenanceArray.add(maintenanceItems[i].title)
             }
         }
-    }
-
-    fun maintenanceDateConversion(inputDate: String) :String
-    {
-        val sanitizedDate = inputDate.replace("/", "-")
-
-        return sanitizedDate
     }
 
     fun dialogDismiss(input: Boolean = false)
@@ -249,24 +266,51 @@ import java.time.format.DateTimeFormatter
         }
     }
 
-    fun emptyListCheck()
+    fun maintenanceOrder()
+    {
+        if(localStateManager.maintenanceUpdateInd)
+        {
+            maintenanceTypeConversion()
+
+            guitarViewModel.addDataToFirestore(
+                inputMaintenanceData = maintenanceMapList,
+                serviceOption = true,
+                update = true,
+                serviceDate = maintenanceDateConversion(fetchedMaintenance?.get("Date of creation").toString()),
+                dateUpdate = specificMaintenanceDoc
+            )
+        }
+        else {
+
+            maintenanceTypeConversion()
+
+            guitarViewModel.addDataToFirestore(
+                inputMaintenanceData = maintenanceMapList,
+                serviceOption = true,
+                serviceDate = maintenanceDateConversion(maintenanceMapList["Date of creation"].toString())
+            )
+        }
+
+    }
+
+    fun emptyListCheck(input: Boolean = false)
     {
         for(i in 0 until maintenanceItems.size)
         {
             if(maintenanceItems[i].isChecked)
             {
-                localStateManager = localStateManager.copy(nameInputToggle = true)
+                if(!input)
+                {
+                    localStateManager = localStateManager.copy(nameInputToggle = true)
+                }
+                else
+                {
+                    maintenanceOrder()
+                }
 
                 break
             }
         }
-    }
-
-    fun maintenanceOrder()
-    {
-        maintenanceTypeConversion()
-
-        guitarViewModel.addDataToFirestore(inputMaintenanceData = maintenanceMapList, serviceOption = true, serviceDate = maintenanceDateConversion(maintenanceMapList["Date of creation"].toString()))
     }
 
     Column(modifier = Modifier.fillMaxSize().background(Color.White).padding(top = (100 + offlineSignToggle).dp), verticalArrangement = Arrangement.Top,
@@ -673,7 +717,12 @@ import java.time.format.DateTimeFormatter
                 {
                     Text(
                         text = "Customer: ${fetchedMaintenance?.get("Name")}\n" +
-                                "",
+                                "Maintenance items placed: \n" +
+                                " ${fetchedMaintenance?.get("1") ?: ""} \n" +
+                                " ${fetchedMaintenance?.get("2") ?: ""} \n" +
+                                " ${fetchedMaintenance?.get("3") ?: ""} \n" +
+                                " ${fetchedMaintenance?.get("4") ?: ""} \n" +
+                                " ${fetchedMaintenance?.get("5") ?: ""} \n",
                         overflow = TextOverflow.Clip,
                         lineHeight = 30.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
 
@@ -689,6 +738,8 @@ import java.time.format.DateTimeFormatter
                                 /*guitarViewModel.updateOrderState(13, false)
                                 guitarViewModel.updateOrderState(14, true)
                                 localStateManager = localStateManager.copy(maintenanceListInd = false)*/
+                                localStateManager = localStateManager.copy(maintenanceUpdateInd = true)
+                                localStateManager = localStateManager.copy(checkListToggle = !localStateManager.checkListToggle)
                             },
                             modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
                                 .width(150.dp).height(35.dp)
@@ -728,7 +779,7 @@ import java.time.format.DateTimeFormatter
                     )
                     {
                         TextButton(
-                            onClick = {guitarViewModel.updateOrderState(14, false)},
+                            onClick = {guitarViewModel.updateOrderState(18, false)},
                             modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
                                 .width(90.dp).height(35.dp)
                         )
@@ -821,7 +872,7 @@ import java.time.format.DateTimeFormatter
                         )
                         {
                             TextButton(
-                                onClick = { emptyListCheck() },
+                                onClick = { emptyListCheck(localStateManager.maintenanceUpdateInd) },
                                 modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
                                     .width(200.dp).height(50.dp)
                             )
@@ -943,8 +994,36 @@ import java.time.format.DateTimeFormatter
         if(orderState.maintenanceSuccess)
         {
             AlertDialog(
-                onDismissRequest = { dialogDismiss() },
-                title = {Text("Maintenance confirmed!" + "\nDetails: ", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
+                onDismissRequest = {
+
+                    if(localStateManager.maintenanceUpdateInd)
+                    {
+                        localStateManager = localStateManager.copy(maintenanceUpdateInd = false)
+
+                        guitarViewModel.updateOrderState(17, false)
+
+                        guitarViewModel.updateOrderState(18, false)
+                    }
+
+                    dialogDismiss()
+                                   },
+                title = {
+                    if(!localStateManager.maintenanceUpdateInd) {
+                        Text(
+                            "Maintenance confirmed!" + "\nDetails: ",
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    else
+                    {
+                        Text(
+                            "Maintenance updated!" + "\nDetails: ",
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                        },
                 text = {Column (verticalArrangement = Arrangement.Top)
                 {
                     Text(text = "Name: ${maintenanceArray[0]}")
@@ -955,6 +1034,15 @@ import java.time.format.DateTimeFormatter
 
                         println(maintenanceArray[i])
                     }
+
+                    if(!localStateManager.maintenanceUpdateInd)
+                    {
+                        Text(
+                            text = "Available maintenance slots: ${5 - orderState.maintenanceInstance}",
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
                 },
                 confirmButton = {
@@ -964,7 +1052,18 @@ import java.time.format.DateTimeFormatter
                     )
                     {
                         TextButton(
-                            onClick = { dialogDismiss() },
+                            onClick = {
+                                if(localStateManager.maintenanceUpdateInd)
+                                {
+                                    localStateManager = localStateManager.copy(maintenanceUpdateInd = false)
+
+                                    guitarViewModel.updateOrderState(17, false)
+
+                                    guitarViewModel.updateOrderState(18, false)
+                                }
+
+                                dialogDismiss()
+                                      },
                             modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
                                 .width(90.dp).height(35.dp)
                         )
