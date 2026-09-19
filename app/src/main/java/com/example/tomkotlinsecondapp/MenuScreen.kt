@@ -238,6 +238,12 @@ import java.time.format.DateTimeFormatter
 
                 maintenanceArray.add(maintenanceItems[i].title)
             }
+            else
+            {
+                maintenanceMapList.put((i+1).toString(), "")
+
+                maintenanceArray.add("")
+            }
         }
     }
 
