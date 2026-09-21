@@ -240,9 +240,9 @@ import java.time.format.DateTimeFormatter
             }
             else
             {
-                maintenanceMapList.put((i+1).toString(), "")
+                maintenanceMapList.put((i+1).toString(), " ")
 
-                maintenanceArray.add("")
+                maintenanceArray.add(" ")
             }
         }
     }
@@ -877,15 +877,36 @@ import java.time.format.DateTimeFormatter
                                 .border(3.dp, Color.Black, RoundedCornerShape(15.dp)), contentAlignment = Alignment.Center
                         )
                         {
-                            TextButton(
-                                onClick = { emptyListCheck(localStateManager.maintenanceUpdateInd) },
-                                modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
-                                    .width(200.dp).height(50.dp)
-                            )
+                            if(!maintenanceLoading)
                             {
-                                Text("Schedule maintenance",
-                                    fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold,
-                                    color = Color.Black)
+                                TextButton(
+                                    onClick = { emptyListCheck(localStateManager.maintenanceUpdateInd) },
+                                    modifier = Modifier.background(
+                                        Color.White,
+                                        RoundedCornerShape(10.dp)
+                                    )
+                                        .width(200.dp).height(50.dp)
+                                )
+                                {
+                                    Text(
+                                        "Schedule maintenance",
+                                        fontFamily = FontFamily.Monospace,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.Black
+                                    )
+                                }
+                            }
+                            else
+                            {
+                                Box(modifier = Modifier.height(50.dp).width(200.dp).background(Color.White, RoundedCornerShape(12.dp)),
+                                    contentAlignment = Alignment.Center)
+                                {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(40.dp),
+                                        strokeWidth = 4.dp, color = Color.White,
+                                        trackColor = colorOffset
+                                    )
+                                }
                             }
                         }
 
@@ -963,12 +984,8 @@ import java.time.format.DateTimeFormatter
                             {
                                 TextButton(
                                     onClick = { maintenanceOrder() },
-                                    modifier = Modifier.background(
-                                        Color.White,
-                                        RoundedCornerShape(12.dp)
-                                    ).width(150.dp),
-                                    //enabled = !localStateManager.nameIsEmpty
-                                ) {
+                                    modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp)).width(150.dp))
+                                {
                                     Text(
                                         text = "Request maintenance",
                                         color = Color.Black,

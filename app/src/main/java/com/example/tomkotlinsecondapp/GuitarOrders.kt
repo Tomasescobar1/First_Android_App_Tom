@@ -860,7 +860,7 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                             }
                             else
                             {
-                                dbMaintenance.document(uid).collection(serviceDate).document(dateUpdate).delete().await()
+                                _maintenanceLoading.value = true
 
                                 dbMaintenance.document(uid).collection(serviceDate).document(dateUpdate).set(inputMaintenanceData).await()
 
@@ -977,39 +977,70 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun orderDelete(serviceDate: String, dateToDelete: String)
+    fun orderDelete(serviceDate: String, dateToDelete: String, maintenance: Boolean = false)
     {
         viewModelScope.launch {
             try
             {
                 if(currentUser != null && uid != null)
                 {
-                    _isLoading.value = true
-
-                    val countSnapshot = dbOrders.document(uid).collection(serviceDate).count().get(AggregateSource.SERVER).await()
-
-                    val dateCount = countSnapshot.count.toInt()
-
-                    Log.d("orderDelete", "${dateCount}")
-
-                    val snapShot = dbOrders.document(uid).collection("User preferences").document("Date quantity").get().await()
-
-                    var snapShotLong: Int? = snapShot.getLong("OrderNumber")?.toInt()
-
-                    if(snapShot.exists())
+                    if(!maintenance)
                     {
-                        if(snapShotLong != null)
-                        {
-                            if (snapShotLong > 0)
-                            {
-                                snapShotLong -= 1
+                        _isLoading.value = true
 
-                                if(dateCount == 1)
+                        val countSnapshot = dbOrders.document(uid).collection(serviceDate).count().get(AggregateSource.SERVER).await()
+
+                        val dateCount = countSnapshot.count.toInt()
+
+                        Log.d("orderDelete", "${dateCount}")
+
+                        val snapShot = dbOrders.document(uid).collection("User preferences").document("Date quantity").get().await()
+
+                        var snapShotLong: Int? = snapShot.getLong("OrderNumber")?.toInt()
+
+                        if (snapShot.exists()) {
+                            if (snapShotLong != null) {
+                                if (snapShotLong > 0)
                                 {
-                                    dbOrders.document(uid).collection("User preferences").document("Dates placed").update("Date Items", FieldValue.arrayRemove(serviceDate)).await()
-                                }
+                                    snapShotLong -= 1
 
-                                dbOrders.document(uid).collection("User preferences").document("Date quantity").set(dateSetter(snapShotLong)).await()
+                                    if (dateCount == 1)
+                                    {
+                                        dbOrders.document(uid).collection("User preferences").document("Dates placed").update("Date Items", FieldValue.arrayRemove(serviceDate)).await()
+                                    }
+
+                                    dbOrders.document(uid).collection("User preferences").document("Date quantity").set(dateSetter(snapShotLong)).await()
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        _isLoading.value = true
+
+                        val countSnapshot = dbOrders.document(uid).collection(serviceDate).count().get(AggregateSource.SERVER).await()
+
+                        val dateCount = countSnapshot.count.toInt()
+
+                        Log.d("orderDelete", "${dateCount}")
+
+                        val snapShot = dbOrders.document(uid).collection("User preferences").document("Date quantity").get().await()
+
+                        var snapShotLong: Int? = snapShot.getLong("OrderNumber")?.toInt()
+
+                        if (snapShot.exists()) {
+                            if (snapShotLong != null) {
+                                if (snapShotLong > 0)
+                                {
+                                    snapShotLong -= 1
+
+                                    if (dateCount == 1)
+                                    {
+                                        dbOrders.document(uid).collection("User preferences").document("Dates placed").update("Date Items", FieldValue.arrayRemove(serviceDate)).await()
+                                    }
+
+                                    dbOrders.document(uid).collection("User preferences").document("Date quantity").set(dateSetter(snapShotLong)).await()
+                                }
                             }
                         }
                     }
