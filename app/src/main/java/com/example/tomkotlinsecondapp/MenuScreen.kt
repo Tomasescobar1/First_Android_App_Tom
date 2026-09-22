@@ -97,6 +97,7 @@ import java.time.format.DateTimeFormatter
         var maintenanceSuccessLocal: Boolean = false,
         var maintenanceListInd: Boolean = false,
         var maintenanceUpdateInd: Boolean = false,
+        var maintenanceDeleteConfirm: Boolean = false,
         var checkListToggle: Boolean = false,
         var nameInputToggle: Boolean = false,
         var nameIsEmpty: Boolean = true,
@@ -673,6 +674,7 @@ import java.time.format.DateTimeFormatter
                         {
                             TextButton(
                                 onClick = {
+
                                     guitarViewModel.readOrderFromFirebase(localDateIndicator, true, guitarViewModel.fetchedMaintenanceList[i], true)
                                     guitarViewModel.updateOrderState(16, false, guitarViewModel.fetchedMaintenanceList[i])
                                 },
@@ -741,9 +743,6 @@ import java.time.format.DateTimeFormatter
                     {
                         TextButton(
                             onClick = {
-                                /*guitarViewModel.updateOrderState(13, false)
-                                guitarViewModel.updateOrderState(14, true)
-                                localStateManager = localStateManager.copy(maintenanceListInd = false)*/
                                 localStateManager = localStateManager.copy(maintenanceUpdateInd = true)
                                 localStateManager = localStateManager.copy(checkListToggle = !localStateManager.checkListToggle)
                             },
@@ -765,7 +764,9 @@ import java.time.format.DateTimeFormatter
                     )
                     {
                         TextButton(
-                            onClick = { /*localStates = localStates.copy(orderDeleteConfirm = true)*/ },
+                            onClick = {
+                                localStateManager = localStateManager.copy(maintenanceDeleteConfirm = true)
+                                      },
                             modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
                                 .width(150.dp).height(35.dp)
                         )
@@ -1126,7 +1127,78 @@ import java.time.format.DateTimeFormatter
                                 color = Color.Black)
                         }
                     }
-                })
+                }
+            )
+        }
+
+        if(localStateManager.maintenanceDeleteConfirm)
+        {
+            AlertDialog(
+                onDismissRequest = { localStateManager = localStateManager.copy(maintenanceDeleteConfirm = false) },
+                title = {Text("Confirm delete?", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
+                text = {Column(verticalArrangement = Arrangement.Top)
+                {
+                    Text(
+                        text = "Data will be unrecoverable after deletion...",
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                },
+                confirmButton = {
+                    Box(
+                        Modifier.background(Color(245,66,87), RoundedCornerShape(10.dp)).height(55.dp).width(120.dp)
+                            .border(3.dp, Color.Black, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center)
+                    {
+                        TextButton(
+                            onClick = { guitarViewModel.orderDelete(localDateIndicator, specificMaintenanceDoc, true) },
+                            modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
+                                .height(35.dp).width(90.dp)
+                        )
+                        {
+                            Text("Confirm",
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Black)
+                        }
+                    }
+                }
+            )
+        }
+
+        if(orderState.maintenanceDelete)
+        {
+            AlertDialog(
+                onDismissRequest = {
+                    localStateManager = localStateManager.copy(maintenanceDeleteConfirm = false)
+                    guitarViewModel.updateOrderState(19, false)
+                                   },
+                title = {Text("Order deleted successfully!", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
+                text = {Column(verticalArrangement = Arrangement.Top)
+                {
+
+                }
+                },
+                confirmButton = {
+                    Box(
+                        Modifier.background(Color(245,66,87), RoundedCornerShape(10.dp)).height(55.dp).width(120.dp)
+                            .border(3.dp, Color.Black, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center)
+                    {
+                        TextButton(
+                            onClick = {
+                                localStateManager = localStateManager.copy(maintenanceDeleteConfirm = false)
+                                guitarViewModel.updateOrderState(19, false)
+                                      },
+                            modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
+                                .height(35.dp).width(90.dp)
+                        )
+                        {
+                            Text("Confirm",
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Black)
+                        }
+                    }
+                }
+            )
         }
     }
 }

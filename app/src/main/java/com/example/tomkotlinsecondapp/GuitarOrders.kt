@@ -74,6 +74,7 @@ data class OrderUIState (
     var maintenanceInstance: Int = 0,
     var maintenanceSuccess: Boolean = false,
     var maintenanceFull: Boolean = false,
+    var maintenanceDelete: Boolean = false,
     var maintenanceFail: Boolean = false,
     var maintenanceUpdate: Boolean = false
 )
@@ -550,6 +551,10 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
             18 -> {
                 _specificFetchedMaintenance.value = input2
             }
+
+            19 -> {
+                _orderState.update {currentState -> currentState.copy(maintenanceDelete = false)}
+            }
         }
     }
 
@@ -1013,43 +1018,52 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                                 }
                             }
                         }
+
+                        dbOrders.document(uid).collection(serviceDate).document(dateToDelete).delete().await()
+
+                        _isLoading.value = false
+
+                        _orderState.update { currentState -> currentState.copy(orderDelete = true) }
                     }
                     else
                     {
-                        _isLoading.value = true
+                        _maintenanceLoading.value = true
 
-                        val countSnapshot = dbOrders.document(uid).collection(serviceDate).count().get(AggregateSource.SERVER).await()
+                        val countSnapshot = dbMaintenance.document(uid).collection(serviceDate).count().get(AggregateSource.SERVER).await()
 
                         val dateCount = countSnapshot.count.toInt()
 
                         Log.d("orderDelete", "${dateCount}")
 
-                        val snapShot = dbOrders.document(uid).collection("User preferences").document("Date quantity").get().await()
+                        val snapShot = dbMaintenance.document(uid).collection("User preferences").document("Date quantity").get().await()
 
                         var snapShotLong: Int? = snapShot.getLong("OrderNumber")?.toInt()
 
-                        if (snapShot.exists()) {
-                            if (snapShotLong != null) {
+                        if (snapShot.exists())
+                        {
+                            if (snapShotLong != null)
+                            {
                                 if (snapShotLong > 0)
                                 {
                                     snapShotLong -= 1
 
                                     if (dateCount == 1)
                                     {
-                                        dbOrders.document(uid).collection("User preferences").document("Dates placed").update("Date Items", FieldValue.arrayRemove(serviceDate)).await()
+                                        dbMaintenance.document(uid).collection("User preferences").document("Dates placed").update("Date Items", FieldValue.arrayRemove(serviceDate)).await()
                                     }
 
-                                    dbOrders.document(uid).collection("User preferences").document("Date quantity").set(dateSetter(snapShotLong)).await()
+                                    dbMaintenance.document(uid).collection("User preferences").document("Date quantity").set(dateSetter(snapShotLong)).await()
                                 }
                             }
                         }
+
+                        dbMaintenance.document(uid).collection(serviceDate).document(dateToDelete).delete().await()
+
+                        _maintenanceLoading.value = false
+
+                        _orderState.update { currentState -> currentState.copy(maintenanceDelete = true) }
+
                     }
-
-                    dbOrders.document(uid).collection(serviceDate).document(dateToDelete).delete().await()
-
-                    _isLoading.value = false
-
-                    _orderState.update { currentState -> currentState.copy(orderDelete = true) }
                 }
             }
             catch (e: Exception)
