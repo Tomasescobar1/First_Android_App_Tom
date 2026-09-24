@@ -123,9 +123,13 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
     val orderSlotState = _orderSlotState.asStateFlow()
 
-    private val _maintenanceSlotState = MutableStateFlow(false)
+    private val _maintenanceSlotState = MutableStateFlow(true)
 
     val maintenanceSlotState = _maintenanceSlotState.asStateFlow()
+
+    private val _maintenanceSlotAmount = MutableStateFlow(0)
+
+    val maintenanceSlotAmount = _maintenanceSlotAmount.asStateFlow()
 
     private val _userOrderView = MutableStateFlow(false)
 
@@ -646,11 +650,15 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                                 {
                                     _maintenanceSlotState.value = false
 
+                                    _maintenanceSlotAmount.value = 0
+
                                     println("Available maintenance slots null")
                                 }
                                 else
                                 {
                                     _maintenanceSlotState.value = true
+
+                                    _maintenanceSlotAmount.value = 5 - maintenanceSnapshotLong
 
                                     println("There are available maintenance slots!")
                                 }

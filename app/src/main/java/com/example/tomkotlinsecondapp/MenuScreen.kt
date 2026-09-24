@@ -116,7 +116,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
     val fetchedMaintenance by guitarViewModel.maintenanceSpecs.collectAsStateWithLifecycle()
 
-    val fetchedMaintenanceDate by guitarViewModel.fetchedMaintenanceDate.collectAsStateWithLifecycle()
+    val availableMaintenanceSlots by guitarViewModel.maintenanceSlotAmount.collectAsStateWithLifecycle()
+
+    val slotAvailabilityState by guitarViewModel.maintenanceSlotState.collectAsStateWithLifecycle()
 
     val specificMaintenanceDoc by guitarViewModel.specificMaintenanceDoc.collectAsStateWithLifecycle()
 
@@ -481,6 +483,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
                                 TextButton(
                                     onClick = {
                                         localStateManager = localStateManager.copy(maintenanceListInd = true)
+                                        guitarViewModel.checkSlotAvailability(true)
                                               },
                                     modifier = Modifier.background(
                                         Color.White,
@@ -515,18 +518,31 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
                             {
                                 TextButton(
                                     onClick = { localStateManager = localStateManager.copy(checkListToggle = !localStateManager.checkListToggle) },
+                                    enabled = slotAvailabilityState,
                                     modifier = Modifier.background(
                                         Color.White,
                                         RoundedCornerShape(12.dp)
                                     )
                                         .width(150.dp)
                                 ) {
-                                    Text(
-                                        text = "Maintenance",
-                                        color = Color.Black,
-                                        fontFamily = FontFamily.Monospace,
-                                        fontWeight = FontWeight.Bold
-                                    )
+                                    if(slotAvailabilityState)
+                                    {
+                                        Text(
+                                            text = "Maintenance",
+                                            color = Color.Black,
+                                            fontFamily = FontFamily.Monospace,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                    else
+                                    {
+                                        Text(
+                                            text = "Orders full",
+                                            color = Color.Black,
+                                            fontFamily = FontFamily.Monospace,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -609,6 +625,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
                                 }
                             }
                         }
+
+                        Text(
+                            text = "Available maintenance slots: $availableMaintenanceSlots",
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold
+                        )
 
                         Box(
                             modifier = Modifier.width(200.dp).height(80.dp)
@@ -1000,6 +1022,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
         if(orderState.maintenanceSuccess)
         {
+            guitarViewModel.checkSavedDates(true)
+
             AlertDialog(
                 onDismissRequest = {
 
