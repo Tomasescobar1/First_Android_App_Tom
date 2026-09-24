@@ -70,21 +70,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
-import kotlinx.coroutines.delay
-import kotlin.math.roundToInt
-import kotlin.time.Duration.Companion.milliseconds
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-
-/*fun formatDayMonthYear(timeStampMillis: Long): String {
-
-    val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy").withZone(ZoneId.systemDefault())
-
-    return formatter.format(Instant.ofEpochMilli(timeStampMillis))
-
-}*/
 
 @Composable fun MenuScreen(onNavigateToMain: () -> Unit, guitarViewModel: GuitarOrder)
 {
@@ -140,8 +125,6 @@ import java.time.format.DateTimeFormatter
     val specificFetchedMaintenance by guitarViewModel.specificFetchedMaintenance.collectAsStateWithLifecycle()
 
     val dateStorage by remember {mutableStateOf(TrackedValue())}
-
-    var convertedDate by remember {mutableStateOf("")}
 
     var nameStorage by remember { mutableStateOf("") }
 

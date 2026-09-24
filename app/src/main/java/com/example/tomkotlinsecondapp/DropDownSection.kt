@@ -126,22 +126,6 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
 
     val scaleLengths = listOf(25.5, 25.0, 24.75, 24.0)
 
-    fun dialogDismiss(input:Boolean = false)
-    {
-        customerInputLocal = ""
-
-        localStates = localStates.copy(orderFoundInd = false)
-
-        if(input)
-        {
-            guitarViewModel.updateOrderState(7, false)
-        }
-
-        guitarViewModel.updateOrderState(6, false)
-
-        guitarViewModel.updateOrderState(4, false)
-    }
-
     LaunchedEffect(orderState.updateSuccess)
     {
         if(orderState.updateSuccess)

@@ -1,7 +1,5 @@
 package com.example.tomkotlinsecondapp
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.AndroidViewModel
 import android.app.Application
@@ -27,7 +25,6 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
-import android.nfc.Tag
 import android.util.Log
 import androidx.compose.runtime.currentRecomposeScope
 import com.google.firebase.auth.GoogleAuthProvider

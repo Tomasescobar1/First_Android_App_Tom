@@ -2,7 +2,6 @@ package com.example.tomkotlinsecondapp
 
 import android.app.Activity
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.EnterTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -10,7 +9,6 @@ import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -46,7 +44,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlin.math.roundToInt
 
 @Composable
@@ -55,8 +52,6 @@ fun FABComponent(guitarViewModel: GuitarOrder) {
     val isDeployed by guitarViewModel.deployedState.collectAsStateWithLifecycle()
 
     val offlineState by guitarViewModel.isOffline.collectAsStateWithLifecycle()
-
-    val authState by guitarViewModel.authState.collectAsStateWithLifecycle()
 
     val userOrderView by guitarViewModel.userOrderView.collectAsStateWithLifecycle()
 
@@ -79,7 +74,6 @@ fun FABComponent(guitarViewModel: GuitarOrder) {
 
     sizeOffset = when {
         userOrderView -> 480
-        //authState -> 540
         else -> 400
     }
 
