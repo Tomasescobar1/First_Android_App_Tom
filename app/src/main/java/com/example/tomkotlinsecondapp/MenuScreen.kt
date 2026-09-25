@@ -666,7 +666,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
         if(maintenanceFetchLoad)
         {
             AlertDialog(
-                onDismissRequest = {  },
+                onDismissRequest = { guitarViewModel.updateOrderState(17,false) },
                 title = {Text("Maintenance placed on ${localDateIndicator}:", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
                 text = {Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.Top, horizontalAlignment = Alignment.CenterHorizontally)
                 {
@@ -679,7 +679,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
                         {
                             TextButton(
                                 onClick = {
-
                                     guitarViewModel.readOrderFromFirebase(localDateIndicator, true, guitarViewModel.fetchedMaintenanceList[i], true)
                                     guitarViewModel.updateOrderState(16, false, guitarViewModel.fetchedMaintenanceList[i])
                                 },
@@ -1157,15 +1156,43 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
                         Modifier.background(Color(245,66,87), RoundedCornerShape(10.dp)).height(55.dp).width(120.dp)
                             .border(3.dp, Color.Black, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center)
                     {
-                        TextButton(
-                            onClick = { guitarViewModel.orderDelete(localDateIndicator, specificMaintenanceDoc, true) },
-                            modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
-                                .height(35.dp).width(90.dp)
-                        )
+                        if(!maintenanceLoading)
                         {
-                            Text("Confirm",
-                                fontWeight = FontWeight.Bold,
-                                color = Color.Black)
+                            TextButton(
+                                onClick = {
+                                    guitarViewModel.orderDelete(
+                                        localDateIndicator,
+                                        specificMaintenanceDoc,
+                                        true
+                                    )
+                                },
+                                modifier = Modifier.background(
+                                    Color.White,
+                                    RoundedCornerShape(10.dp)
+                                )
+                                    .height(35.dp).width(90.dp)
+                            )
+                            {
+                                Text(
+                                    "Confirm",
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.Black
+                                )
+                            }
+                        }
+                        else
+                        {
+                            Box(
+                                modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp)).height(35.dp).width(90.dp),
+                                contentAlignment = Alignment.Center
+                            )
+                            {
+                                CircularProgressIndicator (
+                                    modifier = Modifier.size(25.dp),
+                                    strokeWidth = 3.dp, color = Color.White,
+                                    trackColor = Color(245, 66, 87)
+                                )
+                            }
                         }
                     }
                 }
@@ -1176,8 +1203,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
         {
             AlertDialog(
                 onDismissRequest = {
+                    localStateManager = localStateManager.copy(maintenanceListInd = false)
                     localStateManager = localStateManager.copy(maintenanceDeleteConfirm = false)
-                    guitarViewModel.updateOrderState(19, false)
+                    guitarViewModel.checkSavedDates(true)
+                    guitarViewModel.updateOrderState(17, false)
+                    guitarViewModel.updateOrderState(18, false)
+                    guitarViewModel.updateOrderState(19,false)
                                    },
                 title = {Text("Order deleted successfully!", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
                 text = {Column(verticalArrangement = Arrangement.Top)
@@ -1192,7 +1223,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
                     {
                         TextButton(
                             onClick = {
+                                localStateManager = localStateManager.copy(maintenanceListInd = false)
                                 localStateManager = localStateManager.copy(maintenanceDeleteConfirm = false)
+                                guitarViewModel.checkSavedDates(true)
+                                guitarViewModel.updateOrderState(17, false)
+                                guitarViewModel.updateOrderState(18, false)
                                 guitarViewModel.updateOrderState(19, false)
                                       },
                             modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))

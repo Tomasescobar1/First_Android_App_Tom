@@ -646,6 +646,10 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                         {
                             if (maintenanceSnapshotLong != null)
                             {
+                                if(maintenanceSnapshotLong == 0)
+                                {
+                                    _userMaintenanceView.value = false
+                                }
                                 if (maintenanceSnapshotLong == 5)
                                 {
                                     _maintenanceSlotState.value = false
@@ -718,12 +722,22 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                         {
                             maintenanceDateList = maintenanceRef.get("Date Items") as? List<String>
 
-                            for (i in 0 until (maintenanceDateList?.size ?: 5))
+                            if(maintenanceDateList?.size != 0)
                             {
-                                Log.d("checkedSavedDates, Input = true", "Date number $i: ${maintenanceDateList?.get(i)}")
-                            }
+                                for (i in 0 until (maintenanceDateList?.size ?: 5))
+                                {
+                                    Log.d(
+                                        "checkedSavedDates, Input = true",
+                                        "Date number $i: ${maintenanceDateList?.get(i)}"
+                                    )
+                                }
 
-                            _userMaintenanceView.value = true
+                                _userMaintenanceView.value = true
+                            }
+                            else
+                            {
+                                _userMaintenanceView.value = false
+                            }
                         }
                     }
                 }
