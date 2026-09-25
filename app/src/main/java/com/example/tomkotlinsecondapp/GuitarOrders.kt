@@ -76,6 +76,17 @@ data class OrderUIState (
     var maintenanceUpdate: Boolean = false
 )
 
+data class MaintenanceUIState (
+    var maintenanceInstance: Int = 0
+    var maintenanceFull: Boolean = false,
+    var maintenanceDelete: Boolean = false,
+    var maintenanceFail: Boolean = false,
+    var maintenanceUpdate: Boolean = false,
+    var maintenanceSpecs: MutableMap<String, Any>? = mutableMapOf<String, Any>(),
+    var specificDocName: String = "",
+    var fetchedMaintenanceDate: String = ""
+)
+
 data class OrderDataState (
     var colorInput: String = "White",
     var modelIndVal: String = "Telecaster",
@@ -208,9 +219,9 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
     val orderSpecs = _orderSpecs.asStateFlow()
 
-    private val _maintenanceSpecs = MutableStateFlow(maintenanceFetchedMap)
+    private val _maintenanceSpecs = MutableStateFlow(maintenanceFetchedMap)//-------------------
 
-    val maintenanceSpecs = _maintenanceSpecs.asStateFlow()
+    val maintenanceSpecs = _maintenanceSpecs.asStateFlow() //-------------------------------------------
 
     private val _specificFetchedOrder = MutableStateFlow(false)
 
@@ -228,19 +239,13 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
     val fetchedMaintenanceDate = _fetchedMaintenanceDate.asStateFlow()
 
-    private val _specificMaintenanceDoc = MutableStateFlow("")
+    private val _specificMaintenanceDoc = MutableStateFlow("") //-------------------------------
 
-    val specificMaintenanceDoc = _specificMaintenanceDoc.asStateFlow()
+    val specificMaintenanceDoc = _specificMaintenanceDoc.asStateFlow() //------------------------------
 
     fun dateSetter(input: Int? = 1) : MutableMap<String, Int?>
     {
         val outputMap = mutableMapOf("OrderNumber" to input)
-        return outputMap
-    }
-
-    fun dateList(input1: Int?, input2: String): MutableMap<String, String>
-    {
-        val outputMap = mutableMapOf("Date ${input1.toString()}" to input2)
         return outputMap
     }
 
