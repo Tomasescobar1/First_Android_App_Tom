@@ -77,14 +77,21 @@ data class OrderUIState (
 )
 
 data class MaintenanceUIState (
-    var maintenanceInstance: Int = 0
+    var maintenanceInstance: Int = 0,
     var maintenanceFull: Boolean = false,
     var maintenanceDelete: Boolean = false,
     var maintenanceFail: Boolean = false,
     var maintenanceUpdate: Boolean = false,
+    var maintenanceLoading: Boolean = false,
+    var maintenanceSlotState: Boolean = false,
+    var maintenanceSlotAmount: Int = 0,
+    var userMaintenanceView: Boolean = false,
+    var maintenanceFetchLoad: Boolean = false,
+    var specificFetchedMaintenance: Boolean = false,
     var maintenanceSpecs: MutableMap<String, Any>? = mutableMapOf<String, Any>(),
     var specificDocName: String = "",
-    var fetchedMaintenanceDate: String = ""
+    var fetchedMaintenanceDate: String = "",
+    var specificMaintenanceDoc: String = ""
 )
 
 data class OrderDataState (
@@ -134,33 +141,33 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
     val orderSlotState = _orderSlotState.asStateFlow()
 
-    private val _maintenanceSlotState = MutableStateFlow(true)
+    private val _maintenanceSlotState = MutableStateFlow(true) //---------------------------------
 
-    val maintenanceSlotState = _maintenanceSlotState.asStateFlow()
+    val maintenanceSlotState = _maintenanceSlotState.asStateFlow() //-------------------------------------
 
-    private val _maintenanceSlotAmount = MutableStateFlow(0)
+    private val _maintenanceSlotAmount = MutableStateFlow(0) //-----------------------------------
 
-    val maintenanceSlotAmount = _maintenanceSlotAmount.asStateFlow()
+    val maintenanceSlotAmount = _maintenanceSlotAmount.asStateFlow() //----------------------------------
 
     private val _userOrderView = MutableStateFlow(false)
 
     val userOrderView = _userOrderView.asStateFlow()
 
-    private val _userMaintenanceView = MutableStateFlow(false)
+    private val _userMaintenanceView = MutableStateFlow(false) //---------------------------------
 
-    val userMaintenanceView = _userMaintenanceView.asStateFlow()
+    val userMaintenanceView = _userMaintenanceView.asStateFlow() //--------------------------------------
 
     private val _orderFetchLoad = MutableStateFlow(false)
 
     val orderFetchLoad = _orderFetchLoad.asStateFlow()
 
-    private val _maintenanceFetchLoad = MutableStateFlow(false)
+    private val _maintenanceFetchLoad = MutableStateFlow(false) //--------------------------------
 
-    val maintenanceFetchLoad = _maintenanceFetchLoad.asStateFlow()
+    val maintenanceFetchLoad = _maintenanceFetchLoad.asStateFlow() //-------------------------------------
 
-    private val _specificFetchedMaintenance = MutableStateFlow(false)
+    private val _specificFetchedMaintenance = MutableStateFlow(false) //----------------------------
 
-    val specificFetchedMaintenance = _specificFetchedMaintenance.asStateFlow()
+    val specificFetchedMaintenance = _specificFetchedMaintenance.asStateFlow() //----------------------------
 
     private val _dataState = MutableStateFlow(OrderDataState())
 
@@ -199,9 +206,9 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
     val isLoading = _isLoading.asStateFlow()
 
-    private val _maintenanceLoading = MutableStateFlow(false)
+    private val _maintenanceLoading = MutableStateFlow(false) //----------------------------------------
 
-    val maintenanceLoading = _maintenanceLoading.asStateFlow()
+    val maintenanceLoading = _maintenanceLoading.asStateFlow() //-----------------------------------------------
 
     val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
@@ -231,13 +238,13 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
     val fetchedOrderDate = _fetchedOrderDate.asStateFlow()
 
-    private val _specificDocName = MutableStateFlow("")
+    private val _specificDocName = MutableStateFlow("") //-------------------------------------
 
-    val specificDocName = _specificDocName.asStateFlow()
+    val specificDocName = _specificDocName.asStateFlow() //--------------------------------------------
 
-    private val _fetchedMaintenanceDate = MutableStateFlow("")
+    private val _fetchedMaintenanceDate = MutableStateFlow("") //-------------------------------
 
-    val fetchedMaintenanceDate = _fetchedMaintenanceDate.asStateFlow()
+    val fetchedMaintenanceDate = _fetchedMaintenanceDate.asStateFlow() //------------------------------
 
     private val _specificMaintenanceDoc = MutableStateFlow("") //-------------------------------
 
