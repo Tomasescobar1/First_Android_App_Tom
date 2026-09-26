@@ -503,46 +503,39 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
                             }
                         }
 
-                        AnimatedVisibility(
-                            visible = authState,
-                            enter = slideInVertically(animationSpec = tween(200)){fullHeight -> -fullHeight},
-                            exit = slideOutVertically(animationSpec = tween(200){fullHeight -> fullHeight})
+                        Box(
+                            modifier = Modifier.width(200.dp).height(80.dp).zIndex(1f)
+                                .background(colorOffset, RoundedCornerShape(16.dp))
+                                .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
+                            contentAlignment = Alignment.Center
                         )
                         {
-                            Box(
-                                modifier = Modifier.width(200.dp).height(80.dp).zIndex(1f)
-                                    .background(colorOffset, RoundedCornerShape(16.dp))
-                                    .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
-                                contentAlignment = Alignment.Center
-                            )
-                            {
-                                TextButton(
-                                    onClick = { localStateManager = localStateManager.copy(checkListToggle = !localStateManager.checkListToggle) },
-                                    enabled = slotAvailabilityState,
-                                    modifier = Modifier.background(
-                                        Color.White,
-                                        RoundedCornerShape(12.dp)
+                            TextButton(
+                                onClick = { localStateManager = localStateManager.copy(checkListToggle = !localStateManager.checkListToggle) },
+                                enabled = slotAvailabilityState,
+                                modifier = Modifier.background(
+                                    Color.White,
+                                    RoundedCornerShape(12.dp)
+                                )
+                                    .width(150.dp)
+                            ) {
+                                if(slotAvailabilityState)
+                                {
+                                    Text(
+                                        text = "Maintenance",
+                                        color = Color.Black,
+                                        fontFamily = FontFamily.Monospace,
+                                        fontWeight = FontWeight.Bold
                                     )
-                                        .width(150.dp)
-                                ) {
-                                    if(slotAvailabilityState)
-                                    {
-                                        Text(
-                                            text = "Maintenance",
-                                            color = Color.Black,
-                                            fontFamily = FontFamily.Monospace,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                    }
-                                    else
-                                    {
-                                        Text(
-                                            text = "Orders full",
-                                            color = Color.Black,
-                                            fontFamily = FontFamily.Monospace,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                    }
+                                }
+                                else
+                                {
+                                    Text(
+                                        text = "Orders full",
+                                        color = Color.Black,
+                                        fontFamily = FontFamily.Monospace,
+                                        fontWeight = FontWeight.Bold
+                                    )
                                 }
                             }
                         }

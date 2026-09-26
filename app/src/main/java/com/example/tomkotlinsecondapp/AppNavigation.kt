@@ -22,6 +22,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.composable
+import androidx.navigation.navOptions
 import kotlinx.serialization.Serializable
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -65,7 +66,8 @@ object DetailsRoute
     {
         composable<DetailsRoute>
         {
-            DetailsScreen(onNavigateToMenu = { navigationController.navigate(MenuRoute) })
+            DetailsScreen(onNavigateToMenu = { navigationController.navigate(route = MenuRoute){popUpTo<DetailsRoute>{inclusive = true}} },
+                guitarViewModel = guitarViewModel)
         }
 
         composable<MenuRoute>
