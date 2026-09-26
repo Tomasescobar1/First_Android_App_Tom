@@ -77,6 +77,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
     data class LocalStateClass(
         var depSideBar: Boolean = false,
         var menuLeave: Boolean = false,
+        var maintenancePlacedCheck: Boolean = false,
         var maintenanceToggle: Boolean = false,
         var maintenanceLoadingTrigger: Boolean = false,
         var maintenanceSuccessLocal: Boolean = false,
@@ -305,6 +306,20 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
         }
     }
 
+    LaunchedEffect(maintenancePlaced)
+    {
+        if(maintenancePlaced)
+        {
+            localStateManager = localStateManager.copy(maintenancePlacedCheck = true)
+        }
+        else
+        {
+            localStateManager = localStateManager.copy(maintenancePlacedCheck = false)
+
+            guitarViewModel.checkSavedDates(true)
+        }
+    }
+
     Column(modifier = Modifier.fillMaxSize().background(Color.White).padding(top = (100 + offlineSignToggle).dp), verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally)
     {
@@ -468,7 +483,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
                         }
 
                         AnimatedVisibility(
-                            visible = maintenancePlaced,
+                            visible = localStateManager.maintenancePlacedCheck,
                             enter = slideInVertically(animationSpec = tween(200)){fullHeight -> -fullHeight},
                             exit = slideOutVertically(animationSpec = tween(200){fullHeight -> fullHeight})
                         )
