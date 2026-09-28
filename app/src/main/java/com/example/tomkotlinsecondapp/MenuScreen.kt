@@ -436,58 +436,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
                         horizontalAlignment = Alignment.Start
                     )
                     {
-
-                        /*Box(
-                            modifier = Modifier.width(200.dp).height(80.dp).zIndex(1f)
-                                .background(colorOffset, RoundedCornerShape(16.dp))
-                                .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
-                            contentAlignment = Alignment.Center
-                        )
-                        {
-                            if(authLoadingState)
-                            {
-                                Box(modifier = Modifier.height(50.dp).width(150.dp).background(Color.White, RoundedCornerShape(12.dp)),
-                                    contentAlignment = Alignment.Center)
-                                {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.size(40.dp),
-                                        strokeWidth = 4.dp, color = Color.White,
-                                        trackColor = colorOffset
-                                    )
-                                }
-                            }
-                            else
-                            {
-                                TextButton(
-                                    onClick = { guitarViewModel.signInWithGoogle(context) },
-                                    enabled = !offlineState && !authState,
-                                    modifier = Modifier.background(
-                                        Color.White,
-                                        RoundedCornerShape(12.dp)
-                                    ).height(60.dp).width(150.dp)
-                                ) {
-                                    if(!authState)
-                                    {
-                                        Text(
-                                            text = "Log In For Maintenance.",
-                                            color = Color.Black,
-                                            fontFamily = FontFamily.Monospace,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                    }
-                                    else
-                                    {
-                                        Text(
-                                            text = "You are logged in.",
-                                            color = Color.Black,
-                                            fontFamily = FontFamily.Monospace,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                    }
-                                }
-                            }
-                        }*/
-
                         AnimatedVisibility(
                             visible = localStateManager.maintenancePlacedCheck,
                             enter = slideInVertically(animationSpec = tween(200)){fullHeight -> -fullHeight},
