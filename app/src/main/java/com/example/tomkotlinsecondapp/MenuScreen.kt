@@ -431,7 +431,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
                     )
                     {
 
-                        Box(
+                        /*Box(
                             modifier = Modifier.width(200.dp).height(80.dp).zIndex(1f)
                                 .background(colorOffset, RoundedCornerShape(16.dp))
                                 .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
@@ -480,7 +480,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
                                     }
                                 }
                             }
-                        }
+                        }*/
 
                         AnimatedVisibility(
                             visible = localStateManager.maintenancePlacedCheck,

@@ -92,7 +92,14 @@ fun FABComponent(guitarViewModel: GuitarOrder) {
     )
     {
         Icon(
-            modifier = Modifier.clickable(interactionSource = null, indication = null){ guitarViewModel.updateDataState(6, " ", 0.0) },
+            modifier = Modifier.clickable(interactionSource = null, indication = null)
+            {
+                guitarViewModel.updateDataState(6, " ", 0.0)
+
+                guitarViewModel.checkSavedDates()
+
+                guitarViewModel.checkSlotAvailability()
+            },
             imageVector = Icons.Default.Add,
             contentDescription = "Add",
             tint = Color.Black

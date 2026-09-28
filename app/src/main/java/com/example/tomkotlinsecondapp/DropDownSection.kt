@@ -81,7 +81,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
         val orderDeleteConfirm: Boolean = false,
         val ordersFull: Boolean = false,
         val logInToPlaceOrder: Boolean = false,
-        val orderSlotCheck: Boolean = false,
+        //val orderSlotCheck: Boolean = false,
         val slotCheckLoading: Boolean = false,
         val orderListInd: Boolean = false,
     )
@@ -654,104 +654,30 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
             )
             {
 
-                if(!authLoadingState || localStates.slotCheckLoading)
-                {
-                    TextButton(
-                        onClick = {
-                            println(orderState.orderListFull.toString())
+                TextButton(
+                    onClick = {
 
-                            if (authState)
-                            {
-                                localStates = localStates.copy(orderSlotCheck = true)
+                        println(orderState.orderListFull.toString())
 
-                                if(!orderState.orderListFull && orderSlotState)
-                                {
-                                    guitarViewModel.updateOrderState(2, true)
-                                }
-                                else
-                                {
-                                    localStates = localStates.copy(ordersFull = true)
-                                }
-                            }
-                            else
-                            {
-                                localStates = localStates.copy(logInToPlaceOrder = true)
-                            }
-                        },
-                        enabled = !offlineState,
-                        modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp))
-                            .width(150.dp)
-                    ) {
-                        Text(
-                            text = "Place Order",
-                            color = Color.Black,
-                            fontFamily = FontFamily.Monospace,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-                else
-                {
-                    Box(modifier = Modifier.height(50.dp).width(150.dp).background(Color.White, RoundedCornerShape(12.dp)),
-                        contentAlignment = Alignment.Center)
-                    {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(40.dp),
-                            strokeWidth = 4.dp, color = Color.White,
-                            trackColor = Color(66, 203,245)
-                        )
-                    }
-                }
-            }
-
-    if(localStates.logInToPlaceOrder)
-    {
-        AlertDialog(
-            onDismissRequest = { localStates = localStates.copy(logInToPlaceOrder = false) },
-            title = {Text("You need to log in to place an order...", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
-            text = {Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally)
-            {
-                Box(
-                    modifier = Modifier.width(200.dp).height(80.dp)
-                        .background(Color(66, 203,  245), RoundedCornerShape(16.dp))
-                        .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
-                    contentAlignment = Alignment.Center
-                )
-                {
-                    TextButton(
-                        onClick = {
-                            guitarViewModel.signInWithGoogle(context)
-                            localStates = localStates.copy(logInToPlaceOrder = false) },
-                        modifier = Modifier.background(Color.White,RoundedCornerShape(12.dp)).width(150.dp)
+                        if (!orderState.orderListFull && orderSlotState) {
+                            guitarViewModel.updateOrderState(2, true)
+                        } else {
+                            localStates = localStates.copy(ordersFull = true)
+                        }
+                    },
+                    enabled = !offlineState,
+                    modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp))
+                        .width(150.dp)
+                ) {
+                    Text(
+                        text = "Place Order",
+                        color = Color.Black,
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold
                     )
-                    {
-                        Text(
-                            text = "Log in",
-                            color = Color.Black,
-                            fontFamily = FontFamily.Monospace,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
                 }
             }
-            },
-            confirmButton = {})
-    }
 
-    if(localStates.loginFail)
-    {
-        AlertDialog(
-            onDismissRequest = {},
-            title = {Text("Failed to log in!", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
-            text = {Column(verticalArrangement = Arrangement.Top)
-            {
-                Text(
-                    text = "Crap.", overflow = TextOverflow.Clip,
-                    lineHeight = 30.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-            }
-            },
-            confirmButton = {})
-    }
 
     if(localStates.ordersFull)
     {
