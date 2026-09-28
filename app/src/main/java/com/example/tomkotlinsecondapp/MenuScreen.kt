@@ -372,7 +372,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
                     modifier = Modifier.clickable(
                         interactionSource = null,
                         indication = null
-                    ) { localStateManager = localStateManager.copy(depSideBar = !localStateManager.depSideBar) }.width((130.0 + buttonSizeOffset).dp).height(130.dp)
+                    )
+                    {
+                        guitarViewModel.checkSavedDates(true)
+                        guitarViewModel.checkSlotAvailability(true)
+                        localStateManager = localStateManager.copy(depSideBar = !localStateManager.depSideBar)
+                    }
+                        .width((130.0 + buttonSizeOffset).dp).height(130.dp)
                         .border(4.dp, Color.Black)
                         .background(colorOffset)
                         .padding(top = 10.dp, bottom = 10.dp),

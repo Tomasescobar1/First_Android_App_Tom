@@ -152,6 +152,11 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
 
             guitarViewModel.updateOrderState(14, false)
 
+            if(guitarViewModel.orderDateList?.size == 0)
+            {
+                localStates = localStates.copy(orderListInd = false)
+            }
+
             localStates = localStates.copy(orderDeleteConfirm = false)
 
             localStates = localStates.copy(orderFoundInd = false)
@@ -291,9 +296,9 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                     {
                         Log.d("DropDownSection 351", "Update conditional working!")
 
-                        guitarViewModel.addListElement(fetchedOrder.customerOrdering, cDataState.modelIndVal, cDataState.colorInput, cDataState.scaleLengthInd, localDateIndicator.toString())
+                        guitarViewModel.addListElement(fetchedOrder.customerOrdering, cDataState.modelIndVal, cDataState.colorInput, cDataState.scaleLengthInd, localDateIndicator)
 
-                        guitarViewModel.addDataToFirestore(inputOrderData = guitarViewModel.dbOrderList, serviceDate = localDateIndicator.toString(), update = true, dateUpdate = specificOrderDocName)
+                        guitarViewModel.addDataToFirestore(inputOrderData = guitarViewModel.dbOrderList, serviceDate = localDateIndicator, update = true, dateUpdate = specificOrderDocName)
                     }
                           },
                 modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp))
@@ -572,7 +577,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                 )
                 {
                     TextButton(
-                        onClick = { guitarViewModel.orderDelete(localDateIndicator.toString(), specificOrderDocName) },
+                        onClick = { guitarViewModel.orderDelete(localDateIndicator, specificOrderDocName) },
                         modifier = Modifier.background(
                             Color.White,
                             RoundedCornerShape(12.dp)
@@ -605,6 +610,10 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
 
     if(orderState.orderDelete)
     {
+        guitarViewModel.checkSavedDates()
+
+        guitarViewModel.checkSlotAvailability()
+
         AlertDialog(
             onDismissRequest = {},
             title = {Text("Order deleted successfully!", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},

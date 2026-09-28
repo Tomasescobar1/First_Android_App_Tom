@@ -718,12 +718,19 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                         {
                             orderDateList = ordersRef.get("Date Items") as? List<String>
 
-                            for (i in 0 until (orderDateList?.size ?: 5))
+                            if(orderDateList?.size != 0)
                             {
-                                println("Date number $i: ${orderDateList?.get(i)}")
-                            }
+                                for (i in 0 until (orderDateList?.size ?: 5))
+                                {
+                                    println("Date number $i: ${orderDateList?.get(i)}")
+                                }
 
-                            _userOrderView.value = true
+                                _userOrderView.value = true
+                            }
+                            else
+                            {
+                                _userOrderView.value = false
+                            }
                         }
                     }
                     else

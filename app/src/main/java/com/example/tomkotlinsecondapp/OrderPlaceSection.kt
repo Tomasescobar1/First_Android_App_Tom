@@ -250,6 +250,10 @@ fun ConfirmSection(guitarViewModel: GuitarOrder)
 
     if(orderState.orderSuccess)
     {
+        guitarViewModel.checkSavedDates()
+
+        guitarViewModel.checkSlotAvailability()
+
         AlertDialog(
             onDismissRequest = {dialogDismiss(input2 = true)},
             title = {Text("Order confirmed!" + "\nSpecifications: ", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
