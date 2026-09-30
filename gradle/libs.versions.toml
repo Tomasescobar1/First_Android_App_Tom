@@ -1,6 +1,7 @@
 [versions]
-agp = "9.2.1"
-kotlin = "2.4.10"
+agp = "9.4.1"
+kotlin = "2.0.21"
+ksp = "2.0.21-1.0.28"
 androidx-lifecycle = "2.11.0"
 coreKtx = "1.19.0"
 junit = "4.13.2"
@@ -17,6 +18,7 @@ firebaseBom = "34.17.0"
 androidx-navigation = "2.9.8"
 credentials = "1.6.0"
 googleid = "1.2.0"
+room3 = "3.0.3"
 
 [libraries]
 
@@ -41,6 +43,8 @@ androidx-compose-material-icons-core = { group = "androidx.compose.material", na
 androidx-compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
 androidx-credentials-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentials" }
+androidx-room3-runtime = {group = "androidx.room3", name = "room3-runtime", version.ref = "room3"}
+androidx-room3-compiler = {group = "androidx-room3", name = "room3-compiler", version.ref = "room3"}
 googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
 scene-view-lib = { name = "sceneview", group = "io.github.sceneview", version.ref = "sceneview"}
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
@@ -53,3 +57,5 @@ android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
+ksp = {id = "com.google.devtools.ksp", version.ref = "ksp"}
+room3 = {id = "androidx.room3", version.ref = "room3"}
