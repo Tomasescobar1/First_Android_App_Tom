@@ -61,6 +61,7 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.androidx.room3.runtime)
     ksp(libs.androidx.room3.compiler)
+    implementation(libs.sqlite.bundled)
     implementation(libs.scene.view.lib)
     implementation(libs.firebase.firestore)
     implementation(libs.androidx.credentials)

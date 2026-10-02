@@ -19,6 +19,7 @@ androidx-navigation = "2.9.8"
 credentials = "1.6.0"
 googleid = "1.2.0"
 room3 = "3.0.3"
+sqlite = "2.5.0"
 
 [libraries]
 
@@ -46,6 +47,7 @@ androidx-credentials-play-services-auth = { module = "androidx.credentials:crede
 androidx-room3-runtime = {group = "androidx.room3", name = "room3-runtime", version.ref = "room3"}
 androidx-room3-compiler = {group = "androidx.room3", name = "room3-compiler", version.ref = "room3"}
 androidx-room3-paging = {group ="androidx.room3", name = "room3-paging", version.ref = "room3"}
+sqlite-bundled = {group = "androidx.sqlite", name = "sqlite-bundled", version.ref = "sqlite"}
 googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
 scene-view-lib = { name = "sceneview", group = "io.github.sceneview", version.ref = "sceneview"}
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
