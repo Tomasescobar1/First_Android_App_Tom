@@ -2,6 +2,7 @@
 agp = "9.4.1"
 kotlin = "2.0.21"
 ksp = "2.0.21-1.0.28"
+hilt = "2.60.0"
 androidx-lifecycle = "2.11.0"
 coreKtx = "1.19.0"
 junit = "4.13.2"
@@ -44,10 +45,12 @@ androidx-compose-material-icons-core = { group = "androidx.compose.material", na
 androidx-compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
 androidx-credentials-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentials" }
-androidx-room3-runtime = {group = "androidx.room3", name = "room3-runtime", version.ref = "room3"}
-androidx-room3-compiler = {group = "androidx.room3", name = "room3-compiler", version.ref = "room3"}
+hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt"}
+hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt"}
+androidx-room3-runtime = { group = "androidx.room3", name = "room3-runtime", version.ref = "room3"}
+androidx-room3-compiler = { group = "androidx.room3", name = "room3-compiler", version.ref = "room3"}
 androidx-room3-paging = {group ="androidx.room3", name = "room3-paging", version.ref = "room3"}
-sqlite-bundled = {group = "androidx.sqlite", name = "sqlite-bundled", version.ref = "sqlite"}
+sqlite-bundled = { group = "androidx.sqlite", name = "sqlite-bundled", version.ref = "sqlite"}
 googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
 scene-view-lib = { name = "sceneview", group = "io.github.sceneview", version.ref = "sceneview"}
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
@@ -60,5 +63,6 @@ android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
+hilt = {id = "com.google.dagger.hilt.android", version.ref = "hilt"}
 ksp = {id = "com.google.devtools.ksp", version.ref = "ksp"}
 room3 = {id = "androidx.room3", version.ref = "room3"}

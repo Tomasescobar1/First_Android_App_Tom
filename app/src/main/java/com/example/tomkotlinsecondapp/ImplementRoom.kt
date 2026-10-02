@@ -19,9 +19,14 @@ data class User (
 
 @Dao
 interface TomasUserDao {
-    @Query("INSERT OR REPLACE INTO userTable (first_name, last_name) VALUES (:userName, :lastName)")
+    @Query("INSERT OR REPLACE INTO userTable (userId, first_name, last_name) VALUES (:userName, :lastName)")
     suspend fun insertUserName(userName: String, lastName: String): User?
 
-    @Query("SELECT * FROM userTable WHERE first_name LIKE :userName AND last_name LIKE :lastName")
-    suspend fun getTheUserName(userName: String, lastName: String) :User?
+    @Query("SELECT * FROM userTable WHERE first_name LIKE :userName AND userId = :userId")
+    suspend fun getTheUserName(userName: String, userId: Int) :User?
+}
+
+@Database (entities = [User::class], version = 1)
+abstract class ImplementRoomDatabase : RoomDatabase() {
+    abstract fun userDao() : TomasUserDao
 }
