@@ -2,7 +2,7 @@
 agp = "9.4.1"
 kotlin = "2.0.21"
 ksp = "2.0.21-1.0.28"
-hilt = "2.60.0"
+hilt = "2.60.1"
 androidx-lifecycle = "2.11.0"
 coreKtx = "1.19.0"
 junit = "4.13.2"
