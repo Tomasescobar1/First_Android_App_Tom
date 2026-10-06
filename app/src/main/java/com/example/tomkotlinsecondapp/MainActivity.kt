@@ -1,12 +1,14 @@
 package com.example.tomkotlinsecondapp
 
 import android.app.AlertDialog
+import android.app.Application
 import android.graphics.drawable.Icon
 import android.media.tv.AdRequest
 import android.os.Bundle
 import android.widget.ImageButton
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.viewModels
 import androidx.compose.material3.AlertDialog
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -77,7 +79,9 @@ import com.example.tomkotlinsecondapp.MainScreen
 import com.example.tomkotlinsecondapp.ui.theme.TomKotlinSecondAppTheme
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -87,9 +91,11 @@ class MainActivity : ComponentActivity() {
 
             val globalViewModel: GuitarOrder = viewModel()
 
+            val roomViewModelGlobal: RoomViewModel by viewModels()
+
             TomKotlinSecondAppTheme {
 
-                AppNavigation(guitarViewModel = globalViewModel)
+                AppNavigation(guitarViewModel = globalViewModel, roomViewModel = roomViewModelGlobal)
 
             }
         }

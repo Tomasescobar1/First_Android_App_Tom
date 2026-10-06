@@ -57,7 +57,7 @@ fun Context.triggerAppReboot()
     }
 }
 
-@Composable fun MainScreen(guitarViewModel: GuitarOrder)
+@Composable fun MainScreen(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel)
 {
     val context = LocalContext.current
 
@@ -69,7 +69,7 @@ fun Context.triggerAppReboot()
         contentAlignment = Alignment.Center
     )
     {
-        GuitarViewPort(guitarViewModel = guitarViewModel)
+        GuitarViewPort(guitarViewModel = guitarViewModel, roomViewModel = roomViewModel)
     }
 
     BackHandler {

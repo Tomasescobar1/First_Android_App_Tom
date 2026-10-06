@@ -77,6 +77,7 @@ import io.github.sceneview.rememberScene
 import io.github.sceneview.rememberView
 import com.example.tomkotlinsecondapp.ColorDropDown
 import com.google.android.filament.MaterialInstance
+import dagger.hilt.android.AndroidEntryPoint
 import io.github.sceneview.rememberModelInstance
 import io.github.sceneview.safeDestroyMaterialInstance
 import kotlinx.coroutines.delay
@@ -84,7 +85,7 @@ import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
-fun GuitarViewPort(guitarViewModel: GuitarOrder)
+fun GuitarViewPort(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel)
 {
 
     val cDataState by guitarViewModel.dataState.collectAsStateWithLifecycle()
@@ -148,6 +149,9 @@ fun GuitarViewPort(guitarViewModel: GuitarOrder)
 
         key(cDataState.colorInput, cDataState.modelIndVal)
         {
+
+            roomViewModel.insertUserIntoRoom(1, cDataState.colorInput, cDataState.modelIndVal)
+
             SceneView(
                 modifier = Modifier.fillMaxSize().border(6.dp, Color.White)
                     .align(Alignment.Center),
