@@ -2,6 +2,7 @@ package com.example.tomkotlinsecondapp
 
 import android.content.Context
 import android.util.Log
+import androidx.compose.runtime.MutableState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.room3.Room
@@ -21,6 +22,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -28,14 +31,15 @@ import javax.inject.Singleton
 @Entity(tableName = "guitarTable")
 data class Specs (
     @PrimaryKey val guitarId: Int,
+    @ColumnInfo(name = "model_name") val modelName: String,
     @ColumnInfo(name = "color_name") val colorName: String,
-    @ColumnInfo(name = "model_name") val modelName: String
+    @ColumnInfo(name = "scale_length") val scaleLength: Double
 )
 
 @Dao
 interface TomasSpecsDao {
-    @Query("INSERT OR REPLACE INTO guitarTable (guitarId, color_name, model_name) VALUES (:guitarId, :colorName, :modelName)")
-    suspend fun insertGuitarSpecs(guitarId: Int, colorName: String, modelName: String)
+    @Query("INSERT OR REPLACE INTO guitarTable (guitarId, model_name, color_name, scale_length) VALUES (:guitarId, :modelName, :colorName, :scaleLength)")
+    suspend fun insertGuitarSpecs(guitarId: Int, modelName: String, colorName: String, scaleLength: Double)
 
     @Query("SELECT * FROM guitarTable WHERE guitarId = :guitarId")
     suspend fun getTheGuitarSpecs(guitarId: Int) :Specs?
@@ -56,7 +60,7 @@ object DataBaseModule {
     {
         return Room.databaseBuilder<ImplementRoomDatabase>(
             context = context,
-            name = context.getDatabasePath("myAppDatabase.db").absolutePath
+            name = context.getDatabasePath("myGuitarDatabase.db").absolutePath
             )
             .setDriver(BundledSQLiteDriver())
             .build()
@@ -71,12 +75,16 @@ class RoomViewModel @Inject constructor(private val db: ImplementRoomDatabase) :
 
     var nameTest: String = ""
 
-    fun insertParamsIntoRoom(guitarNumber: Int, colorName:String, modelName: String)
+    private val _fetchedColor = MutableStateFlow("")
+
+    val fetchedColor = _fetchedColor.asStateFlow()
+
+    fun insertParamsIntoRoom(guitarNumber: Int, modelName:String, colorName: String, scaleLength: Double)
     {
         viewModelScope.launch {
             try
             {
-                specsDAO.insertGuitarSpecs(guitarNumber, colorName, modelName)
+                specsDAO.insertGuitarSpecs(guitarNumber, modelName, colorName, scaleLength)
 
                 nameTest = specsDAO.getTheGuitarSpecs(1)?.modelName.toString()
 
@@ -89,21 +97,17 @@ class RoomViewModel @Inject constructor(private val db: ImplementRoomDatabase) :
         }
     }
 
-    fun getParamsFromRoom(guitarNumber: Int): String
+    fun getParamsFromRoom(guitarNumber: Int)
     {
-        var fetchedColor: String = ""
-
         viewModelScope.launch {
             try
             {
-                fetchedColor = specsDAO.getTheGuitarSpecs(guitarNumber)?.modelName.toString()
+                _fetchedColor.value = specsDAO.getTheGuitarSpecs(guitarNumber)?.modelName.toString()
             }
             catch(e: Exception)
             {
                 Log.d("getParamsFromRoom", "Failed to fetch the params from the DB :(")
             }
         }
-
-        return fetchedColor
     }
 }

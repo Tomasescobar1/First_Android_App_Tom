@@ -138,8 +138,6 @@ fun FABComponent(guitarViewModel: GuitarOrder) {
                     }
                 }
 
-                ColorDropDown(guitarViewModel = guitarViewModel)
-
                 DropDownSection(guitarViewModel = guitarViewModel)
 
                 Box(

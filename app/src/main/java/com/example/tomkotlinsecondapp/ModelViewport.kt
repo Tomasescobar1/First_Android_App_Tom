@@ -75,7 +75,6 @@ import io.github.sceneview.rememberModelLoader
 import io.github.sceneview.rememberRenderer
 import io.github.sceneview.rememberScene
 import io.github.sceneview.rememberView
-import com.example.tomkotlinsecondapp.ColorDropDown
 import com.google.android.filament.MaterialInstance
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.sceneview.rememberModelInstance
@@ -91,7 +90,7 @@ fun GuitarViewPort(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel)
 
     val fDataState by guitarViewModel.deployedState.collectAsStateWithLifecycle()
 
-    var initialColor by remember{mutableStateOf("Growler")}
+    val initialColor by roomViewModel.fetchedColor.collectAsStateWithLifecycle()
 
     val engine = rememberEngine()
 
@@ -112,8 +111,6 @@ fun GuitarViewPort(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel)
     val environmentLoaderDef = rememberEnvironmentLoader(engine)
 
     val view = rememberView(engine)
-
-    initialColor = roomViewModel.getParamsFromRoom(1)
 
     Box(modifier = Modifier
         .height(900.dp).width(400.dp).background(Color.White), contentAlignment = Alignment.Center,)
@@ -153,8 +150,9 @@ fun GuitarViewPort(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel)
         key(cDataState.colorInput, cDataState.modelIndVal)
         {
 
+            //roomViewModel.getParamsFromRoom(1)
 
-            roomViewModel.insertParamsIntoRoom(1, cDataState.colorInput, cDataState.modelIndVal)
+            //roomViewModel.insertParamsIntoRoom(1, cDataState.colorInput, cDataState.modelIndVal)
 
             SceneView(
                 modifier = Modifier.fillMaxSize().border(6.dp, Color.White)
@@ -175,7 +173,7 @@ fun GuitarViewPort(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel)
                 cameraNode = cameraNodeDef
             )
             {
-                when (cDataState.modelIndVal)
+                when (initialColor)//cDataState.modelIndVal)
                 {
                     "Telecaster" -> {
 

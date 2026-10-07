@@ -126,6 +126,10 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
 
     val scaleLengths = listOf(25.5, 25.0, 24.75, 24.0)
 
+    var dropped by remember {mutableStateOf(false)}
+
+    val guitarColors = listOf("White", "Red", "Sky Blue", "Pine Green", "Navy Blue")
+
     LaunchedEffect(orderState.updateSuccess)
     {
         if(orderState.updateSuccess)
@@ -186,6 +190,34 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
             localStates= localStates.copy(orderFindFailInd = false)
 
             customerInputLocal = ""
+        }
+    }
+
+    Box(modifier = Modifier.width(200.dp).height(80.dp)
+        .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
+        .border(4.dp, Color.Black, RoundedCornerShape(16.dp)), contentAlignment = Alignment.Center)
+    {
+
+        TextButton(onClick = {dropped =  true}, modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp)).width(150.dp)) {
+            Text(text = "Color: ${cDataState.colorInput}", color = Color.Black, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+        }
+
+        DropdownMenu(
+            expanded = dropped,
+            onDismissRequest = {dropped = false},
+            modifier = Modifier.border(4.dp, Color.Black, RoundedCornerShape(4.dp))
+                .background(Color.White)
+        ) {
+            guitarColors.forEach { guitarColor ->
+                DropdownMenuItem(
+                    text = {Text(guitarColor, color = Color.Black, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
+                    onClick = {
+                        guitarViewModel.updateDataState(1, guitarColor, 0.0)
+                        dropped = false
+                    },
+                    modifier = Modifier.width(200.dp)
+                )
+            }
         }
     }
 

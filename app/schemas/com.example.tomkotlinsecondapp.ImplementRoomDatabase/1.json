@@ -2,16 +2,22 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "8627fe8138c23a6a584677cbd2679752",
+    "identityHash": "063523448d63ecd7c4f3f183321db1a2",
     "entities": [
       {
         "tableName": "guitarTable",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`guitarId` INTEGER NOT NULL, `color_name` TEXT NOT NULL, `model_name` TEXT NOT NULL, PRIMARY KEY(`guitarId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`guitarId` INTEGER NOT NULL, `model_name` TEXT NOT NULL, `color_name` TEXT NOT NULL, `scale_length` REAL NOT NULL, PRIMARY KEY(`guitarId`))",
         "fields": [
           {
             "fieldPath": "guitarId",
             "columnName": "guitarId",
             "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "modelName",
+            "columnName": "model_name",
+            "affinity": "TEXT",
             "notNull": true
           },
           {
@@ -21,9 +27,9 @@
             "notNull": true
           },
           {
-            "fieldPath": "modelName",
-            "columnName": "model_name",
-            "affinity": "TEXT",
+            "fieldPath": "scaleLength",
+            "columnName": "scale_length",
+            "affinity": "REAL",
             "notNull": true
           }
         ],
@@ -37,7 +43,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8627fe8138c23a6a584677cbd2679752')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '063523448d63ecd7c4f3f183321db1a2')"
     ]
   }
 }
