@@ -24,6 +24,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -60,7 +61,7 @@ object DataBaseModule {
     {
         return Room.databaseBuilder<ImplementRoomDatabase>(
             context = context,
-            name = context.getDatabasePath("myGuitarDatabase.db").absolutePath
+            name = context.getDatabasePath("myGuitarTable.db").absolutePath
             )
             .setDriver(BundledSQLiteDriver())
             .build()
@@ -75,9 +76,13 @@ class RoomViewModel @Inject constructor(private val db: ImplementRoomDatabase) :
 
     var nameTest: String = ""
 
-    private val _fetchedColor = MutableStateFlow("")
+    data class GuitarSpecs(
+        val guitar: Specs? = Specs(1, "Telecaster", "White", 25.5)
+    )
 
-    val fetchedColor = _fetchedColor.asStateFlow()
+    private val _fetchedSpecs = MutableStateFlow(GuitarSpecs())
+
+    val fetchedSpecs = _fetchedSpecs.asStateFlow()
 
     fun insertParamsIntoRoom(guitarNumber: Int, modelName:String, colorName: String, scaleLength: Double)
     {
@@ -102,7 +107,7 @@ class RoomViewModel @Inject constructor(private val db: ImplementRoomDatabase) :
         viewModelScope.launch {
             try
             {
-                _fetchedColor.value = specsDAO.getTheGuitarSpecs(guitarNumber)?.modelName.toString()
+                _fetchedSpecs.update {currentState -> currentState.copy(guitar = specsDAO.getTheGuitarSpecs(guitarNumber))}
             }
             catch(e: Exception)
             {

@@ -399,7 +399,16 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun updateDataState(input1: Int, input2: String, input3: Double, input4: Boolean = false)
+    fun initialDataState(modelName: String, colorName: String, scaleLength: Double)
+    {
+        _dataState.update {currentState -> currentState.copy(modelIndVal = modelName)}
+
+        _dataState.update {currentState -> currentState.copy(colorInput = colorName)}
+
+        _dataState.update {currentState -> currentState.copy(scaleLengthInd = scaleLength)}
+    }
+
+    fun updateDataState(input1: Int, input2: String, input3: Double, input4: Boolean = false, input5: String = "")
     {
         when(input1)
         {
@@ -408,7 +417,7 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
             }
 
             2 -> {
-                _dataState.update {currentDstate -> currentDstate.copy(modelIndVal = input2)}
+                _dataState.update {currentDstate -> currentDstate.copy(modelIndVal = input5)}
             }
 
             3 -> {

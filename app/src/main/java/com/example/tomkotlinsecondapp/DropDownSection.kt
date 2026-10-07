@@ -61,11 +61,12 @@ import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
-fun DropDownSection(guitarViewModel: GuitarOrder)
+fun DropDownSection(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel)
 {
 
     data class LocalStates(
-        val dropped: Boolean = false,
+        val modelDropped: Boolean = false,
+        val colorDropped: Boolean = false,
         val scaleLengthDropped: Boolean = false,
         val searchLoadTrigger: Boolean = false,
         val loadingUpdateTrigger: Boolean = false,
@@ -114,6 +115,8 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
 
     val specificOrderDocName by guitarViewModel.specificDocName.collectAsStateWithLifecycle()
 
+    val fetchedRoomSpecs by roomViewModel.fetchedSpecs.collectAsStateWithLifecycle()
+
     val focusManager = LocalFocusManager.current
 
     val context = LocalContext.current
@@ -126,9 +129,13 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
 
     val scaleLengths = listOf(25.5, 25.0, 24.75, 24.0)
 
-    var dropped by remember {mutableStateOf(false)}
-
     val guitarColors = listOf("White", "Red", "Sky Blue", "Pine Green", "Navy Blue")
+
+    fun dropDownSpecs(placeHolder: Int, modelName: String, colorName: String, scaleLength: Double)
+    {
+        roomViewModel.insertParamsIntoRoom(1, modelName, colorName, scaleLength)
+        guitarViewModel.updateDataState(placeHolder, colorName, scaleLength, input5 = modelName)
+    }
 
     LaunchedEffect(orderState.updateSuccess)
     {
@@ -198,13 +205,13 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
         .border(4.dp, Color.Black, RoundedCornerShape(16.dp)), contentAlignment = Alignment.Center)
     {
 
-        TextButton(onClick = {dropped =  true}, modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp)).width(150.dp)) {
+        TextButton(onClick = {localStates = localStates.copy(colorDropped = true)}, modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp)).width(150.dp)) {
             Text(text = "Color: ${cDataState.colorInput}", color = Color.Black, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
         }
 
         DropdownMenu(
-            expanded = dropped,
-            onDismissRequest = {dropped = false},
+            expanded = localStates.colorDropped,
+            onDismissRequest = {localStates = localStates.copy(colorDropped = false)},
             modifier = Modifier.border(4.dp, Color.Black, RoundedCornerShape(4.dp))
                 .background(Color.White)
         ) {
@@ -212,8 +219,8 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                 DropdownMenuItem(
                     text = {Text(guitarColor, color = Color.Black, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
                     onClick = {
-                        guitarViewModel.updateDataState(1, guitarColor, 0.0)
-                        dropped = false
+                        //dropDownSpecs(1, cDataState.modelIndVal, guitarColor, cDataState.scaleLengthInd)
+                        localStates = localStates.copy(colorDropped = false)
                     },
                     modifier = Modifier.width(200.dp)
                 )
@@ -229,7 +236,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
     )
     {
         TextButton(
-            onClick = { localStates = localStates.copy(dropped = true) },
+            onClick = { localStates = localStates.copy(modelDropped = true) },
             modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp)).width(150.dp)
         ) {
             Text(
@@ -240,8 +247,8 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
             )
         }
         DropdownMenu(
-            expanded = localStates.dropped,
-            onDismissRequest = { localStates = localStates.copy(dropped = false) },
+            expanded = localStates.modelDropped,
+            onDismissRequest = { localStates = localStates.copy(modelDropped = false) },
             modifier = Modifier.border(4.dp, Color.Black, RoundedCornerShape(4.dp))
                 .background(Color.White)
         ) {
@@ -255,8 +262,9 @@ fun DropDownSection(guitarViewModel: GuitarOrder)
                             fontWeight = FontWeight.Bold
                         ) },
                     onClick = {
-                        guitarViewModel.updateDataState(2, guitarName, 0.0)
-                        localStates = localStates.copy(dropped = false) },
+                        dropDownSpecs(2, "Telecaster", cDataState.colorInput, cDataState.scaleLengthInd)
+                        //guitarViewModel.updateDataState(2, guitarName, 0.0)
+                        localStates = localStates.copy(modelDropped = false) },
                     modifier = Modifier.background(Color.Transparent).width(200.dp)
                 )
             }

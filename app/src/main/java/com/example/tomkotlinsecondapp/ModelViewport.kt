@@ -90,7 +90,7 @@ fun GuitarViewPort(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel)
 
     val fDataState by guitarViewModel.deployedState.collectAsStateWithLifecycle()
 
-    val initialColor by roomViewModel.fetchedColor.collectAsStateWithLifecycle()
+    val fetchedSpecs by roomViewModel.fetchedSpecs.collectAsStateWithLifecycle()
 
     val engine = rememberEngine()
 
@@ -116,7 +116,12 @@ fun GuitarViewPort(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel)
         .height(900.dp).width(400.dp).background(Color.White), contentAlignment = Alignment.Center,)
     {
 
-        LaunchedEffect(cDataState.colorInput, cDataState.modelIndVal, cDataState.cameraInd)
+        roomViewModel.getParamsFromRoom(1)
+
+        guitarViewModel.initialDataState(fetchedSpecs.guitar?.modelName.toString(), fetchedSpecs.guitar?.colorName.toString(),
+            fetchedSpecs.guitar?.scaleLength ?: 0.0)
+
+        LaunchedEffect(cDataState.colorInput, cDataState.modelIndVal)
         {
             isLoading = true
 
@@ -127,6 +132,8 @@ fun GuitarViewPort(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel)
 
         if(isLoading)
         {
+
+
             Box(modifier = Modifier.fillMaxSize().background(Color.LightGray, RoundedCornerShape(22.dp)).zIndex(1f), contentAlignment = Alignment.Center)
             {
                 CircularProgressIndicator(modifier = Modifier.size(100.dp), strokeWidth = 10.dp, trackColor = Color(66, 203, 245), color = Color.White)
@@ -173,7 +180,7 @@ fun GuitarViewPort(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel)
                 cameraNode = cameraNodeDef
             )
             {
-                when (initialColor)//cDataState.modelIndVal)
+                when (cDataState.modelIndVal)
                 {
                     "Telecaster" -> {
 
@@ -392,7 +399,7 @@ fun GuitarViewPort(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel)
         Column(modifier = Modifier.width(400.dp).height(900.dp).zIndex(3f), verticalArrangement = Arrangement.Bottom,
             horizontalAlignment = Alignment.Start)
         {
-            FABComponent(guitarViewModel = guitarViewModel)
+            FABComponent(guitarViewModel = guitarViewModel, roomViewModel = roomViewModel)
 
             ConfirmSection(guitarViewModel = guitarViewModel)
         }

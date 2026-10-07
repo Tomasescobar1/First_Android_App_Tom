@@ -47,7 +47,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlin.math.roundToInt
 
 @Composable
-fun FABComponent(guitarViewModel: GuitarOrder) {
+fun FABComponent(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel) {
 
     val isDeployed by guitarViewModel.deployedState.collectAsStateWithLifecycle()
 
@@ -96,6 +96,8 @@ fun FABComponent(guitarViewModel: GuitarOrder) {
             {
                 guitarViewModel.updateDataState(6, " ", 0.0)
 
+                //roomViewModel.getParamsFromRoom(1)
+
                 guitarViewModel.checkSavedDates()
 
                 guitarViewModel.checkSlotAvailability()
@@ -138,7 +140,7 @@ fun FABComponent(guitarViewModel: GuitarOrder) {
                     }
                 }
 
-                DropDownSection(guitarViewModel = guitarViewModel)
+                DropDownSection(guitarViewModel = guitarViewModel, roomViewModel = roomViewModel)
 
                 Box(
                     modifier = Modifier.width(200.dp).height(80.dp)
