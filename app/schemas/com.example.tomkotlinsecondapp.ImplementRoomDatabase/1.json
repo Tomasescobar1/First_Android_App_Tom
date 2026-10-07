@@ -2,27 +2,27 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "73b956a66a4e38e2a56452b86fa57fca",
+    "identityHash": "8627fe8138c23a6a584677cbd2679752",
     "entities": [
       {
-        "tableName": "userTable",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`userId` INTEGER NOT NULL, `first_name` TEXT NOT NULL, `last_name` TEXT NOT NULL, PRIMARY KEY(`userId`))",
+        "tableName": "guitarTable",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`guitarId` INTEGER NOT NULL, `color_name` TEXT NOT NULL, `model_name` TEXT NOT NULL, PRIMARY KEY(`guitarId`))",
         "fields": [
           {
-            "fieldPath": "userId",
-            "columnName": "userId",
+            "fieldPath": "guitarId",
+            "columnName": "guitarId",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "firstName",
-            "columnName": "first_name",
+            "fieldPath": "colorName",
+            "columnName": "color_name",
             "affinity": "TEXT",
             "notNull": true
           },
           {
-            "fieldPath": "lastName",
-            "columnName": "last_name",
+            "fieldPath": "modelName",
+            "columnName": "model_name",
             "affinity": "TEXT",
             "notNull": true
           }
@@ -30,14 +30,14 @@
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "userId"
+            "guitarId"
           ]
         }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '73b956a66a4e38e2a56452b86fa57fca')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8627fe8138c23a6a584677cbd2679752')"
     ]
   }
 }

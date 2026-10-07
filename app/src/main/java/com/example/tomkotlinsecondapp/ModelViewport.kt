@@ -87,10 +87,11 @@ import kotlin.time.Duration.Companion.milliseconds
 @Composable
 fun GuitarViewPort(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel)
 {
-
     val cDataState by guitarViewModel.dataState.collectAsStateWithLifecycle()
 
     val fDataState by guitarViewModel.deployedState.collectAsStateWithLifecycle()
+
+    var initialColor by remember{mutableStateOf("Growler")}
 
     val engine = rememberEngine()
 
@@ -111,6 +112,8 @@ fun GuitarViewPort(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel)
     val environmentLoaderDef = rememberEnvironmentLoader(engine)
 
     val view = rememberView(engine)
+
+    initialColor = roomViewModel.getParamsFromRoom(1)
 
     Box(modifier = Modifier
         .height(900.dp).width(400.dp).background(Color.White), contentAlignment = Alignment.Center,)
@@ -150,7 +153,8 @@ fun GuitarViewPort(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel)
         key(cDataState.colorInput, cDataState.modelIndVal)
         {
 
-            roomViewModel.insertUserIntoRoom(1, cDataState.colorInput, cDataState.modelIndVal)
+
+            roomViewModel.insertParamsIntoRoom(1, cDataState.colorInput, cDataState.modelIndVal)
 
             SceneView(
                 modifier = Modifier.fillMaxSize().border(6.dp, Color.White)
@@ -175,7 +179,7 @@ fun GuitarViewPort(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel)
                 {
                     "Telecaster" -> {
 
-                        key(cDataState.colorInput)
+                        key(cDataState.colorInput, )
                         {
                             rememberModelInstance(modelLoaderDef, "tele_25_inch_body.glb")?.let { model ->
 

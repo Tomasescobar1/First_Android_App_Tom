@@ -25,25 +25,25 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Entity(tableName = "userTable")
-data class User (
-    @PrimaryKey val userId: Int,
-    @ColumnInfo(name = "first_name") val firstName: String,
-    @ColumnInfo(name = "last_name") val lastName: String
+@Entity(tableName = "guitarTable")
+data class Specs (
+    @PrimaryKey val guitarId: Int,
+    @ColumnInfo(name = "color_name") val colorName: String,
+    @ColumnInfo(name = "model_name") val modelName: String
 )
 
 @Dao
-interface TomasUserDao {
-    @Query("INSERT OR REPLACE INTO userTable (userId, first_name, last_name) VALUES (:userId, :userName, :lastName)")
-    suspend fun insertUserName(userId: Int, userName: String, lastName: String)
+interface TomasSpecsDao {
+    @Query("INSERT OR REPLACE INTO guitarTable (guitarId, color_name, model_name) VALUES (:guitarId, :colorName, :modelName)")
+    suspend fun insertGuitarSpecs(guitarId: Int, colorName: String, modelName: String)
 
-    @Query("SELECT * FROM userTable WHERE first_name LIKE :userName AND userId = :userId")
-    suspend fun getTheUserName(userName: String, userId: Int) :User?
+    @Query("SELECT * FROM guitarTable WHERE guitarId = :guitarId")
+    suspend fun getTheGuitarSpecs(guitarId: Int) :Specs?
 }
 
-@Database (entities = [User::class], version = 1)
+@Database (entities = [Specs::class], version = 1)
 abstract class ImplementRoomDatabase : RoomDatabase() {
-    abstract fun userDao() : TomasUserDao
+    abstract fun specsDao() : TomasSpecsDao
 }
 
 @Module
@@ -66,25 +66,44 @@ object DataBaseModule {
 
 @HiltViewModel
 class RoomViewModel @Inject constructor(private val db: ImplementRoomDatabase) : ViewModel() {
-    val userDAO = db.userDao()
+
+    val specsDAO = db.specsDao()
 
     var nameTest: String = ""
 
-    fun insertUserIntoRoom(userNumber: Int, userName:String, lastName: String)
+    fun insertParamsIntoRoom(guitarNumber: Int, colorName:String, modelName: String)
     {
         viewModelScope.launch {
             try
             {
-                userDAO.insertUserName(userNumber, userName, lastName)
+                specsDAO.insertGuitarSpecs(guitarNumber, colorName, modelName)
 
-                nameTest = userDAO.getTheUserName(userName, userNumber)?.lastName.toString()
+                nameTest = specsDAO.getTheGuitarSpecs(1)?.modelName.toString()
 
-                Log.d("insertUserIntoRoom", "'User' added as: $nameTest")
+                Log.d("insertUserIntoRoom", "'Guitar' added as: $nameTest")
             }
             catch(e: Exception)
             {
-                Log.d("RoomVieWModel", "Couldn't insert user into RoomDB :(")
+                Log.d("RoomVieWModel", "Couldn't insert specs into RoomDB :(")
             }
         }
+    }
+
+    fun getParamsFromRoom(guitarNumber: Int): String
+    {
+        var fetchedColor: String = ""
+
+        viewModelScope.launch {
+            try
+            {
+                fetchedColor = specsDAO.getTheGuitarSpecs(guitarNumber)?.modelName.toString()
+            }
+            catch(e: Exception)
+            {
+                Log.d("getParamsFromRoom", "Failed to fetch the params from the DB :(")
+            }
+        }
+
+        return fetchedColor
     }
 }
