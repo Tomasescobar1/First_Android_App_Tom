@@ -219,7 +219,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel)
                 DropdownMenuItem(
                     text = {Text(guitarColor, color = Color.Black, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
                     onClick = {
-                        //dropDownSpecs(1, cDataState.modelIndVal, guitarColor, cDataState.scaleLengthInd)
+                        dropDownSpecs(1, cDataState.modelIndVal, guitarColor, cDataState.scaleLengthInd)
                         localStates = localStates.copy(colorDropped = false)
                     },
                     modifier = Modifier.width(200.dp)
@@ -262,8 +262,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel)
                             fontWeight = FontWeight.Bold
                         ) },
                     onClick = {
-                        dropDownSpecs(2, "Telecaster", cDataState.colorInput, cDataState.scaleLengthInd)
-                        //guitarViewModel.updateDataState(2, guitarName, 0.0)
+                        dropDownSpecs(2, guitarName, cDataState.colorInput, cDataState.scaleLengthInd)
                         localStates = localStates.copy(modelDropped = false) },
                     modifier = Modifier.background(Color.Transparent).width(200.dp)
                 )
@@ -304,7 +303,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel)
                             fontWeight = FontWeight.Bold
                         ) },
                     onClick = {
-                        guitarViewModel.updateDataState(4, " ", scaleLength)
+                        dropDownSpecs(4, cDataState.modelIndVal, cDataState.colorInput, scaleLength)
                         localStates = localStates.copy(scaleLengthDropped = false) },
                     modifier = Modifier.background(Color.Transparent).width(200.dp)
                 )
