@@ -806,6 +806,8 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
                     dbMaintenance.document(uid).collection("User preferences").document("Date quantity").set(dateSetter(0)).await()
 
+                    dbMaintenance.document(uid).collection("User preferences").document("Dates placed").set(hashMapOf<String, Any>()).await()
+
                     dbMaintenance.document(uid).collection("User preferences").document("Username").set(userMap).await()
 
                     _maintenanceLoading.value = false
