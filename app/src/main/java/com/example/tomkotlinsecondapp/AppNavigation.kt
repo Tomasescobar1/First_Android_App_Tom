@@ -67,17 +67,17 @@ object DetailsRoute
         composable<DetailsRoute>
         {
             DetailsScreen(onNavigateToMenu = { navigationController.navigate(route = MenuRoute){popUpTo<DetailsRoute>{inclusive = true}} },
-                guitarViewModel = guitarViewModel)
+                guitarViewModel)
         }
 
         composable<MenuRoute>
         {
-            MenuScreen(onNavigateToMain = { navigationController.navigate(MainRoute) }, guitarViewModel = guitarViewModel)
+            MenuScreen(onNavigateToMain = { navigationController.navigate(MainRoute) }, guitarViewModel, roomViewModel)
         }
 
         composable<MainRoute>
         {
-            MainScreen(guitarViewModel = guitarViewModel, roomViewModel = roomViewModel)
+            MainScreen(guitarViewModel, roomViewModel)
         }
 
     }

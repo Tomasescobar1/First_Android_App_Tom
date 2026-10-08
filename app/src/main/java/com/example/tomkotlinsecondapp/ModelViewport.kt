@@ -115,12 +115,6 @@ fun GuitarViewPort(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel)
     Box(modifier = Modifier
         .height(900.dp).width(400.dp).background(Color.White), contentAlignment = Alignment.Center,)
     {
-
-        roomViewModel.getParamsFromRoom(1)
-
-        guitarViewModel.initialDataState(fetchedSpecs.guitar?.modelName.toString(), fetchedSpecs.guitar?.colorName.toString(),
-            fetchedSpecs.guitar?.scaleLength ?: 0.0)
-
         LaunchedEffect(cDataState.colorInput, cDataState.modelIndVal)
         {
             isLoading = true

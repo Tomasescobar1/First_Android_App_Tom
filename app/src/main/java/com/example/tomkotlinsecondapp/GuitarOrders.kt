@@ -157,6 +157,10 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
     val userMaintenanceView = _userMaintenanceView.asStateFlow() //--------------------------------------
 
+    private val _existingUserCheck = MutableStateFlow(false)
+
+    val existingUserCheck = _existingUserCheck.asStateFlow()
+
     private val _orderFetchLoad = MutableStateFlow(false)
 
     val orderFetchLoad = _orderFetchLoad.asStateFlow()
@@ -209,6 +213,10 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
     private val _maintenanceLoading = MutableStateFlow(false) //----------------------------------------
 
     val maintenanceLoading = _maintenanceLoading.asStateFlow() //-----------------------------------------------
+
+    private val _userNameAdded = MutableStateFlow(false)
+
+    val userNameAdded = _userNameAdded.asStateFlow()
 
     val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
@@ -577,6 +585,10 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
             19 -> {
                 _orderState.update {currentState -> currentState.copy(maintenanceDelete = false)}
             }
+
+            20 -> {
+                _existingUserCheck.value = false
+            }
         }
     }
 
@@ -699,6 +711,8 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                         {
                             _maintenanceSlotState.value = true
 
+                            _existingUserCheck.value = true
+
                             println("The maintenance snapshot doesn't exist yet.")
                         }
                     }
@@ -772,6 +786,37 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                 catch (e: Exception)
                 {
                     println("Unable to fetch placed dates.")
+                }
+            }
+        }
+    }
+
+    fun addUserToFirestore(userName: String)
+    {
+
+        val userMap: MutableMap<String, String> = mutableMapOf("Username" to userName)
+
+        viewModelScope.launch {
+
+            if(currentUser != null && uid != null)
+            {
+                try
+                {
+                    _maintenanceLoading.value = true
+
+                    dbMaintenance.document(uid).collection("User preferences").document("Date quantity").set(dateSetter(0)).await()
+
+                    dbMaintenance.document(uid).collection("User preferences").document("Username").set(userMap).await()
+
+                    _maintenanceLoading.value = false
+
+                    _userNameAdded.value = true
+                }
+                catch (e: Exception)
+                {
+                    Log.d("addUserToFirestore", "Couldn't add username, crap! ${e.message}")
+
+                    _maintenanceLoading.value = false
                 }
             }
         }

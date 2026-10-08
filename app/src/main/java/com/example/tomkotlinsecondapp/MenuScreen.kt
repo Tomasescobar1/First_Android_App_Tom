@@ -70,8 +70,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
-@Composable fun MenuScreen(onNavigateToMain: () -> Unit, guitarViewModel: GuitarOrder)
+@Composable fun MenuScreen(onNavigateToMain: () -> Unit, guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel)
 {
 
     data class LocalStateClass(
@@ -87,6 +89,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
         var checkListToggle: Boolean = false,
         var nameInputToggle: Boolean = false,
         var nameIsEmpty: Boolean = true,
+        var userAddedAlert: Boolean = false
     )
 
     data class TrackedValue(
@@ -111,6 +114,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
     val maintenancePlaced by guitarViewModel.userMaintenanceView.collectAsStateWithLifecycle()
 
+    val existingUser by guitarViewModel.existingUserCheck.collectAsStateWithLifecycle()
+
+    val userAdded by guitarViewModel.userNameAdded.collectAsStateWithLifecycle()
+
     val localDateIndicator by guitarViewModel.fetchedMaintenanceDate.collectAsStateWithLifecycle()
 
     val offlineState by guitarViewModel.isOffline.collectAsStateWithLifecycle()
@@ -126,6 +133,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
     val maintenanceFetchLoad by guitarViewModel.maintenanceFetchLoad.collectAsStateWithLifecycle()
 
     val specificFetchedMaintenance by guitarViewModel.specificFetchedMaintenance.collectAsStateWithLifecycle()
+
+    val fetchedSpecs by roomViewModel.fetchedSpecs.collectAsStateWithLifecycle()
 
     val dateStorage by remember {mutableStateOf(TrackedValue())}
 
@@ -286,24 +295,25 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
     }
 
-    fun emptyListCheck(input: Boolean = false)
+    fun emptyListCheck()
     {
         for(i in 0 until maintenanceItems.size)
         {
             if(maintenanceItems[i].isChecked)
             {
-                if(!input)
-                {
-                    localStateManager = localStateManager.copy(nameInputToggle = true)
-                }
-                else
-                {
-                    maintenanceOrder()
-                }
+                maintenanceOrder()
 
                 break
             }
         }
+    }
+
+    fun navigateInitialGuitarSpecs()
+    {
+        onNavigateToMain()
+
+        guitarViewModel.initialDataState(fetchedSpecs.guitar?.modelName ?: "Telecaster", fetchedSpecs.guitar?.colorName ?: "White",
+            fetchedSpecs.guitar?.scaleLength ?: 25.5)
     }
 
     LaunchedEffect(maintenancePlaced)
@@ -317,6 +327,20 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
             localStateManager = localStateManager.copy(maintenancePlacedCheck = false)
 
             guitarViewModel.checkSavedDates(true)
+        }
+    }
+
+    LaunchedEffect(userAdded)
+    {
+        if(userAdded)
+        {
+            localStateManager = localStateManager.copy(userAddedAlert = true)
+
+            delay(1500.milliseconds)
+
+            localStateManager = localStateManager.copy(userAddedAlert = false)
+
+            guitarViewModel.updateOrderState(20, false, "")
         }
     }
 
@@ -767,6 +791,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
         if(localStateManager.menuLeave)
         {
+            roomViewModel.getParamsFromRoom(1)
+
             AlertDialog(
                 modifier = Modifier.fillMaxWidth().wrapContentSize(Alignment.Center),
                 onDismissRequest = { localStateManager = localStateManager.copy(menuLeave = false) },
@@ -804,7 +830,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
                         )
                         {
                             TextButton(
-                                onClick = onNavigateToMain,
+                                onClick = { navigateInitialGuitarSpecs() },
                                 modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
                                     .width(225.dp).height(65.dp)
                             )
@@ -847,7 +873,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
                             if(!maintenanceLoading)
                             {
                                 TextButton(
-                                    onClick = { emptyListCheck(localStateManager.maintenanceUpdateInd) },
+                                    onClick = { emptyListCheck() },
                                     modifier = Modifier.background(
                                         Color.White,
                                         RoundedCornerShape(10.dp)
@@ -902,6 +928,15 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
             )
         }
 
+        if(existingUser)
+        {
+            localStateManager = localStateManager.copy(nameInputToggle = true)
+        }
+        else
+        {
+            localStateManager = localStateManager.copy(nameInputToggle = false)
+        }
+
         if(localStateManager.nameInputToggle)
         {
             AlertDialog(
@@ -914,7 +949,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "Please type in your name to place the order.",
+                            text = "Please type in your name to start...",
                             fontFamily = FontFamily.Monospace,
                             fontWeight = FontWeight.Bold
                         )
@@ -950,11 +985,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
                             if(!maintenanceLoading)
                             {
                                 TextButton(
-                                    onClick = { maintenanceOrder() },
+                                    onClick = { guitarViewModel.addUserToFirestore(nameStorage) },
                                     modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp)).width(150.dp))
                                 {
                                     Text(
-                                        text = "Request maintenance",
+                                        text = "Done",
                                         color = Color.Black,
                                         fontFamily = FontFamily.Monospace,
                                         fontWeight = FontWeight.Bold
@@ -981,6 +1016,20 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
             )
         }
 
+        if(localStateManager.userAddedAlert)
+        {
+            AlertDialog(
+                onDismissRequest = {},
+                title = {Text("User added successfully!", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
+                text = {Column(verticalArrangement = Arrangement.Top)
+                {
+                    Text("Yaaaay!!!", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                }
+                },
+                confirmButton = {}
+            )
+        }
+
         if(orderState.maintenanceSuccess)
         {
             guitarViewModel.checkSavedDates(true)
@@ -999,6 +1048,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
                     dialogDismiss()
                                    },
+
                 title = {
                     if(!localStateManager.maintenanceUpdateInd) {
                         Text(
