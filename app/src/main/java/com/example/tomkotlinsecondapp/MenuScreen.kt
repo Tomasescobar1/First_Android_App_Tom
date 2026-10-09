@@ -935,6 +935,8 @@ import kotlin.time.Duration.Companion.milliseconds
         else
         {
             localStateManager = localStateManager.copy(nameInputToggle = false)
+
+
         }
 
         if(localStateManager.nameInputToggle)

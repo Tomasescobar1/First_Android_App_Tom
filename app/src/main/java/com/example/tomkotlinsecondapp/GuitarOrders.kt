@@ -793,7 +793,6 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
     fun addUserToFirestore(userName: String)
     {
-
         val userMap: MutableMap<String, String> = mutableMapOf("Username" to userName)
 
         viewModelScope.launch {
@@ -819,6 +818,23 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                     Log.d("addUserToFirestore", "Couldn't add username, crap! ${e.message}")
 
                     _maintenanceLoading.value = false
+                }
+            }
+        }
+    }
+
+    fun retrieveUserFromFirestore()
+    {
+        viewModelScope.launch {
+            if(currentUser != null && uid != null)
+            {
+                try
+                {
+                    val userSnapshot = dbMaintenance.document(uid).collection("User preferences").document("Username").get().await()
+                }
+                catch(e: Exception)
+                {
+                    Log.d("retrieveUserFromFirestore", "Not able to retrieve the user, crap! ${e.message}")
                 }
             }
         }

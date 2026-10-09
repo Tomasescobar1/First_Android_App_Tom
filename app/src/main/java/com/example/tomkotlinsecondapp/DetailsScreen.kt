@@ -184,8 +184,6 @@ import kotlin.time.Duration.Companion.milliseconds
             delay(200.milliseconds)
 
             onNavigateToMenu()
-
-            //guitarViewModel.checkSlotAvailability(true)
         }
     }
 
