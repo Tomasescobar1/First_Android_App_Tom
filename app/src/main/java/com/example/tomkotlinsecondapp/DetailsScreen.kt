@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.contextmenu.modifier.filterTextContextMenuComponents
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
@@ -33,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -57,15 +59,39 @@ import kotlin.time.Duration.Companion.milliseconds
     Column(modifier = Modifier.fillMaxSize().background(Color.White).padding(top = 200.dp), verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally)
     {
-        Box(modifier = Modifier.background(Color.White, RoundedCornerShape(16.dp)).width(200.dp).height(50.dp))
+        Box(modifier = Modifier.width(280.dp).height(190.dp).background(Color(66, 203, 245), RoundedCornerShape(16.dp))
+            .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
+            contentAlignment = Alignment.Center)
         {
-            Text(
-                text = "Hello, this is the details screen.",
-                color = Color.Black,
-                fontFamily = FontFamily.Monospace,
-                fontWeight= FontWeight.Bold
+            Box(
+                modifier = Modifier.background(Color.White, RoundedCornerShape(16.dp)).width(220.dp)
+                    .height(150.dp),
+                contentAlignment = Alignment.Center
             )
+            {
+                Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.SpaceEvenly,
+                    horizontalAlignment = Alignment.CenterHorizontally)
+                {
+                    Text(
+                        text = "Hello and welcome!",
+                        color = Color.Black,
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    Box(modifier = Modifier.width(200.dp).height(20.dp))
+
+                    Text(
+                        text = "Please log in to start...",
+                        color = Color.Black,
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
         }
+
 
         Box(modifier = Modifier.width(200.dp).height(200.dp))
 
