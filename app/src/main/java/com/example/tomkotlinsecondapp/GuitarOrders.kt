@@ -230,6 +230,10 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
     val isOffline = _isOffline.asStateFlow()
 
+    private val _userNameString = MutableStateFlow("")
+
+    val userNameString = _userNameString.asStateFlow()
+
     private val _orderSpecs = MutableStateFlow(FetchedOrderData())
 
     val orderSpecs = _orderSpecs.asStateFlow()
@@ -825,12 +829,20 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
     fun retrieveUserFromFirestore()
     {
+        var retrievedUsername: MutableMap<String, Any>?
+
         viewModelScope.launch {
             if(currentUser != null && uid != null)
             {
                 try
                 {
                     val userSnapshot = dbMaintenance.document(uid).collection("User preferences").document("Username").get().await()
+
+                    retrievedUsername = userSnapshot.data
+
+                    _userNameString.value = retrievedUsername?.get(key = "Username") as String
+
+                    Log.d("retrieveUserFromFirestore", _userNameString.value)
                 }
                 catch(e: Exception)
                 {

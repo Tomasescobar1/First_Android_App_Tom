@@ -134,6 +134,8 @@ import kotlin.time.Duration.Companion.milliseconds
 
     val specificFetchedMaintenance by guitarViewModel.specificFetchedMaintenance.collectAsStateWithLifecycle()
 
+    val userNameString by guitarViewModel.userNameString.collectAsStateWithLifecycle()
+
     val fetchedSpecs by roomViewModel.fetchedSpecs.collectAsStateWithLifecycle()
 
     val dateStorage by remember {mutableStateOf(TrackedValue())}
@@ -201,7 +203,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
     fun maintenanceTypeConversion()
     {
-        if(!localStateManager.maintenanceUpdateInd)
+        /*if(!localStateManager.maintenanceUpdateInd)
         {
             maintenanceMapList.put("Name", nameStorage.lowercase())
 
@@ -212,7 +214,7 @@ import kotlin.time.Duration.Companion.milliseconds
             maintenanceMapList.put("Name", fetchedMaintenance?.get("Name").toString())
 
             maintenanceArray.add(fetchedMaintenance?.get("Name").toString())
-        }
+        }*/
 
         for(i in 0 until maintenanceItems.size)
         {
@@ -258,7 +260,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
         guitarViewModel.updateOrderState(11, true)
 
-        nameStorage = ""
+        //nameStorage = ""
 
         localStateManager = localStateManager.copy(maintenanceSuccessLocal = false)
 
@@ -344,40 +346,59 @@ import kotlin.time.Duration.Companion.milliseconds
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize().background(Color.White).padding(top = (100 + offlineSignToggle).dp), verticalArrangement = Arrangement.Top,
+    Column(modifier = Modifier.fillMaxSize().background(Color.White), verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally)
     {
-
-        if(offlineState)
+        Box(modifier = Modifier.fillMaxWidth().background(Color.White).padding(top = 100.dp), contentAlignment = Alignment.Center)
         {
-            Box(
-                modifier = Modifier.background(Color(245,66,87), RoundedCornerShape(16.dp))
-                    .border(4.dp, Color.Black, RoundedCornerShape(16.dp )).width(250.dp).height(80.dp),
-                contentAlignment = Alignment.Center
-            )
+            if(offlineState)
             {
-                Box(modifier = Modifier.width(210.dp).height(50.dp).background(Color.White, RoundedCornerShape(12.dp)),
-                    contentAlignment = Alignment.Center)
+                Box(
+                    modifier = Modifier.background(Color(245,66,87), RoundedCornerShape(16.dp))
+                        .border(4.dp, Color.Black, RoundedCornerShape(16.dp )).width(250.dp).height(100.dp),
+                    contentAlignment = Alignment.Center
+                )
                 {
-                    Text(
-                        text = "Currently Offline.",
-                        color = Color.Black,
-                        fontFamily = FontFamily.Monospace,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Box(modifier = Modifier.width(210.dp).height(70.dp).background(Color.White, RoundedCornerShape(12.dp)),
+                        contentAlignment = Alignment.Center)
+                    {
+                        Text(
+                            text = "Currently Offline.",
+                            color = Color.Black,
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
-
-            Box(modifier = Modifier.height(20.dp).width(200.dp))
+            else
+            {
+                Box(
+                    modifier = Modifier.background(colorOffset, RoundedCornerShape(16.dp))
+                        .border(4.dp, Color.Black, RoundedCornerShape(16.dp )).width(300.dp).height(100.dp),
+                    contentAlignment = Alignment.Center
+                )
+                {
+                    Box(modifier = Modifier.width(270.dp).height(70.dp).background(Color.White, RoundedCornerShape(12.dp)),
+                        contentAlignment = Alignment.Center)
+                    {
+                        Text(
+                            text = "Hello \n ${userNameString}!",
+                            color = Color.Black,
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
         }
 
-        Box(
-            modifier = Modifier.background(Color.White, RoundedCornerShape(16.dp)).width(200.dp)
-                .height(50.dp)
-        )
+        Box(modifier = Modifier.height(20.dp).width(200.dp))
+
+        Box(modifier = Modifier.background(Color.White).width(300.dp).height(40.dp), contentAlignment = Alignment.Center)
         {
             Text(
-                text = "Hello, this is the menu screen.",
+                text = "This is the menu screen.",
                 color = Color.Black,
                 fontFamily = FontFamily.Monospace,
                 fontWeight = FontWeight.Bold
@@ -386,7 +407,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
         Box(modifier = Modifier.height(20.dp).width(200.dp))
 
-        Column(modifier = Modifier.fillMaxSize().background(Color.LightGray),
+        Column(modifier = Modifier.fillMaxWidth().background(Color.LightGray),
             verticalArrangement = Arrangement.Top, horizontalAlignment = Alignment.Start)
         {
             Column(modifier = Modifier.width((130 + buttonSizeOffset).dp).fillMaxHeight().background(Color.White),
@@ -714,7 +735,7 @@ import kotlin.time.Duration.Companion.milliseconds
                 text = {Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.Top, horizontalAlignment = Alignment.CenterHorizontally)
                 {
                     Text(
-                        text = "Customer: ${fetchedMaintenance?.get("Name")}\n" +
+                        text = "Customer: ${userNameString}\n" +
                                 "Maintenance items placed: \n" +
                                 " ${fetchedMaintenance?.get("1") ?: ""} \n" +
                                 " ${fetchedMaintenance?.get("2") ?: ""} \n" +
@@ -936,7 +957,7 @@ import kotlin.time.Duration.Companion.milliseconds
         {
             localStateManager = localStateManager.copy(nameInputToggle = false)
 
-
+            guitarViewModel.retrieveUserFromFirestore()
         }
 
         if(localStateManager.nameInputToggle)
@@ -1070,7 +1091,7 @@ import kotlin.time.Duration.Companion.milliseconds
                         },
                 text = {Column (verticalArrangement = Arrangement.Top)
                 {
-                    Text(text = "Name: ${maintenanceArray[0]}")
+                    //Text(text = "Name: ${maintenanceArray[0]}")
 
                     for(i in 1 until maintenanceArray.size)
                     {
