@@ -772,13 +772,17 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                             {
                                 for (i in 0 until (maintenanceDateList?.size ?: 5))
                                 {
-                                    Log.d(
-                                        "checkedSavedDates, Input = true",
-                                        "Date number $i: ${maintenanceDateList?.get(i)}"
-                                    )
-                                }
+                                    if(maintenanceDateList?.get(i) != null)
+                                    {
+                                        _userMaintenanceView.value = true
 
-                                _userMaintenanceView.value = true
+                                        break
+                                    }
+                                    else
+                                    {
+                                        _userMaintenanceView.value = false
+                                    }
+                                }
                             }
                             else
                             {
