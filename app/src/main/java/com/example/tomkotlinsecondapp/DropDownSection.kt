@@ -143,8 +143,8 @@ fun DropDownSection(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel)
 
     fun confirmData()
     {
-        if(customerInputLocal != "")
-        {
+        //if(customerInputLocal != "")
+        //{
             guitarViewModel.addListElement(
                 customerInputLocal,
                 cDataState.modelIndVal,
@@ -155,7 +155,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel)
             for (i in 0 until guitarViewModel.orderList.size) {
                 println(guitarViewModel.orderList[i].customer)
             }
-        }
+        //}
     }
 
     fun orderDateConversion(inputDate: String) :String
@@ -450,11 +450,11 @@ fun DropDownSection(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel)
             }
             else
             {
-                Box(modifier = Modifier.height(50.dp).width(150.dp).background(Color.White, RoundedCornerShape(12.dp)),
+                Box(modifier = Modifier.height(35.dp).width(150.dp).background(Color.White, RoundedCornerShape(12.dp)),
                     contentAlignment = Alignment.Center)
                 {
                     CircularProgressIndicator(
-                        modifier = Modifier.size(40.dp),
+                        modifier = Modifier.size(35.dp),
                         strokeWidth = 4.dp, color = Color.White,
                         trackColor = Color(66, 203,245)
                     )
