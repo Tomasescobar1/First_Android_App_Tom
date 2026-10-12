@@ -63,7 +63,9 @@ import kotlin.time.Duration.Companion.milliseconds
 @Composable
 fun DropDownSection(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel)
 {
-
+    data class TrackedValue(
+        val createdAt: Long = System.currentTimeMillis()
+    )
     data class LocalStates(
         val modelDropped: Boolean = false,
         val colorDropped: Boolean = false,
@@ -123,6 +125,8 @@ fun DropDownSection(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel)
 
     val keyboardController = LocalSoftwareKeyboardController.current
 
+    var dateStorage by remember {mutableStateOf(TrackedValue())}
+
     var customerInputLocal by remember {mutableStateOf("")}
 
     val guitarNames = listOf("Telecaster", "Growler")
@@ -135,6 +139,38 @@ fun DropDownSection(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel)
     {
         roomViewModel.insertParamsIntoRoom(1, modelName, colorName, scaleLength)
         guitarViewModel.updateDataState(placeHolder, colorName, scaleLength, input5 = modelName)
+    }
+
+    fun confirmData()
+    {
+        if(customerInputLocal != "")
+        {
+            guitarViewModel.addListElement(
+                customerInputLocal,
+                cDataState.modelIndVal,
+                cDataState.colorInput,
+                cDataState.scaleLengthInd,
+                guitarViewModel.formatDayMonthYear(dateStorage.createdAt)
+            )
+            for (i in 0 until guitarViewModel.orderList.size) {
+                println(guitarViewModel.orderList[i].customer)
+            }
+        }
+    }
+
+    fun orderDateConversion(inputDate: String) :String
+    {
+        val sanitizedDate = inputDate.replace("/", "-")
+
+        return sanitizedDate
+    }
+
+
+    fun orderPlace()
+    {
+        confirmData()
+
+        guitarViewModel.addDataToFirestore(inputOrderData = guitarViewModel.dbOrderList, serviceDate = orderDateConversion(guitarViewModel.dbOrderList["dateOfCreation"].toString()))
     }
 
     LaunchedEffect(orderState.updateSuccess)
@@ -371,6 +407,57 @@ fun DropDownSection(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel)
                             trackColor = Color(66, 203,245)
                         )
                     }
+                }
+            }
+        }
+    }
+
+    Box(
+        modifier = Modifier.width(200.dp).height(80.dp)
+            .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
+            .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
+        contentAlignment = Alignment.Center
+    )
+    {
+
+        TextButton(
+            onClick = {
+
+                println(orderState.orderListFull.toString())
+
+                if (!orderState.orderListFull && orderSlotState)
+                {
+                    orderPlace()
+                }
+                else
+                {
+                    localStates = localStates.copy(ordersFull = true)
+                }
+            },
+            enabled = !offlineState,
+            modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp))
+                .width(150.dp)
+        )
+        {
+            if(!loadingState)
+            {
+                Text(
+                    text = "Place Order",
+                    color = Color.Black,
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            else
+            {
+                Box(modifier = Modifier.height(50.dp).width(150.dp).background(Color.White, RoundedCornerShape(12.dp)),
+                    contentAlignment = Alignment.Center)
+                {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(40.dp),
+                        strokeWidth = 4.dp, color = Color.White,
+                        trackColor = Color(66, 203,245)
+                    )
                 }
             }
         }
@@ -693,39 +780,6 @@ fun DropDownSection(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel)
             },
             confirmButton = {})
     }
-
-            Box(
-                modifier = Modifier.width(200.dp).height(80.dp)
-                    .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
-                    .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
-                contentAlignment = Alignment.Center
-            )
-            {
-
-                TextButton(
-                    onClick = {
-
-                        println(orderState.orderListFull.toString())
-
-                        if (!orderState.orderListFull && orderSlotState) {
-                            guitarViewModel.updateOrderState(2, true)
-                        } else {
-                            localStates = localStates.copy(ordersFull = true)
-                        }
-                    },
-                    enabled = !offlineState,
-                    modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp))
-                        .width(150.dp)
-                ) {
-                    Text(
-                        text = "Place Order",
-                        color = Color.Black,
-                        fontFamily = FontFamily.Monospace,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-
 
     if(localStates.ordersFull)
     {
