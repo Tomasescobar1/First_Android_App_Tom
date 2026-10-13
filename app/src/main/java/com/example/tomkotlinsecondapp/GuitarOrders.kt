@@ -70,7 +70,6 @@ data class OrderUIState (
     var instanceInd: Int = 0,
     var maintenanceInstance: Int = 0,
     var maintenanceSuccess: Boolean = false,
-    var maintenanceFull: Boolean = false,
     var maintenanceDelete: Boolean = false,
     var maintenanceFail: Boolean = false,
     var maintenanceUpdate: Boolean = false
@@ -260,9 +259,15 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
     val specificMaintenanceDoc = _specificMaintenanceDoc.asStateFlow() //------------------------------
 
-    fun dateSetter(input: Int? = 1) : MutableMap<String, Int?>
+    fun dateSetter(input: Int? = 1, input2: Int? = 1, toggle: Boolean = false) : MutableMap<String, Int?>
     {
-        val outputMap = mutableMapOf("OrderNumber" to input)
+        var outputMap = mutableMapOf("OrderNumber" to input)
+
+        if(toggle)
+        {
+            outputMap = mutableMapOf("TotalOrderCount" to input2)
+        }
+
         return outputMap
     }
 
@@ -637,6 +642,8 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                                 {
                                     _orderSlotState.value = true
 
+                                    _orderState.update {currentState -> currentState.copy(orderListFull = false)}
+
                                     println("There are available order slots!")
                                 }
                             }
@@ -865,13 +872,19 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
                         var snapshotLong: Int? = snapshot.getLong("OrderNumber")?.toInt()
 
-                        if (snapshot.exists())
+                        val totalOrderSnapshot = dbOrders.document(uid).collection("User preferences").document("Total orders placed").get().await()
+
+                        var totalOrderLong: Int? = totalOrderSnapshot.getLong("TotalOrderCount")?.toInt()
+
+                        if (snapshot.exists() && totalOrderSnapshot.exists())
                         {
-                            if (snapshotLong != null)
+                            if (snapshotLong != null && totalOrderLong != null)
                             {
                                 if (snapshotLong <= 5 && !update)
                                 {
                                     snapshotLong += 1
+
+                                    totalOrderLong += 1
                                 }
                             }
                             else
@@ -879,26 +892,34 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                                 println("SnapshotLong does not exist!")
 
                                 snapshotLong = 1
+
+                                totalOrderLong = 1
                             }
                         }
                         else
                         {
                             snapshotLong = 1
 
+                            totalOrderLong = 1
+
                             dbOrders.document(uid).collection("User preferences").document("Date quantity").set(dateSetter(snapshotLong)).await()
 
                             dbOrders.document(uid).collection("User preferences").document("Dates placed").set(hashMapOf<String, Any>()).await()
+
+                            dbOrders.document(uid).collection("User preferences").document("Total orders placed").set(dateSetter(input2 = totalOrderLong, toggle = true)).await()
                         }
 
                         if (snapshotLong <= 5)
                         {
                             if (!update)
                             {
-                                dbOrders.document(uid).collection(serviceDate).document("Order $snapshotLong").set(inputOrderData).await()
+                                dbOrders.document(uid).collection(serviceDate).document("Order $totalOrderLong").set(inputOrderData).await()
 
                                 dbOrders.document(uid).collection("User preferences").document("Date quantity").set(dateSetter(snapshotLong)).await()
 
                                 dbOrders.document(uid).collection("User preferences").document("Dates placed").update("Date Items", FieldValue.arrayUnion(serviceDate)).await()
+
+                                dbOrders.document(uid).collection("User preferences").document("Total orders placed").set(dateSetter(input2 = totalOrderLong, toggle = true)).await()
 
                                 _orderState.update { currentState -> currentState.copy(instanceInd = snapshotLong) }
 
@@ -936,13 +957,19 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
                         var maintenanceSnapshotLong: Int? = maintenanceSnapshot.getLong("OrderNumber")?.toInt()
 
-                        if(maintenanceSnapshot.exists())
+                        val totalMaintenanceSnapshot = dbMaintenance.document(uid).collection("User preferences").document("Total maintenance placed").get().await()
+
+                        var totalMaintenanceLong: Int? = totalMaintenanceSnapshot.getLong("TotalOrderCount")?.toInt()
+
+                        if(maintenanceSnapshot.exists() && totalMaintenanceSnapshot.exists())
                         {
-                            if (maintenanceSnapshotLong != null)
+                            if (maintenanceSnapshotLong != null && totalMaintenanceLong != null)
                             {
                                 if (maintenanceSnapshotLong <= 5 && !update)
                                 {
                                     maintenanceSnapshotLong += 1
+
+                                    totalMaintenanceLong += 1
                                 }
                             }
                             else
@@ -950,26 +977,34 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                                 Log.d("addDataToFirestore-Maint", "SnapshotLong does not exist!")
 
                                 maintenanceSnapshotLong = 1
+
+                                totalMaintenanceLong = 1
                             }
                         }
                         else
                         {
                             maintenanceSnapshotLong = 1
 
+                            totalMaintenanceLong = 1
+
                             dbMaintenance.document(uid).collection("User preferences").document("Date quantity").set(dateSetter(maintenanceSnapshotLong)).await()
 
                             dbMaintenance.document(uid).collection("User preferences").document("Dates placed").set(hashMapOf<String, Any>()).await()
+
+                            dbMaintenance.document(uid).collection("User preferences").document("Total maintenance placed").set(dateSetter(input2 = totalMaintenanceLong, toggle = true))
 
                         }
                         if(maintenanceSnapshotLong <= 5)
                         {
                             if (!update)
                             {
-                                dbMaintenance.document(uid).collection(serviceDate).document("Order $maintenanceSnapshotLong").set(inputMaintenanceData).await()
+                                dbMaintenance.document(uid).collection(serviceDate).document("Order $totalMaintenanceLong").set(inputMaintenanceData).await()
 
                                 dbMaintenance.document(uid).collection("User preferences").document("Date quantity").set(dateSetter(maintenanceSnapshotLong)).await()
 
                                 dbMaintenance.document(uid).collection("User preferences").document("Dates placed").update("Date Items", FieldValue.arrayUnion(serviceDate)).await()
+
+                                dbMaintenance.document(uid).collection("User preferences").document("Total maintenance placed").set(dateSetter(input2 = totalMaintenanceLong, toggle = true)).await()
 
                                 _orderState.update { currentState -> currentState.copy(maintenanceInstance = maintenanceSnapshotLong) }
 
@@ -977,9 +1012,9 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
                                 Log.d("addDataToFirestore", "Added maintenance to Firestore, yaaaay!")
 
-                                if (maintenanceSnapshotLong == 5)
+                                if(maintenanceSnapshotLong == 5)
                                 {
-                                    _orderState.update { currentState -> currentState.copy(maintenanceFull = true) }
+                                    _maintenanceSlotState.value = false
                                 }
                             }
                             else

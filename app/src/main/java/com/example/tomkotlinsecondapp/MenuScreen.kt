@@ -1240,6 +1240,7 @@ import kotlin.time.Duration.Companion.milliseconds
                 onDismissRequest = {
                     localStateManager = localStateManager.copy(maintenanceListInd = false)
                     localStateManager = localStateManager.copy(maintenanceDeleteConfirm = false)
+                    guitarViewModel.checkSlotAvailability(true)
                     guitarViewModel.checkSavedDates(true)
                     guitarViewModel.updateOrderState(17, false)
                     guitarViewModel.updateOrderState(18, false)
