@@ -84,7 +84,6 @@ fun DropDownSection(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel)
         val orderDeleteConfirm: Boolean = false,
         val ordersFull: Boolean = false,
         val logInToPlaceOrder: Boolean = false,
-        //val orderSlotCheck: Boolean = false,
         val slotCheckLoading: Boolean = false,
         val orderListInd: Boolean = false,
     )
@@ -148,8 +147,6 @@ fun DropDownSection(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel)
             guitarViewModel.updateOrderState(2, false)
 
             guitarViewModel.updateOrderState(4, false)
-
-            //localStates = localStates.copy(orderLoadSuccess = false)
         }
 
         else if(input)
@@ -615,8 +612,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel)
             text = {Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.Top, horizontalAlignment = Alignment.CenterHorizontally)
             {
                 Text(
-                    text = //"Customer: ${fetchedOrder.customerOrdering}\n" +
-                            "Model: ${fetchedOrder.modelInd}\n" +
+                    text =  "Model: ${fetchedOrder.modelInd}\n" +
                             "Color: ${fetchedOrder.color}\n" +
                             "Scale Length: ${fetchedOrder.scaleLength}",
                     overflow = TextOverflow.Clip,

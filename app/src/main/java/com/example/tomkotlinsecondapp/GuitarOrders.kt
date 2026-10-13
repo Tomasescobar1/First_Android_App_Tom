@@ -43,7 +43,6 @@ class AuthRepository(private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 }
 
 data class Guitar (
-    //var customer: String = "Tom",
     var model: String = " Telecaster",
     var color: String = "White",
     var scaleLength: Double = 25.5,

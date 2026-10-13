@@ -203,19 +203,6 @@ import kotlin.time.Duration.Companion.milliseconds
 
     fun maintenanceTypeConversion()
     {
-        /*if(!localStateManager.maintenanceUpdateInd)
-        {
-            maintenanceMapList.put("Name", nameStorage.lowercase())
-
-            maintenanceArray.add(nameStorage)
-        }
-        else
-        {
-            maintenanceMapList.put("Name", fetchedMaintenance?.get("Name").toString())
-
-            maintenanceArray.add(fetchedMaintenance?.get("Name").toString())
-        }*/
-
         for(i in 0 until maintenanceItems.size)
         {
             if(i == 1)
@@ -259,8 +246,6 @@ import kotlin.time.Duration.Companion.milliseconds
         localStateManager = localStateManager.copy(nameInputToggle = false)
 
         guitarViewModel.updateOrderState(11, true)
-
-        //nameStorage = ""
 
         localStateManager = localStateManager.copy(maintenanceSuccessLocal = false)
 
@@ -1091,8 +1076,6 @@ import kotlin.time.Duration.Companion.milliseconds
                         },
                 text = {Column (verticalArrangement = Arrangement.Top)
                 {
-                    //Text(text = "Name: ${maintenanceArray[0]}")
-
                     for(i in 1 until maintenanceArray.size)
                     {
                         Text(text = "- ${maintenanceArray[i]}", lineHeight = 30.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
