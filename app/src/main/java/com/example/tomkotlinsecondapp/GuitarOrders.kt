@@ -43,7 +43,7 @@ class AuthRepository(private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 }
 
 data class Guitar (
-    var customer: String = "Tom",
+    //var customer: String = "Tom",
     var model: String = " Telecaster",
     var color: String = "White",
     var scaleLength: Double = 25.5,
@@ -105,7 +105,6 @@ data class OrderDataState (
 data class FetchedOrderData (
     var color: String = "",
     var modelInd: String = "",
-    var customerOrdering: String = "",
     var scaleLength: Double = 0.0,
     var dateOfCreation: String = ""
 )
@@ -188,7 +187,6 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
     var orderList = mutableListOf<Guitar>()
 
     var dbOrderList: MutableMap<String, Any> = mutableMapOf(
-        "customerOrdering" to " ",
         "modelInd" to " ",
         "color" to " ",
         "scaleLength" to 0.0,
@@ -597,16 +595,11 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
     }
 
 
-    fun addListElement(customer: String = "Tom", model: String = "Telecaster", color: String = "White", scaleLength: Double = 25.5, dateOfCreation: String = "")
+    fun addListElement(model: String = "Telecaster", color: String = "White", scaleLength: Double = 25.5, dateOfCreation: String = "")
     {
-        val newGuitar = Guitar(customer, model, color, scaleLength, dateOfCreation)
+        val newGuitar = Guitar(model, color, scaleLength, dateOfCreation)
 
         orderList.add(newGuitar)
-
-        if(customer != "")
-        {
-            dbOrderList.replace("customerOrdering", orderList.last().customer.lowercase())
-        }
 
         dbOrderList.replace("modelInd", orderList.last().model)
 
@@ -901,7 +894,7 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                         {
                             if (!update)
                             {
-                                dbOrders.document(uid).collection(serviceDate).document("${serviceDate}_${snapshotLong}").set(inputOrderData).await()
+                                dbOrders.document(uid).collection(serviceDate).document("Order $snapshotLong").set(inputOrderData).await()
 
                                 dbOrders.document(uid).collection("User preferences").document("Date quantity").set(dateSetter(snapshotLong)).await()
 
@@ -972,7 +965,7 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
                         {
                             if (!update)
                             {
-                                dbMaintenance.document(uid).collection(serviceDate).document("${serviceDate}_${maintenanceSnapshotLong}").set(inputMaintenanceData).await()
+                                dbMaintenance.document(uid).collection(serviceDate).document("Order $maintenanceSnapshotLong").set(inputMaintenanceData).await()
 
                                 dbMaintenance.document(uid).collection("User preferences").document("Date quantity").set(dateSetter(maintenanceSnapshotLong)).await()
 
@@ -1129,8 +1122,10 @@ class GuitarOrder(application: Application) : AndroidViewModel(application)
 
                         var snapShotLong: Int? = snapShot.getLong("OrderNumber")?.toInt()
 
-                        if (snapShot.exists()) {
-                            if (snapShotLong != null) {
+                        if (snapShot.exists())
+                        {
+                            if (snapShotLong != null)
+                            {
                                 if (snapShotLong > 0)
                                 {
                                     snapShotLong -= 1

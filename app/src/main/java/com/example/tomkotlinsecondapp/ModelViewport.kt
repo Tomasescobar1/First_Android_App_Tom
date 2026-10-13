@@ -395,7 +395,7 @@ fun GuitarViewPort(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel)
         {
             FABComponent(guitarViewModel = guitarViewModel, roomViewModel = roomViewModel)
 
-            ConfirmSection(guitarViewModel = guitarViewModel)
+            //ConfirmSection(guitarViewModel = guitarViewModel)
         }
     }
 

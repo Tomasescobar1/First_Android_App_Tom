@@ -117,17 +117,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel)
 
     val specificOrderDocName by guitarViewModel.specificDocName.collectAsStateWithLifecycle()
 
-    val fetchedRoomSpecs by roomViewModel.fetchedSpecs.collectAsStateWithLifecycle()
-
-    val focusManager = LocalFocusManager.current
-
-    val context = LocalContext.current
-
-    val keyboardController = LocalSoftwareKeyboardController.current
-
     var dateStorage by remember {mutableStateOf(TrackedValue())}
-
-    var customerInputLocal by remember {mutableStateOf("")}
 
     val guitarNames = listOf("Telecaster", "Growler")
 
@@ -143,19 +133,36 @@ fun DropDownSection(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel)
 
     fun confirmData()
     {
-        //if(customerInputLocal != "")
-        //{
-            guitarViewModel.addListElement(
-                customerInputLocal,
-                cDataState.modelIndVal,
-                cDataState.colorInput,
-                cDataState.scaleLengthInd,
-                guitarViewModel.formatDayMonthYear(dateStorage.createdAt)
-            )
-            for (i in 0 until guitarViewModel.orderList.size) {
-                println(guitarViewModel.orderList[i].customer)
-            }
-        //}
+        guitarViewModel.addListElement(
+            cDataState.modelIndVal,
+            cDataState.colorInput,
+            cDataState.scaleLengthInd,
+            guitarViewModel.formatDayMonthYear(dateStorage.createdAt)
+        )
+    }
+
+    fun dialogDismiss(input: Boolean = true, input2: Boolean)
+    {
+        if(input && input2)
+        {
+            guitarViewModel.updateOrderState(2, false)
+
+            guitarViewModel.updateOrderState(4, false)
+
+            //localStates = localStates.copy(orderLoadSuccess = false)
+        }
+
+        else if(input)
+        {
+            guitarViewModel.updateOrderState(2, false)
+
+            guitarViewModel.updateOrderState(5, false)
+        }
+
+        else
+        {
+            guitarViewModel.updateOrderState(1, false)
+        }
     }
 
     fun orderDateConversion(inputDate: String) :String
@@ -231,8 +238,6 @@ fun DropDownSection(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel)
             localStates = localStates.copy(orderFindFail = false)
 
             localStates= localStates.copy(orderFindFailInd = false)
-
-            customerInputLocal = ""
         }
     }
 
@@ -371,7 +376,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel)
                     {
                         Log.d("DropDownSection 351", "Update conditional working!")
 
-                        guitarViewModel.addListElement(fetchedOrder.customerOrdering, cDataState.modelIndVal, cDataState.colorInput, cDataState.scaleLengthInd, localDateIndicator)
+                        guitarViewModel.addListElement(cDataState.modelIndVal, cDataState.colorInput, cDataState.scaleLengthInd, localDateIndicator)
 
                         guitarViewModel.addDataToFirestore(inputOrderData = guitarViewModel.dbOrderList, serviceDate = localDateIndicator, update = true, dateUpdate = specificOrderDocName)
                     }
@@ -610,7 +615,7 @@ fun DropDownSection(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel)
             text = {Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.Top, horizontalAlignment = Alignment.CenterHorizontally)
             {
                 Text(
-                    text = "Customer: ${fetchedOrder.customerOrdering}\n" +
+                    text = //"Customer: ${fetchedOrder.customerOrdering}\n" +
                             "Model: ${fetchedOrder.modelInd}\n" +
                             "Color: ${fetchedOrder.color}\n" +
                             "Scale Length: ${fetchedOrder.scaleLength}",
@@ -669,6 +674,47 @@ fun DropDownSection(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel)
                 {
                     TextButton(
                         onClick = {guitarViewModel.updateOrderState(14, false)},
+                        modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
+                            .width(90.dp).height(35.dp)
+                    )
+                    {
+                        Text("Confirm",
+                            fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold,
+                            color = Color.Black)
+                    }
+                }
+            })
+    }
+
+    if(orderState.orderSuccess)
+    {
+        guitarViewModel.checkSavedDates()
+
+        guitarViewModel.checkSlotAvailability()
+
+        AlertDialog(
+            onDismissRequest = {dialogDismiss(input2 = true)},
+            title = {Text("Order confirmed!" + "\nSpecifications: ", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)},
+            text = {Column(verticalArrangement = Arrangement.Top)
+            {
+                Text(
+                    text =  " Model: ${guitarViewModel.orderList.last().model}" +
+                            "\n Color: ${guitarViewModel.orderList.last().color}" +
+                            "\n Scale length: ${guitarViewModel.orderList.last().scaleLength} in ", overflow = TextOverflow.Clip,
+                    lineHeight = 30.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+
+                Text("\nAvailable order slots: ${5 - orderState.instanceInd}", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+
+            }
+            },
+            confirmButton = {
+                Box(
+                    Modifier.background(Color(66, 203, 245), RoundedCornerShape(10.dp)).width(120.dp).height(55.dp)
+                        .border(3.dp, Color.Black, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center
+                )
+                {
+                    TextButton(
+                        onClick = {dialogDismiss(input2 = true)},
                         modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
                             .width(90.dp).height(35.dp)
                     )
@@ -788,24 +834,6 @@ fun DropDownSection(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel)
             title = {Text("Order slots full!", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, fontSize = 20.sp)},
             text = {Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally)
             {
-                if(guitarViewModel.orderList.isNotEmpty())
-                {
-                    Text(
-                        text = "Last session customer list: ",
-                        fontFamily = FontFamily.Monospace,
-                        fontWeight = FontWeight.Bold
-                    )
-
-                    for (i in 0 until guitarViewModel.orderList.size) {
-                        Text(
-                            text = "\nCustomer ${i + 1}: ${guitarViewModel.orderList[i].customer}",
-                            lineHeight = 25.sp,
-                            fontFamily = FontFamily.Monospace,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-
                 Box(
                     Modifier.background(Color(66, 203, 245), RoundedCornerShape(10.dp)).height(55.dp).width(120.dp)
                         .border(3.dp, Color.Black, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center)
