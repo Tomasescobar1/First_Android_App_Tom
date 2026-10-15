@@ -72,10 +72,7 @@ fun FABComponent(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel) {
         Color(66, 203, 240)
     }
 
-    sizeOffset = when {
-        userOrderView -> 480
-        else -> 400
-    }
+    sizeOffset = 560
 
     FloatingActionButton (
         onClick = {},

@@ -349,6 +349,27 @@ fun DropDownSection(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel)
         }
     }
 
+    Box(
+        modifier = Modifier.width(200.dp).height(80.dp)
+            .background(Color(66, 203, 245), RoundedCornerShape(16.dp))
+            .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
+        contentAlignment = Alignment.Center
+    )
+    {
+        TextButton(
+            onClick = { guitarViewModel.initialDataState("Telecaster", "White", 25.5) },
+            modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp)).width(150.dp)
+        ) {
+            Text(
+                text = "Reset to default options",
+                color = Color.Black,
+                fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.Bold,
+                fontSize = 13.sp
+            )
+        }
+    }
+
     AnimatedVisibility(
         visible = userOrderView,
         enter = slideInVertically(animationSpec = tween(200){fullHeight -> -fullHeight}),
