@@ -88,6 +88,7 @@ import kotlin.time.Duration.Companion.milliseconds
         var maintenanceDeleteConfirm: Boolean = false,
         var checkListToggle: Boolean = false,
         var nameInputToggle: Boolean = false,
+        var maintenanceDescToggle: Boolean = false,
         var nameIsEmpty: Boolean = true,
         var userAddedAlert: Boolean = false
     )
@@ -141,6 +142,8 @@ import kotlin.time.Duration.Companion.milliseconds
     val dateStorage by remember {mutableStateOf(TrackedValue())}
 
     var nameStorage by remember { mutableStateOf("") }
+
+    var descriptionStorage by remember{ mutableStateOf("") }
 
     val maintenanceMapList = remember { mutableStateMapOf<String, Any>() }
 
@@ -201,7 +204,7 @@ import kotlin.time.Duration.Companion.milliseconds
         return sanitizedDate
     }
 
-    fun maintenanceTypeConversion()
+    fun maintenanceTypeConversion(descriptionInput: String)
     {
         for(i in 0 until maintenanceItems.size)
         {
@@ -230,6 +233,11 @@ import kotlin.time.Duration.Companion.milliseconds
                 maintenanceArray.add(" ")
             }
         }
+
+        maintenanceMapList["customerDescription"] = descriptionInput
+
+        maintenanceArray.add(descriptionInput)
+
     }
 
     fun dialogDismiss(input: Boolean = false)
@@ -255,11 +263,11 @@ import kotlin.time.Duration.Companion.milliseconds
         }
     }
 
-    fun maintenanceOrder()
+    fun maintenanceOrder(descriptionInput: String)
     {
         if(localStateManager.maintenanceUpdateInd)
         {
-            maintenanceTypeConversion()
+            maintenanceTypeConversion(descriptionInput)
 
             guitarViewModel.addDataToFirestore(
                 inputMaintenanceData = maintenanceMapList,
@@ -269,9 +277,9 @@ import kotlin.time.Duration.Companion.milliseconds
                 dateUpdate = specificMaintenanceDoc
             )
         }
-        else {
-
-            maintenanceTypeConversion()
+        else
+        {
+            maintenanceTypeConversion(descriptionInput)
 
             guitarViewModel.addDataToFirestore(
                 inputMaintenanceData = maintenanceMapList,
@@ -282,13 +290,13 @@ import kotlin.time.Duration.Companion.milliseconds
 
     }
 
-    fun emptyListCheck()
+    fun emptyListCheck(descriptionInput: String)
     {
         for(i in 0 until maintenanceItems.size)
         {
             if(maintenanceItems[i].isChecked)
             {
-                maintenanceOrder()
+                maintenanceOrder(descriptionInput)
 
                 break
             }
@@ -879,7 +887,7 @@ import kotlin.time.Duration.Companion.milliseconds
                             if(!maintenanceLoading)
                             {
                                 TextButton(
-                                    onClick = { emptyListCheck() },
+                                    onClick = { localStateManager = localStateManager.copy(maintenanceDescToggle = true) },
                                     modifier = Modifier.background(
                                         Color.White,
                                         RoundedCornerShape(10.dp)
@@ -1033,6 +1041,102 @@ import kotlin.time.Duration.Companion.milliseconds
                 {
                     Text("Yaaaay!!!", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                 }
+                },
+                confirmButton = {}
+            )
+        }
+
+        if(localStateManager.maintenanceDescToggle)
+        {
+            AlertDialog(
+                onDismissRequest = {},
+                title = {},
+                text = {
+                    Column(
+                        modifier = Modifier.height(550.dp).width(400.dp),
+                        verticalArrangement = Arrangement.Top,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Before you continue...",
+                            textAlign = TextAlign.Start,
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        Box(modifier = Modifier.height(20.dp).fillMaxWidth())
+
+                        Text(
+                            text = "Please add a short description of your instrument's maintenance requirements",
+                            textAlign = TextAlign.Start,
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        Box(modifier = Modifier.height(30.dp).fillMaxWidth())
+
+                        OutlinedTextField(
+
+                            value = descriptionStorage,
+                            onValueChange = { descriptionStorage = it },
+                            label = {
+                                Text(
+                                    text = "Your instrument is in for maintenance because...",
+                                    fontFamily = FontFamily.Monospace
+                                )
+                            },
+                            minLines = 1,
+                            maxLines = 40,
+                            singleLine = false,
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                            keyboardActions = KeyboardActions (
+                                onDone = {
+                                    keyboardController?.hide()
+                                    focusManager.clearFocus()
+                                }
+                            ),
+                            modifier = Modifier.width(300.dp).height(300.dp)
+
+                        )
+
+                        Box(modifier = Modifier.height(30.dp).width(80.dp))
+
+                        Box(
+                            modifier = Modifier.width(200.dp).height(80.dp)
+                                .background(colorOffset, RoundedCornerShape(16.dp))
+                                .border(4.dp, Color.Black, RoundedCornerShape(16.dp)),
+                            contentAlignment = Alignment.Center
+                        )
+                        {
+                            if(!maintenanceLoading)
+                            {
+                                TextButton(
+                                    onClick = { emptyListCheck(descriptionStorage) },
+                                    modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp)).width(150.dp))
+                                {
+                                    Text(
+                                        text = "Done",
+                                        color = Color.Black,
+                                        fontFamily = FontFamily.Monospace,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+                            else
+                            {
+                                Box(modifier = Modifier.height(50.dp).width(150.dp).background(Color.White, RoundedCornerShape(12.dp)),
+                                    contentAlignment = Alignment.Center)
+                                {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(40.dp),
+                                        strokeWidth = 4.dp, color = Color.White,
+                                        trackColor = colorOffset
+                                    )
+                                }
+                            }
+                        }
+                    }
+
                 },
                 confirmButton = {}
             )
