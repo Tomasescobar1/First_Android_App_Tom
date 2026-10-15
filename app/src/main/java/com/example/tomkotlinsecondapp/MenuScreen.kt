@@ -819,18 +819,19 @@ import kotlin.time.Duration.Companion.milliseconds
                             text = "Confirm?", overflow = TextOverflow.Clip,
                             lineHeight = 30.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
 
+
                         Box(
                             Modifier.padding(top = 10.dp).background(colorOffset, RoundedCornerShape(15.dp)).width(245.dp).height(85.dp)
                                 .border(3.dp, Color.Black, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center
                         )
                         {
                             TextButton(
-                                onClick = { localStateManager = localStateManager.copy(menuLeave = false) },
+                                onClick = { navigateInitialGuitarSpecs() },
                                 modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
                                     .width(225.dp).height(65.dp)
                             )
                             {
-                                Text("No, stay on this section",
+                                Text("Yes, go to the viewer",
                                     fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold,
                                     color = Color.Black)
                             }
@@ -844,12 +845,12 @@ import kotlin.time.Duration.Companion.milliseconds
                         )
                         {
                             TextButton(
-                                onClick = { navigateInitialGuitarSpecs() },
+                                onClick = { localStateManager = localStateManager.copy(menuLeave = false) },
                                 modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp))
                                     .width(225.dp).height(65.dp)
                             )
                             {
-                                Text("Yes, go to the viewer",
+                                Text("No, stay on this section",
                                     fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold,
                                     color = Color.Black)
                             }
