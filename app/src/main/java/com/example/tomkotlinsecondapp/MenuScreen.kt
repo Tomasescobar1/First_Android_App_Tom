@@ -179,7 +179,7 @@ import kotlin.time.Duration.Companion.milliseconds
         MaintenanceData(2, "Pickup replacement"),
         MaintenanceData(3, "Fret leveling"),
         MaintenanceData(4, "Re-fret"),
-        MaintenanceData(5, "Paintwork")
+        MaintenanceData(5, "Paintwork"),
         )
     }
 
@@ -213,6 +213,8 @@ import kotlin.time.Duration.Companion.milliseconds
                 if(!localStateManager.maintenanceUpdateInd)
                 {
                     maintenanceMapList.put("Date of creation", guitarViewModel.formatDayMonthYear(dateStorage.createdAt))
+
+                    maintenanceMapList.put("Customer description", descriptionInput)
                 }
                 else
                 {
@@ -234,10 +236,6 @@ import kotlin.time.Duration.Companion.milliseconds
             }
         }
 
-        maintenanceMapList["customerDescription"] = descriptionInput
-
-        maintenanceArray.add(descriptionInput)
-
     }
 
     fun dialogDismiss(input: Boolean = false)
@@ -256,6 +254,8 @@ import kotlin.time.Duration.Companion.milliseconds
         guitarViewModel.updateOrderState(11, true)
 
         localStateManager = localStateManager.copy(maintenanceSuccessLocal = false)
+
+        localStateManager = localStateManager.copy(maintenanceDescToggle = false)
 
         if(input)
         {
