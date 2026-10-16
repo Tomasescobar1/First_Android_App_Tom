@@ -357,7 +357,10 @@ fun DropDownSection(guitarViewModel: GuitarOrder, roomViewModel: RoomViewModel)
     )
     {
         TextButton(
-            onClick = { guitarViewModel.initialDataState("Telecaster", "White", 25.5) },
+            onClick = {
+                guitarViewModel.initialDataState("Telecaster", "White", 25.5)
+                roomViewModel.insertParamsIntoRoom(1, "Telecaster", "White", 25.5)
+                      },
             modifier = Modifier.background(Color.White, RoundedCornerShape(12.dp)).width(150.dp)
         ) {
             Text(
